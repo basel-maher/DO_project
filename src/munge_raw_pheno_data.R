@@ -145,5 +145,5 @@ for(i in c(1,7:15,17:21,23:74)){
 }
 ##############################################
 
-write.table(full_pheno_table,"./results/full_pheno_table.csv",quote = FALSE, sep = ",",row.names = FALSE )
-
+write.table(full_pheno_table,"./results/flat/full_pheno_table.csv",quote = FALSE, sep = ",",row.names = FALSE )
+save(full_pheno_table, file = "./results/Rdata/full_pheno_table.Rdata")
