@@ -1,0 +1,113 @@
+---
+title: "GigaMUGA QC - inital"
+output: html_notebook
+---
+#REMOVE
+Notebook for quality control of GigaMUGA array data. Using code from https://github.com/kbroman/Paper_MPPdiag/blob/master/R/diagnostics.Rmd
+and "Cleaning Genotype Data from Diversity Outbred Mice" (https://doi.org/10.1534/g3.119.400165 ).
+Also used ((https://kbroman.org/MUGAarrays/new_annotations.html))
+#REMOVE
+
+Also uses Argyle (argyle: an Rpackage for analysis of Illumina genotyping arrays)(http://csbio.unc.edu/MUGA/argyle.pdf)
+This also outputs cleaned a genotype file, which contains the final markers and samples to use downstream
+
+
+```{r, eval=FALSE}
+library(argyle)
+library(qtl2)
+library(qtlcharts)
+
+load(url("ftp://ftp.jax.org/MUGA/GM_snps.Rdata")) #GigaMUGA SNPs
+dir <- "https://raw.githubusercontent.com/kbroman/MUGAarrays/master/UWisc/" #used to remove snps that dont make uniquely to the genome (https://kbroman.org/MUGAarrays/new_annotations.html)
+
+gm <- read.csv(paste0(dir, "gm_uwisc_v1.csv"))
+set.seed(49573024) #random number seed
+```
+We initially start out with `r nrow(GM_snps)` SNPs
+
+Remove the SNPs that dont map uniquely to the genome ((https://kbroman.org/MUGAarrays/new_annotations.html)), and use only tier 1 and 2 snps
+```{r, eval=FALSE}
+GM_snps_clean = GM_snps[-match(gm[which(gm$unique==FALSE),"marker"],GM_snps$marker),] #remove non unique snps
+GM_snps_clean = subset(GM_snps_clean, tier %in% c(1,2))#use snps in tiers 1 and 2
+rm(gm)
+```
+There are `r nrow(GM_snps_clean)` SNPs remaining
+
+Read merged finalReports file 
+```{r, eval=FALSE}
+geno <- read.beadstudio(prefix = "merged", in.path = "../data/GIGAMUGA/merged/", snps = GM_snps_clean, keep.intensity = T,fill=TRUE)
+```
+
+recode to 0/1/2 (homo/het/homo)
+```{r, eval=FALSE}
+geno.recode <- recode(geno, "01")
+
+```
+There are now `r nrow(geno.recode)` SNPs for `r ncol(geno.recode)` samples
+
+We now run sample QC to identify no-call and het calls. 
+Generally upper limits are 5% no-calls and 50% het calls
+Upper limits are `r 0.05 * nrow(geno.recode)` no-calls and `r 0.5 * nrow(geno.recode)` hets. 
+
+Let's round up and run sample QC:
+```{r, eval=FALSE}
+geno <- run.sample.qc(geno.recode, max.N = 6e3, max.H = 60e3)
+```
+A summary shows that 9 samples are flagged due to excessive no-calls
+
+```{r}
+summarize.filters(geno)
+```
+
+Visualize the data
+```{r}
+qcplot(geno)[1,]
+```
+
+Which samples are bad?
+```{r}
+bad <-which(is.filtered(geno)$samples )
+names(bad)
+```
+
+Remove those samples
+```{r}
+geno = apply.filters(geno,apply.to = "both")
+
+```
+
+Now lets do some marker level QC
+##marker level QC
+```{r}
+calls <-summarize.calls(geno, "marker")
+#no calls
+hist(calls$N, col = "grey", border = NA,xlab = "count of no-calls", ylab = "frequency",main = NULL)
+
+#homozygous calls
+hist(with(calls, A+B), col = "lavender", border = NA,xlab = "count of homozygous calls", ylab = "frequency",main = NULL)
+```
+
+
+
+Define max no calls and min homozygous calls based on plots
+```{r, eval=FALSE}
+
+geno <-run.marker.qc(geno, max.N = 50, min.hom = 125)
+```
+
+Apply the sample and marker level filters
+```{r}
+geno.final_merged <-apply.filters(geno,apply.to = "both")
+
+```
+
+Output the geno file
+
+```{r}
+saveRDS(geno.final_merged, "../results/GIGAMUGA/geno.final_merged.RDS")
+
+```
+We now have genotypes for `r ncol(geno.final_merged)` samples across `r nrow(geno.final_merged)` markers
+
+
+
