@@ -8,4 +8,10 @@
     - From https://kbroman.org/qtl2/pages/prep_do_data.html
     - use ./src/geneseek2qtl2_mod.R
     - output is in results/GIGAMUGA/qtl_batches1-4
+    - Also create Merged_Sample_Map.txt by merging all sample maps from geneseek experiments and editing indices appropriately. Done in TextEdit. ./data/GIGAMUGA/merged/
+    - Also create merged_FinalReport.txt by merging all finalReport files from geneseek experiments . Done in TextEdit. In ./data/GIGAMUGA/merged/
 
+
+3. Remove bad samples and markers using Argyle.
+    - use ./src/GIGAMUGA_QC.Rmd
+    - output ./results/GIGAMUGA/geno.final_merged.RDS"
