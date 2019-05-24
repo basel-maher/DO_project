@@ -1,6 +1,5 @@
 ##This script imports raw data from collaborators, outputs pheno table##
 ##raw data in /data/pheno_data/
-library(dplyr)
 
 ##############################################
 ##Bending data
@@ -44,7 +43,7 @@ microCT_data = read.csv("./data/pheno_data/uCT_master.csv",stringsAsFactors = FA
 
 #change colnames
 colnames(microCT_data) = c("specimen","sex","batch","femur_length","BV.TV","BMD","BS.BV","conn_density","SMI","Tb.N",
-                           "Tb.Th","Tb.Sp","Ct.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","Ct.Th","Ct.TMD","Ct.TMD","pMOI","Imax","Imin")
+                           "Tb.Th","Tb.Sp","Ct.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","Ct.Th","Ct.TMD","Ct.porosity", "pMOI","Imax","Imin")
 
 #add uCT_ to colnames"
 colnames(microCT_data) <- paste("uCT", colnames(microCT_data), sep = "_")
@@ -139,8 +138,32 @@ full_pheno_table$adiposity = ((as.numeric(full_pheno_table$RFP) + as.numeric(ful
                               / (as.numeric(full_pheno_table$body_weight)*1000)) * 100
 
 
+
+# because MAT=0 and MAT=NA are different, and because the distribution is zero-inflated, create two new "phenotypes" for each MAT pheno
+#Namely, one which is only the non-zero values, and one that is binary (bin) for the presence or absence of MAT (nonzero) (this will be mapped as a binary trait)
+
+
+full_pheno_table$MAT_VOL1_bin = full_pheno_table$MAT_VOL1_nonzero = full_pheno_table$MAT_VOL1 #create bin and nonzero phenos
+full_pheno_table[which(full_pheno_table$MAT_VOL1 >0),"MAT_VOL1_bin"] = 1 #if greater than zerp, bin pheno = 1
+full_pheno_table[which(full_pheno_table$MAT_VOL1 ==0),"MAT_VOL1_nonzero"] = NA # if zero, nonzero is NA
+
+full_pheno_table$MAT_VOL2_bin = full_pheno_table$MAT_VOL2_nonzero = full_pheno_table$MAT_VOL2 #create bin and nonzero phenos
+full_pheno_table[which(full_pheno_table$MAT_VOL2 >0),"MAT_VOL2_bin"] = 1 #if greater than zerp, bin pheno = 1
+full_pheno_table[which(full_pheno_table$MAT_VOL2 ==0),"MAT_VOL2_nonzero"] = NA # if zero, nonzero is NA
+
+full_pheno_table$MAT_VOL3_bin = full_pheno_table$MAT_VOL3_nonzero = full_pheno_table$MAT_VOL3 #create bin and nonzero phenos
+full_pheno_table[which(full_pheno_table$MAT_VOL3 >0),"MAT_VOL3_bin"] = 1 #if greater than zerp, bin pheno = 1
+full_pheno_table[which(full_pheno_table$MAT_VOL3 ==0),"MAT_VOL3_nonzero"] = NA # if zero, nonzero is NA
+
+full_pheno_table$MAT_VOL4_bin = full_pheno_table$MAT_VOL4_nonzero = full_pheno_table$MAT_VOL4 #create bin and nonzero phenos
+full_pheno_table[which(full_pheno_table$MAT_VOL4 >0),"MAT_VOL4_bin"] = 1 #if greater than zerp, bin pheno = 1
+full_pheno_table[which(full_pheno_table$MAT_VOL4 ==0),"MAT_VOL4_nonzero"] = NA # if zero, nonzero is NA
+
+
+
+
 #convert numerics to numeric
-for(i in c(1,7:15,17:21,23:74)){
+for(i in c(1,7:15,17:21,23:82)){
   full_pheno_table[,i] = as.numeric(full_pheno_table[,i])
 }
 ##############################################
