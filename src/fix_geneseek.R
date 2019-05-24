@@ -1,5 +1,5 @@
 #Fix geneseek files
-library(qtl2convert)
+#library(qtl2convert) dont think i need this
 
 # - There was a sample confusion. Re-genotyped samples have a .1 appended to their name, except 371.
 # - In ./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20190228_FinalReport, change Sample ID 371 to 371.1
