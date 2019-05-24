@@ -2,6 +2,13 @@
 library(qtl2)
 load("./results/Rdata/full_pheno_table.Rdata")
 load(url("ftp://ftp.jax.org/MUGA/GM_snps.Rdata")) #GigaMUGA SNPs
+#broman
+dir <- "https://raw.githubusercontent.com/kbroman/MUGAarrays/master/UWisc/"
+gm <- read.csv(paste0(dir, "gm_uwisc_v1.csv"))
+#remove the SNPs that dont map uniquely to the genome (broman)
+GM_snps = GM_snps[-match(gm[which(gm$unique==FALSE),"marker"],GM_snps$marker),]
+####
+
 geno = readRDS("./results/GIGAMUGA/geno.final_merged.RDS")
 
 #GENERATE APPROPRIATE PHENO FILES
@@ -20,7 +27,8 @@ rname_pheno = rownames(do_pheno) = do_pheno$Mouse.ID
 do_pheno = as.data.frame(lapply(do_pheno,as.numeric))
 rownames(do_pheno) = do_pheno$Mouse.ID = rname_pheno
  
-
+#subset only those that have genotyping data
+do_pheno = do_pheno[which(do_pheno$Mouse.ID %in% colnames(geno)),]
 write.csv(do_pheno, "./results/flat/do_pheno.csv", quote = F)
 ###
 ###
@@ -43,6 +51,9 @@ colnames(do_covar)[7] = "ngen"#rename
 do_covar$ngen = apply(do_covar, 1, function(x) strsplit(x[7], split = "G")[[1]][2])#remove "G
 
 rownames(do_covar) = do_covar$Mouse.ID 
+
+#use only those with genotyping info
+do_covar = do_covar[which(do_covar$Mouse.ID %in% colnames(geno)),]
 write.csv(do_covar, "./results/flat/do_covar.csv", quote = FALSE,row.names = FALSE)
 
 
@@ -69,8 +80,10 @@ write_control_file("./control_file_basic.json",
                    crossinfo_covar="ngen",
                    na.strings=list(NA,"-"),overwrite = T)
 #
+
+
 #read the cross file
-#114184 markers
+#112869 markers
 cross = read_cross2("./control_file_basic.json")
 
 
@@ -79,10 +92,9 @@ cross = read_cross2("./control_file_basic.json")
 GM_snps_tier1_2 = subset(GM_snps, tier %in% c(1,2))
 
 
-#112400 markers
 cross_combined = pull_markers(cross, GM_snps_tier1_2$marker)
-#geno.final_merged from array_QC.R
-#110545 markers remaining - final
+
+#109910 markers remaining - final
 cross_combined = pull_markers(cross_combined, rownames(geno.final_merged))
 
 save(cross_combined, file ="~/Desktop/DO_proj/data/GIGAMUGA/cross_combined.Rdata")
