@@ -21,7 +21,7 @@
 
 3. Remove bad samples and markers using Argyle.
     - use ./src/GIGAMUGA_QC.Rmd
-    - output ./results/GIGAMUGA/geno.final_merged.RDS"
+    - output ./results/GIGAMUGA/geno.final_merged.RDS
 
 
 4. Create cross file for QTL mapping. 
