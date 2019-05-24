@@ -1,6 +1,7 @@
 ##create cross file for qtl2 analysis
 library(qtl2)
 load("./results/Rdata/full_pheno_table.Rdata")
+load(url("ftp://ftp.jax.org/MUGA/GM_snps.Rdata")) #GigaMUGA SNPs
 geno = readRDS("./results/GIGAMUGA/geno.final_merged.RDS")
 
 #GENERATE APPROPRIATE PHENO FILES
