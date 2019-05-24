@@ -24,39 +24,45 @@ write.csv(do_pheno, "./results/flat/do_pheno.csv", quote = F)
 ###
 ###
 
-#prepare covariate data. Must contain sex dolumn and a column giving the DO generation
-ix = which(colnames(full_pheno_table_ordered) %in% c("Mouse.ID","sex","Generation","Sac.date","Age.at.Sac..days.","Body.Weight","Nose.Anal.Length"))
+#prepare covariate data. Must contain sex column and a column giving the DO generation
+ix = which(colnames(full_pheno_table) %in% c("Mouse.ID","sex","sac_date","age_at_sac_days","body_weight","body_length","DO_generation"))
 
-do_covar = full_pheno_table_ordered[,ix]
+#actually generation needs to be a "surrogate variable". 0s and 1s, one less variable than the number of generations
+generation <- factor(full_pheno_table$DO_generation)
+X <- model.matrix(~ generation)[,-1]
 
-colnames(geno.final_merged)[grep(x = colnames(geno.final_merged),pattern = "\\.")]
-do_covar$Mouse.ID[c(265,271,291,324,346,350,352,4)] = c("265.1","271.1","291.1","324.1","346.1","350.1","352.1","4.1")
+do_covar = full_pheno_table[,ix]
+do_covar = cbind(do_covar,X)#add generation surrogate vars
 
-colnames(do_covar)[7] = "ngen"
-do_covar$ngen = apply(do_covar, 1, function(x) strsplit(x[7], split = "G")[[1]][2])
+#same subtitution of rownames as above
+colnames(geno)[grep(x = colnames(geno),pattern = "\\.")]
+do_covar$Mouse.ID[c(265,271,291,324,346,350,352,4,371)] = c("265.1","271.1","291.1","324.1","346.1","350.1","352.1","4.1","371.1")
 
-do_covar = do_covar[sort(c(371,which(do_covar$Mouse.ID %in% colnames(geno.final_merged)))),]#add 371 because its good now (2019 batch fixed dec. 2018)
+colnames(do_covar)[7] = "ngen"#rename
+do_covar$ngen = apply(do_covar, 1, function(x) strsplit(x[7], split = "G")[[1]][2])#remove "G
 
 rownames(do_covar) = do_covar$Mouse.ID 
-write.csv(do_covar, "~/Desktop/DO_proj/data/GIGAMUGA/do_covar.csv", quote = FALSE,row.names = FALSE)
+write.csv(do_covar, "./results/flat/do_covar.csv", quote = FALSE,row.names = FALSE)
 
 
 
 #prepare control file. control file paths relative to control file path
+setwd("./results/flat/")
+
 chr <- c(1:19, "X")
-write_control_file("~/Desktop/DO_proj/data/GIGAMUGA/control_file_gigamuga.json",
+write_control_file("./control_file_basic.json",
                    crosstype="do",
-                   description="control file for eQTL analysis",
-                   founder_geno_file=paste0("GM_processed_files/GM_foundergeno", chr, ".csv"),
+                   description="control file for QTL analysis, basic",
+                   founder_geno_file=paste0("../../data/GIGAMUGA/GM_processed_files/GM_foundergeno", chr, ".csv"),
                    founder_geno_transposed=TRUE,
-                   gmap_file=paste0("GM_processed_files/GM_gmap", chr, ".csv"),
-                   pmap_file=paste0("GM_processed_files/GM_pmap", chr, ".csv"),
-                   geno_file=paste0("qtl2_batches_1-2-3-4/qtl2_batches_1-2-3-4_geno", chr, ".csv"),
+                   gmap_file=paste0("../../data/GIGAMUGA/GM_processed_files/GM_gmap", chr, ".csv"),
+                   pmap_file=paste0("../../data/GIGAMUGA/GM_processed_files/GM_pmap", chr, ".csv"),
+                   geno_file=paste0("../GIGAMUGA/qtl2_batches_1-4/DO_qtl2_geno", chr, ".csv"),
                    geno_transposed=TRUE,
                    geno_codes=list(A=1, H=2, B=3),
                    xchr="X",
-                   pheno_file="do_pheno.csv",
-                   covar_file="do_covar.csv",
+                   pheno_file="../flat/do_pheno.csv",
+                   covar_file="../flat/do_covar.csv",
                    sex_covar="sex",
                    sex_codes=list(F="Female", M="Male"),
                    crossinfo_covar="ngen",
@@ -64,7 +70,7 @@ write_control_file("~/Desktop/DO_proj/data/GIGAMUGA/control_file_gigamuga.json",
 #
 #read the cross file
 #114184 markers
-cross = read_cross2("~/Desktop/DO_proj/data/GIGAMUGA/control_file_gigamuga.json")
+cross = read_cross2("./control_file_basic.json")
 
 
 
