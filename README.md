@@ -1,4 +1,6 @@
 # DO_project
 Do project code and analyses
 
-#this is a line from RStudio
+Go to /doc/analysis_pipeline.md for the analysis pipeline.
+
+- This is a work in progress!
