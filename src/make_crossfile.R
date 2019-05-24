@@ -97,7 +97,8 @@ cross_combined = pull_markers(cross, GM_snps_tier1_2$marker)
 #109910 markers remaining - final
 cross_combined = pull_markers(cross_combined, rownames(geno.final_merged))
 
-save(cross_combined, file ="~/Desktop/DO_proj/data/GIGAMUGA/cross_combined.Rdata")
+cross_basic = cross_combined
+save(cross_basic, file ="../../results/Rdata/cross_basic.Rdata")
 
 ##
 
