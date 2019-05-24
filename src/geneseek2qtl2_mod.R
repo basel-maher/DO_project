@@ -26,7 +26,7 @@ codefile <- "./data/GIGAMUGA/GM_processed_files/GM_allelecodes.csv"
 ifiles <- c("./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20171110_FinalReport.txt",
             "./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20180408_FinalReport.txt",
             "./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20181213_FinalReport.txt",
-            "./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20190228_FinalReport.txt")
+            "./data/GIGAMUGA/FinalReport_files/20190228_FinalReport_FIXED.txt")
 
 # file "stem" for output files
 # output files will be like "DO_qtl2_geno19.csv"
