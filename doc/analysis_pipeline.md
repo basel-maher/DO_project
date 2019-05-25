@@ -26,3 +26,8 @@
 
 4. Create cross file for QTL mapping. 
     - ./src/make_crossfile.R
+
+5. more QC - Broman et al.
+
+5. calculate genotype and allele probs, as well as kinship matrices 
+    - ./src/calc_probs.R
