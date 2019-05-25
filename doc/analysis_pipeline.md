@@ -29,5 +29,5 @@
 
 5. more QC - Broman et al.
 
-5. calculate genotype and allele probs, as well as kinship matrices 
+6. calculate genotype and allele probs, as well as kinship matrices 
     - ./src/calc_probs.R
