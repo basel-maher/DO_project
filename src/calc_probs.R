@@ -10,7 +10,8 @@ map=cross_basic$gmap
 #storage or memory (storage is used as swap for memory purposes)
 
 #This was done on our high performance cluster
-pr <- calc_genoprob(cross_basic, map, cores = 20,error_prob = 0.002,quiet = F)
+pr <- calc_genoprob(cross_basic, map, cores = 20,error_prob = 0.002,map_function="c-f",quiet = F)
+#use carter-falconer mapping function
 
 #cleans genotype probabilities by setting small values to 0 and, for genotype columns where the maximum value is not large, 
 #setting all values to 0. This is intended to help with the problem of unstable estimates of genotype effects 
