@@ -28,4 +28,4 @@ k = calc_kinship(apr)
 save(k,file ="./results/Rdata/k_basic.Rdata")
 
 k_loco = calc_kinship(apr, type = "loco")
-save(k,file ="./results/Rdata/k_loco_basic.Rdata")
+save(k_loco,file ="./results/Rdata/k_loco_basic.Rdata")
