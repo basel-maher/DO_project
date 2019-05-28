@@ -102,15 +102,3 @@ save(cross_basic, file ="../../results/Rdata/cross_basic.Rdata")
 
 ##
 
-#load("~/Desktop/DO_proj/data/GIGAMUGA/cross_combined.Rdata")
-#####
-####
-
-covar = as.matrix(cross_combined$covar)
-covar[,"sex"] = (covar[,"sex"] == "M")*1
-covar = covar[,c(2,3,4,5,6)]
-covar = apply(covar,2,as.numeric)
-#covar[,c(3,4,5)] = apply(covar[,c(3,4,5)],2,as.numeric)
-rownames(covar) = rownames(cross_combined$covar)
-#####
-
