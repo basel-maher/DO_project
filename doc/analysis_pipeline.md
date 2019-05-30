@@ -34,5 +34,9 @@
 6. more QC - Broman et al.
     - script adapted from https://github.com/kbroman/Paper_MPPdiag/blob/master/R/diagnostics.Rmd
     - cite paper
+    - This is largely buggy, but everything looked fine. Led to the removal of several hundred markers that had greater than 5% genotyping errors.
+    - output is cross_basic (results/Rdata/cross_basic.Rdata)
+
+7. recalculate genotype and allele probs using the new cross_basic
 
 
