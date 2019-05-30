@@ -39,13 +39,21 @@
     - 109,427 markers remaining
 
 7. recalculate genotype and allele probs using the new cross_basic
-    -- ./src/calc_probs.R
+    - ./src/calc_probs.R
 
 8. Calc QTL
+
 9. Calc QTL perms
+    -put on Rivanna. permute every phenotype separately
 
 10. Calc eQTL
     - separate instructions for sequencing data preprocessing?
+    - PEER stuff
+    - Cis and trans differently, using different covariates
 11. Calc eQTL perms
+
+    - Also separately for cis and trans
+
 12. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation         modeling
+
 14. Networks
