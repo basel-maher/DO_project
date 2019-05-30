@@ -41,3 +41,11 @@
 7. recalculate genotype and allele probs using the new cross_basic
     -- ./src/calc_probs.R
 
+8. Calc QTL
+9. Calc QTL perms
+
+10. Calc eQTL
+    - separate instructions for sequencing data preprocessing?
+11. Calc eQTL perms
+12. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation         modeling
+14. Networks
