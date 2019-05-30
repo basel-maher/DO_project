@@ -36,7 +36,8 @@
     - cite paper
     - This is largely buggy, but everything looked fine. Led to the removal of several hundred markers that had greater than 5% genotyping errors.
     - output is cross_basic (results/Rdata/cross_basic.Rdata)
+    - 109,427 markers remaining
 
 7. recalculate genotype and allele probs using the new cross_basic
-
+    -- ./src/calc_probs.R
 
