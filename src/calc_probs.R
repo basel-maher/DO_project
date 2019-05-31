@@ -25,15 +25,23 @@ pr <- calc_genoprob(cross_basic, map, cores = 20,error_prob = 0.002,map_function
 #in scan1coef() and fit1() when there's a genotype that is largely absent.
 pr = clean_genoprob(pr)
 
-save(pr,file ="./results/Rdata/pr_basic.Rdata")
+#PICK THE RELEVANT FILE NAME BASED ON THE CROSS FILE THAT WAS LOADED
+#save(pr,file ="./results/Rdata/pr_basic.Rdata")
+save(pr,file ="./results/Rdata/pr_basic_cleaned.Rdata")
 
 apr = genoprob_to_alleleprob(pr)#additive allele model
-save(apr,file ="./results/Rdata/apr_basic.Rdata")
+#save(apr,file ="./results/Rdata/apr_basic.Rdata")
+save(apr,file ="./results/Rdata/apr_basic_cleaned.Rdata")
+
 
 #calculate kinship, both Leave One Chromosome Out and overall
 
 k = calc_kinship(apr)
-save(k,file ="./results/Rdata/k_basic.Rdata")
+#save(k,file ="./results/Rdata/k_basic.Rdata")
+save(k,file ="./results/Rdata/k_basic_cleaned.Rdata")
+
 
 k_loco = calc_kinship(apr, type = "loco")
-save(k_loco,file ="./results/Rdata/k_loco_basic.Rdata")
+#save(k_loco,file ="./results/Rdata/k_loco_basic.Rdata")
+save(k_loco,file ="./results/Rdata/k_loco_basic_cleaned.Rdata")
+
