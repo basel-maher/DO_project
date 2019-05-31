@@ -1,7 +1,14 @@
 #calculate genotype probs and allele probs and calculate kinship
 
 library(qtl2)
-load("./results/Rdata/cross_basic.Rdata")
+##############
+#load the appropriate cross file. The first one was generated after Argyle QC with ./src/make_crossfile.R
+
+#load("./results/Rdata/cross_basic.Rdata")
+
+#This second one was generated after further QC using Broman et al. (Cite) 
+
+load("./results/Rdata/cross_basic_cleaned.Rdata")
 
 ###############
 map=cross_basic$gmap
