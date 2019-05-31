@@ -95,7 +95,7 @@ GM_snps_tier1_2 = subset(GM_snps, tier %in% c(1,2))
 cross_combined = pull_markers(cross, GM_snps_tier1_2$marker)
 
 #109910 markers remaining - final
-cross_combined = pull_markers(cross_combined, rownames(geno.final_merged))
+cross_combined = pull_markers(cross_combined, rownames(geno))
 
 cross_basic = cross_combined
 save(cross_basic, file ="../../results/Rdata/cross_basic.Rdata")
