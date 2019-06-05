@@ -1,5 +1,4 @@
-#This script normalizes RNA-seq counts and creates a cross file for eQTL mapping.
-
+#This script normalizes RNA-seq counts#
 library(DESeq2)
 
 
@@ -25,5 +24,6 @@ for(col in 1:ncol(dds.vst)){
 }
 
 #write
-write.table(dds.vst, "./results/flat/counts_vst_qnorm.csv", row.names = FALSE, col.names = FALSE, quote = FALSE, sep = ",")
+write.table(dds.vst, "./results/flat/counts_vst_qnorm.csv", row.names = FALSE, col.names = TRUE, quote = FALSE, sep = ",")
+save(object = dds.vst, file = "./results/Rdata/counts_vst_qnorm.Rdata")
 
