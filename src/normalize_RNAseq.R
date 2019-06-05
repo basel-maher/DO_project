@@ -23,6 +23,10 @@ for(col in 1:ncol(dds.vst)){
   dds.vst[,col] = qnorm((rank(dds.vst[,col],na.last="keep")-0.5)/sum(!is.na(dds.vst[,col])))
 }
 
+dds.vst = as.data.frame(dds.vst)
+
+dds.vst$Mouse.ID = rownames(dds.vst)
+dds.vst = dds.vst[,c(ncol(dds.vst), 1:(ncol(dds.vst)-1))]
 #write
 write.table(dds.vst, "./results/flat/counts_vst_qnorm.csv", row.names = FALSE, col.names = TRUE, quote = FALSE, sep = ",")
 save(object = dds.vst, file = "./results/Rdata/counts_vst_qnorm.Rdata")
