@@ -35,25 +35,34 @@
     - script adapted from https://github.com/kbroman/Paper_MPPdiag/blob/master/R/diagnostics.Rmd
     - cite paper
     - This is largely buggy, but everything looked fine. Led to the removal of several hundred markers that had greater than 5% genotyping errors.
-    - output is cross_basic (results/Rdata/cross_basic.Rdata)
+    - output is cross_basic_cleaned (./results/Rdata/cross_basic_cleaned.Rdata)
     - 109,427 markers remaining
 
-7. recalculate genotype and allele probs using the new cross_basic
+7. recalculate genotype and allele probs using the new cross_basic_cleaned
     - ./src/calc_probs.R
 
 8. Calc QTL
+    
 
 9. Calc QTL perms
     -put on Rivanna. permute every phenotype separately
 
 10. Calc eQTL
+
     - separate instructions for sequencing data preprocessing?
     - PEER stuff
-    - Cis and trans differently, using different covariates
+
+    - after RNA-seq preprocessing, normalize the counts
+        - ./src/normalize_RNAseq.R
+
+    - make an eqtl specific cross file
+        - ./src/make_cross_eqtl.R
+
+    - map Cis and trans differently, using different covariates
 11. Calc eQTL perms
 
     - Also separately for cis and trans
 
-12. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation         modeling
+12. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
 
 14. Networks
