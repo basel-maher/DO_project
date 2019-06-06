@@ -56,10 +56,14 @@ norm_pheno = as.data.frame(log10(cross_basic$pheno[,c(6:14,16,17,21,23:32,34,35,
 pheno_combined = cbind(norm_pheno, cross_basic$pheno[,c(15,18,19,20,22,33,36,42,50,53,59)])
 new_covar = covar
 new_covar[,c(3)] = log10(new_covar[,c(3)]+0.0000001)
+
 DO_qtl_scan_normal = scan1(apr, pheno_combined, k_loco, Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(DO_qtl_scan_normal,file = "./results/Rdata/DO_qtl_scan_norm.Rdata")
 
+qtl_peaks_norm = find_peaks(DO_qtl_scan_normal, cross_basic$pmap, threshold=4, drop=1.5)
+
 DO_qtl_scan_binary_norm = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
+
 
 qtl_peaks_bin_norm = find_peaks(DO_qtl_scan_binary_norm, cross_basic$pmap, threshold=4, drop=1.5)
 qtl_peaks_both_norm = rbind(qtl_peaks_norm,qtl_peaks_bin_norm)
