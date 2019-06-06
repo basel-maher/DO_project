@@ -42,12 +42,10 @@
     - ./src/calc_probs.R
 
 8. Calc QTL
-    
+    - ./src/map_qtl.R
+    - will also perform permutation analysis
 
-9. Calc QTL perms
-    -put on Rivanna. permute every phenotype separately
-
-10. Calc eQTL
+9. Calc eQTL
 
     - separate instructions for sequencing data preprocessing?
     - PEER stuff
@@ -59,10 +57,10 @@
         - ./src/make_cross_eqtl.R
 
     - map Cis and trans differently, using different covariates
-11. Calc eQTL perms
+10. Calc eQTL perms
 
     - Also separately for cis and trans
 
-12. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
+11. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
 
-14. Networks
+12. Networks
