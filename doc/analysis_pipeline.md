@@ -5,7 +5,7 @@
         - This takes pheno files from ./data/pheno_data and outputs ./results/flat/full_pheno_table.csv and results/Rdata/full_pheno_table.Rdata
 
 2. Fix GeneSeek files
-    There was a sample confusion. Re-genotyped samples have a .1 appended to their name, except 371.
+    - There was a sample confusion. Re-genotyped samples have a .1 appended to their name, except 371.
         - In ./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20190228_FinalReport, change Sample ID 371 to 371.1
             - This is done in ./src/fix_geneseek.R
                 -Add header back manually. See R file for instructions
