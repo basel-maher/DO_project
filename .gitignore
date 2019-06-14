@@ -3,6 +3,7 @@
 /data
 !/data/pheno_data
 /results
+/plots
 
 .Rproj.user
 .Rhistory
