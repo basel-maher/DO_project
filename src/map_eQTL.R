@@ -32,7 +32,7 @@ save(out_eqtl_distal,file ="out_eqtl_distal.Rdata")
 distal_eqtl_peaks = find_peaks(out_eqtl_distal, cross_basic$pmap, threshold=4, drop=1.5)
 
 #using first 35 PEER factors and sex as covars (local eQTL)
-out_eqtl_local <- scan1(apr, cross_basic$pheno, k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,17:51)],cores = 20)
+out_eqtl_local <- scan1(apr, cross_eqtl$pheno, k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,17:51)],cores = 20)
 save(out_eqtl_local,file ="out_eqtl_local.Rdata")
 
 local_qtl_peaks = find_peaks(out_eqtl_local, cross_basic$pmap, threshold=4, drop=1.5)
