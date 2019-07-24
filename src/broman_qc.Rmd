@@ -30,11 +30,11 @@ library(broman)
 library(qtl2)
 library(qtlcharts)
 library(fst)
-source(file = "./bin/func.R") # accessing SNP intensities; recoding genotypes
+source(file = "~/Documents/projects/DO_project/bin/func.R") # accessing SNP intensities; recoding genotypes
 set.seed(94238567) # set random number seed
 
 # full data
-load("./results/Rdata/cross_basic.Rdata")
+load("~/Documents/projects/DO_project/results/Rdata/cross_basic.Rdata")
 
 # omit markers with no data
 nt <- n_typed(cross_basic, "mar")
@@ -91,8 +91,8 @@ out the average intensities for each SNP on the X and Y chromosomes.
 We load them into R as follows.
 
 ```{r load_XYintensities}
-xint <- read_csv_numer("./results/GIGAMUGA/qtl2_batches_1-4/DO_qtl2_chrXint.csv", transpose=TRUE)
-yint <- read_csv_numer("./results/GIGAMUGA/qtl2_batches_1-4/DO_qtl2_chrYint.csv", transpose=TRUE)
+xint <- read_csv_numer("~/Documents/projects/DO_project/results/GIGAMUGA/qtl2_batches_1-4/DO_qtl2_chrXint.csv", transpose=TRUE)
+yint <- read_csv_numer("~/Documents/projects/DO_project/results/GIGAMUGA/qtl2_batches_1-4/DO_qtl2_chrYint.csv", transpose=TRUE)
 ```
 
 We'll omit data for the samples we've omitted previously. These were omitted using "array_QC.R"
@@ -248,7 +248,7 @@ We'll read in the full set of intensities and take the sum of the two
 allele intensities at each SNP.
 
 ```{r read_intensities}
-int <- fst::read.fst("./results/GIGAMUGA/intensities.fst")
+int <- fst::read.fst("~/Documents/projects/DO_project/results/GIGAMUGA/intensities.fst")
 int <- int[seq(1, nrow(int), by=2),-(1:2)] + int[-seq(1, nrow(int), by=2),-(1:2)]
 int <- int[,ind_ids(cross_basic)]
 ```
@@ -390,7 +390,7 @@ given the observed marker data.
 # Probs calculated in ./src/calc_probs.R
 # Just load the output
 ```{r calc_genoprob, eval=FALSE}
-load("./results/Rdata/pr_basic.Rdata")
+load("~/Documents/projects/DO_project/results/Rdata/pr_basic.Rdata")
 ```
 
 
@@ -486,12 +486,7 @@ e <- calc_errorlod(cross_basic, pr, cores=2)
 
 ```{r calc_errorlod_really, echo=FALSE}
 file <- "diag_cache/errorlod.rds"
-if(file.exists(file)) {
-    e <- readRDS(file)
-} else {
-<<calc_errorlod>>
-    saveRDS(e, file)
-}
+if(file.exists(file)) {e <- readRDS(file)}else{saveRDS(e, file)}
 ```
 
 The output is a list of matrices (the components being chromosomes).
@@ -775,7 +770,7 @@ Let's omit the `r sum(errors_mar > 5)` markers with error rates >5%.
 gmap <- cross_basic$gmap
 pmap <- cross_basic$pmap
 cross_basic <- drop_markers(cross_basic, names(errors_mar)[errors_mar > 5])
-save(cross_basic, file ="./results/Rdata/cross_basic_cleaned.Rdata")
+save(cross_basic, file ="~/Documents/projects/DO_project/results/Rdata/cross_basic_cleaned.Rdata")
 ```
 
 We'll now re-calculate the genotype probabilities.

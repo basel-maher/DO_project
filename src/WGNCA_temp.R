@@ -17,6 +17,13 @@ counts = read.csv("./results/flat/genes_over_6reads_in_morethan_38samps_tpm_over
 
 #read in an annotation file. This is output from the RNA-seq pipeline
 annot_file = read.delim("./data/314-FarberDO2_S6.gene_abund.tab",header = TRUE)
+#
+#remove transcripts not on somatic and X chroms
+chr = c(seq(1:19),"X")
+rmv = annot_file[which(annot_file$Reference %in% chr == FALSE),"Gene.ID"]
+
+counts = counts[-which(rownames(counts) %in% rmv),]
+#
 
 #find and remove features that have fewer than 10 reads in more than 90% (173) of samples 
 x=c()
@@ -29,6 +36,27 @@ for(i in 1:nrow(counts)){
 
 #253 genes removed
 counts = counts[-x,]
+
+
+#some genes are duplicated
+counts = t(counts)
+
+colnames(counts) = annot_file[match(colnames(counts),annot_file$Gene.ID),"Gene.Name"]
+counts[,colnames(counts)[which(duplicated(colnames(counts)))]]
+
+#for now, give them a unique ID
+colnames(counts)[which(duplicated(colnames(counts)))] = paste0(colnames(counts)[which(duplicated(colnames(counts)))], "_isoform")
+
+colnames(counts)[4147] = paste0(colnames(counts)[4147],".2")
+colnames(counts)[4148] = paste0(colnames(counts)[4148],".3")
+colnames(counts)[18740] = paste0(colnames(counts)[18740],".2")
+colnames(counts)[21690] = paste0(colnames(counts)[21690],".2")
+
+counts = t(counts)
+
+
+######
+
 
 #vst from deseq2
 vst = varianceStabilizingTransformation(as.matrix(counts))
@@ -113,13 +141,36 @@ edata = ComBat(dat=vst, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=
 
 #transpose the matrix
 edata = t(edata)
+
+#quantile normalize
+
+#qnorm by gene
+#from https://www.nature.com/articles/nature11401#s1 (FTO genotype BMI Visscher et al)
+
+#for(col in 1:ncol(edata)){
+#  edata[,col] = qnorm((rank(edata[,col],na.last="keep")-0.5)/sum(!is.na(edata[,col])))
+#}
 ########################
+
+#check data
+gsg = goodSamplesGenes(edata, verbose = 3);
+gsg$allOK
+
+##
+#cluster samples
+sampleTree = hclust(dist(edata), method = "average")
+
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2)
+#####
+
 
 
 #pick the soft thresholding power
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
-sft = pickSoftThreshold(edata, powerVector = powers, verbose = 5,networkType = "signed")
+sft = pickSoftThreshold(edata, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE)
 # Plot the results:
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
@@ -139,30 +190,30 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 
-net = blockwiseModules(edata, power = 9,
+net = blockwiseModules(edata, power = 4,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = TRUE, pamRespectsDendro = FALSE,
-                       saveTOMs = TRUE,
-                       saveTOMFileBase = "net_combat_sex_age_p9",
+                       saveTOMs = FALSE,
                        verbose = 3)
 
-##
+## 35 modules not including 0, 5736 genes in module 0
+
+#get traits we want to look at
+pheno = read.csv("./results/flat/full_pheno_table.csv", stringsAsFactors = FALSE)
 
 
-full_pheno_table_ordered = read.delim("~/Desktop/DO_proj/pheno_data/full_pheno_table_ordered",stringsAsFactors = FALSE,as.is = TRUE)
-
-datTraits = full_pheno_table_ordered[which(full_pheno_table_ordered$Mouse.ID %in% rownames(edata)),]
+datTraits = pheno[which(pheno$Mouse.ID %in% rownames(edata)),]
 datTraits = datTraits[match(rownames(edata),datTraits$Mouse.ID),]
 
-#datTraits[,135] = as.numeric(gsub(x = datTraits[,135],pattern = "~ ",replacement = ""))
+#remove non-pheno columns
 datTraits = datTraits[,-c(1:7,16,22)]
+
+#convert to numeric
 for(i in 1:ncol(datTraits)){datTraits[,i] = as.numeric(datTraits[,i])}
-#datTraits = log2(datTraits + 0.0001)
-datTraits = datTraits[,-c(27:44)]
 
-# Define numbers of genes and samples
-
+#remove histo columns
+#datTraits = datTraits[,-c(27:44)]
 
 
 sizeGrWindow(12, 9)
@@ -181,27 +232,51 @@ MEs = net$MEs;
 geneTree = net$dendrograms[[1]]
 nGenes = ncol(edata);
 nSamples = nrow(edata);
+
 # Recalculate MEs with color labels
 MEs0 = moduleEigengenes(edata, moduleColors)$eigengenes
 MEs = orderMEs(MEs0)
+#cor module eigengenes with traits
 moduleTraitCor = cor(MEs, datTraits, use = "p",method = "p");
-moduleTraitPvalue = corPvalueStudent(moduleTraitCor, 192)# is this correct? what about nSamples for traits?
+
+moduleTraitPvalue = as.data.frame(matrix(nrow = nrow(moduleTraitCor),ncol = ncol(moduleTraitCor)))# is this correct? what about nSamples for traits?
+for(i in 1:ncol(moduleTraitCor)){
+  nSamples = length(which(is.na(datTraits[,colnames(moduleTraitCor)[i]]) == FALSE))
+  moduleTraitPvalue[,i] = corPvalueStudent(moduleTraitCor[,i], nSamples)
+  print(colnames(moduleTraitCor)[i])
+  print(nSamples)
+  
+}
+nSamples=nrow(edata)
+colnames(moduleTraitPvalue) = colnames(moduleTraitCor)
+rownames(moduleTraitPvalue) = rownames(moduleTraitCor)
+
+
+moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 sizeGrWindow(10,6)
 # Will display correlations and their p-values
 textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
                    signif(moduleTraitPvalue, 1), ")", sep = "");
 dim(textMatrix) = dim(moduleTraitCor)
 par(mar = c(6, 8.5, 3, 3));
+
+trait_names = gsub(pattern = "bending_",replacement = "",x = names(datTraits))
+trait_names = gsub(pattern = "uCT_",replacement = "",x = trait_names)
+trait_names = gsub(pattern = "\\.\\.",replacement = "\\.",x = trait_names)
+trait_names = gsub(pattern = "\\.\\.",replacement = "\\.",x = trait_names)
+trait_names[8] = "Adiposity"
+
+
 # Display the correlation values within a heatmap plot
 labeledHeatmap(Matrix = moduleTraitCor,
-               xLabels = names(datTraits),
+               xLabels = trait_names,
                yLabels = names(MEs),
                ySymbols = names(MEs),
                colorLabels = FALSE,
                colors = greenWhiteRed(50),
                textMatrix = textMatrix,
                setStdMargins = FALSE,
-               cex.text = 0.35,
+               cex.text = 0.30,
                zlim = c(-1,1),
                cex.lab.x = 0.7,
                cex.lab.y = 0.8,
@@ -209,25 +284,21 @@ labeledHeatmap(Matrix = moduleTraitCor,
                horizontalSeparator.y = c(1:length(names(MEs))),
                main = paste("Module-trait relationships"))
 ###
-###
-which(moduleTraitCor == sort((moduleTraitCor),decreasing =TRUE)[2], arr.ind = T)
-colnames(moduleTraitCor)[31]
+which(moduleTraitCor == sort((moduleTraitCor),decreasing =TRUE)[1], arr.ind = T)
+colnames(moduleTraitCor)[33]
 ########################
-annot_file = read.delim("314-FarberDO2_S6.gene_abund.tab",header = TRUE)
-colnames(edata) = annot_file[match(colnames(edata),annot_file$Gene.ID),"Gene.Name"]
-
-
 combat_annot = as.data.frame(colnames(edata))
 
 combat_annot$module = net$colors
 combat_annot$color = moduleColors
 
-combat_annot[,c(4:8)] = annot_file[match(combat_annot$`colnames(edata)`,annot_file$Gene.Name),c(1,3,4,5,6)]
+#the gsub allows for matching of genes that had _isoform* added to them
+combat_annot[,c(4:8)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$Gene.Name),c(1,3,4,5,6)]
 
 
 modNames = substring(names(MEs), 3)
 geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p"))
-MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))
+MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))#nsamples - Is This Correct? or use number of modules?
 geneModuleMembership$gene = colnames(edata)
 #names(geneModuleMembership) = paste("MM", modNames, sep="");
 #names(MMPvalue) = paste("p.MM", modNames, sep="");
@@ -235,26 +306,29 @@ geneModuleMembership$gene = colnames(edata)
 combat_annot[9:35] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),c(1:27)]
 
 
+modNames = substring(names(MEs), 3)
+geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p"))
 
-#reached here
-uct_bend_traits = datTraits[,c(1,2,11:13,15:27,46:63)]
+MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), 192))#nSamples = # of RNA-seq samples?
 
-x = cor.test(signed_net$MEs[,"ME12"],uct_bend_traits$Conn.D)
+geneModuleMembership$gene = colnames(edata)
 
-cor_table = as.data.frame(matrix(ncol=ncol(uct_bend_traits),nrow = 26))
-for(module in 1:length(signed_net$MEs)){
-  for(trait in 1:ncol(uct_bend_traits)){
-    x = cor.test(signed_net$MEs[,module],uct_bend_traits[,trait])
-    cor_table[module,trait] = x$p.value
-    print(x$p.value)
-  }
-}
-rownames(cor_table) = colnames(signed_net$MEs)
-colnames(cor_table) = colnames(uct_bend_traits)
-#
-allGenes = colnames(resid)
-interesting.genes = combat_annot[which(combat_annot$color == "green"),1]#darkred
+#names(geneModuleMembership) = paste("MM", modNames, sep="");
+#names(MMPvalue) = paste("p.MM", modNames, sep="");
 
+combat_annot[9:26] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),c(1:18)]
+
+#which(moduleColors=="red")
+#annot_file_resid[which(moduleColors=="red"),]
+hubs = chooseTopHubInEachModule(edata,moduleColors)
+####topGO###
+#allGenes = select(Mus.musculus, "ENSMUSG00000066438", columns, "ENSEMBL")
+#allGenes = allGenes$ENSEMBL
+#interesting.genes<-res$ENSEMBL
+#allGenes = colnames(edata)
+allGenes = combat_annot$`colnames(edata)`
+interesting.genes = combat_annot[which(combat_annot$color == "brown"),"colnames(edata)"]
+#blue is bone module, 2386 genes
 geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
 names(geneList)<-allGenes
 ###MF###
@@ -286,5 +360,35 @@ t.all<-subset(t.all,t.all$classic<=0.01)
 t.all<-t.all[order(t.all$classic,decreasing=FALSE),]
 dim(t.all[t.all$classic<=1e-5,])
 ######
+
+
+
+sizeGrWindow(10,6)
+# Will display correlations and their p-values
+textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
+                   signif(moduleTraitPvalue, 1), ")", sep = "");
+dim(textMatrix) = dim(moduleTraitCor)
+par(mar = c(6, 8.5, 3, 3));
+# Display the correlation values within a heatmap plot
+labeledHeatmap(Matrix = moduleTraitCor,
+               xLabels = names(datTraits),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = FALSE,
+               colors = greenWhiteRed(50),
+               textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.35,
+               zlim = c(-1,1),
+               cex.lab.x = 0.7,
+               cex.lab.y = 0.8,
+               verticalSeparator.x = c(1:length(names(datTraits))),
+               horizontalSeparator.y = c(1:length(names(MEs))),
+               main = paste("Module-trait relationships"))
+###
+###
+
+
+########################### CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
 
 
