@@ -4,6 +4,9 @@ library(Mus.musculus)#seems to use mm10
 library(WGCNA)
 library(topGO)
 library(DESeq2)
+library("igraph")
+library("bnlearn")
+library("parallel")
 ############
 options(stringsAsFactors = FALSE)
 #
@@ -298,25 +301,14 @@ combat_annot[,c(4:8)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pat
 
 modNames = substring(names(MEs), 3)
 geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p"))
+
 MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))#nsamples - Is This Correct? or use number of modules?
 geneModuleMembership$gene = colnames(edata)
 #names(geneModuleMembership) = paste("MM", modNames, sep="");
 #names(MMPvalue) = paste("p.MM", modNames, sep="");
 
-combat_annot[9:35] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),c(1:27)]
+combat_annot[9:(ncol(geneModuleMembership)+8)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),c(1:ncol(geneModuleMembership))]
 
-
-modNames = substring(names(MEs), 3)
-geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p"))
-
-MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), 192))#nSamples = # of RNA-seq samples?
-
-geneModuleMembership$gene = colnames(edata)
-
-#names(geneModuleMembership) = paste("MM", modNames, sep="");
-#names(MMPvalue) = paste("p.MM", modNames, sep="");
-
-combat_annot[9:26] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),c(1:18)]
 
 #which(moduleColors=="red")
 #annot_file_resid[which(moduleColors=="red"),]
@@ -326,8 +318,8 @@ hubs = chooseTopHubInEachModule(edata,moduleColors)
 #allGenes = allGenes$ENSEMBL
 #interesting.genes<-res$ENSEMBL
 #allGenes = colnames(edata)
-allGenes = combat_annot$`colnames(edata)`
-interesting.genes = combat_annot[which(combat_annot$color == "brown"),"colnames(edata)"]
+allGenes = combat_annot$gene
+interesting.genes = combat_annot[which(combat_annot$color == "brown"),"gene"]
 #blue is bone module, 2386 genes
 geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
 names(geneList)<-allGenes
@@ -387,8 +379,123 @@ labeledHeatmap(Matrix = moduleTraitCor,
                main = paste("Module-trait relationships"))
 ###
 ###
+geneModMemAnnot = combat_annot
 
+#write out net, edata connect and annot. 
+#For blacklist, we would use cis-eqtl
+save(edata, file = "./results/Rdata/edata.RData")
+save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot.RData")
 
-########################### CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
+########################## CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
+#Done on Rivanna. learn_bn.R. Only need to know number of colors (modules) for SLURM script
 
-
+# resid = edata
+# #module membership for all genes in all modules (from auto_wgcna.R)
+# connect = geneModMemAnnot
+# 
+# clr = unique(connect$color)
+# 
+# mod_genes = connect[which(connect$color==i),"gene"]
+# 
+# mod_genes_membership = connect[which(connect$`colnames(edata)` %in% mod_genes),c("gene","Gene.ID",paste0("ME",i),"color")]
+# mod_genes_membership = mod_genes_membership[which(mod_genes_membership$color == i),]
+# 
+# mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
+# 
+# bn = mmhc(mod_genes_exp)
+# 
+# varName = paste0("hybrid_",i,"_nobl")
+# 
+# assign(x = varName, value = bn)
+# print(i)
+# for(i in clr){
+#   mod_genes = connect[which(connect$color==i),"gene"]
+#   
+#   mod_genes_membership = connect[which(connect$`colnames(edata)` %in% mod_genes),c("gene","Gene.ID",paste0("ME",i),"color")]
+#   mod_genes_membership = mod_genes_membership[which(mod_genes_membership$color == i),]
+#   
+#   mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
+# 
+#   bn = mmhc(mod_genes_exp)
+#   
+#   varName = paste0("hybrid_",i,"_nobl")
+#   
+#   assign(x = varName, value = bn)
+#   print(i)
+# }
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# #PHENOTYPE DATA
+# #fix to read object in directly or link to file
+# # full_pheno_table_ordered = read.delim("~/Desktop/DO_proj/pheno_data/full_pheno_table_ordered",stringsAsFactors = FALSE,as.is = TRUE)
+# # datTraits = full_pheno_table_ordered[which(rownames(full_pheno_table_ordered) %in% rownames(resid)),]
+# # #datTraits[,135] = as.numeric(gsub(x = datTraits[,135],pattern = "~ ",replacement = ""))
+# # datTraits = datTraits[,-c(1:7,16,72:150)]
+# # for(i in 1:ncol(datTraits)){datTraits[,i] = as.numeric(datTraits[,i])}
+# #datTraits = log2(datTraits + 0.0001)
+# 
+# 
+# 
+# 
+# ############## Assign blacklist based on eQTL #############
+# ############## Mouse GWS is 5*10^-5 #######################
+# #the commented out portion used old microarray data. Use DO cis eqtl now from (cis_and_trans_eqtl.R)
+# # cis_eSNPs = read.csv("cis.eSNP.031609.csv", as.is = TRUE, stringsAsFactors = FALSE)
+# # cis_eSNPs_ME9 = cis_eSNPs[which(cis_eSNPs$Probe %in% m9_genes_most_connected$TargetId),]
+# # cis_eSNPs_ME9$bp = as.numeric(cis_eSNPs_ME9$bp)*1000000
+# # 
+# # #some gene names are different between cis_eSNPs_ME9 and m9_unique colnames
+# # cis_eSNPs_ME9_gws = cis_eSNPs_ME9[which(cis_eSNPs_ME9$cisp <= 5e-5),]
+# 
+# cis_genes = unique(cis_eqtl_ALL$lodcolumn)
+# 
+# #blacklist_genes_parents = m9_genes_most_connected[which(m9_genes_most_connected$TargetId %in% cis_eSNPs_ME9_gws$Probe),"Symbol"]
+# blacklist_genes_parents = mod_genes[which(mod_genes %in% cis_genes)]
+# 
+# #a gene not in blacklist_genes cannot be a parent to a gene in blacklist_genes
+# #blacklist_genes_children = colnames(m9_genes_exp)[which(colnames(m9_genes_exp) %in% blacklist_genes_parents == F)]
+# blacklist_genes_children = mod_genes[which(mod_genes %in% cis_genes == FALSE)]
+# 
+# blacklist_df = as.data.frame(rep(blacklist_genes_children,times = length(blacklist_genes_parents)),stringsAsFactors = F)
+# colnames(blacklist_df)[1] = "From"
+# blacklist_df$To = rep(blacklist_genes_parents, each = length(blacklist_genes_children))
+# 
+# #pheno_bl = as.data.frame(rep("mean.bmd.sp",times = 354),stringsAsFactors = F)
+# #colnames(pheno_bl)[1] = "From"
+# #pheno_bl$To = rep(colnames(m9_exp_pheno[,c(1:354)]), each = 1)
+# 
+# #blacklist_df = rbind(blacklist_df, pheno_bl)
+# ############################################################
+# ############################################################
+# ############################################################
+# #red_genes_exp[] = lapply(red_genes_exp, as.double)
+# #hybrid_new_test = mmhc(m9_exp_pheno[,c(1:354,356)],blacklist = blacklist_df)
+# #hybrid_new_test_nobl = mmhc(m9_exp_pheno[,c(1:354,356)])
+# 
+# 
+# #remove duplicated genes (same module membership, for now just removing ones that appear second. Different expression patterns though)
+# #x = which(colnames(brown_genes_exp) %in% colnames(brown_genes_exp)[which(duplicated(colnames(brown_genes_exp)))])
+# #x = brown_genes_exp[,x]
+# 
+# #test if duplicates exist. there shouldnt be any
+# which(duplicated(colnames(mod_genes_exp)))
+# #remove if dups exist (or rename)
+# #mod_genes_exp = mod_genes_exp[,-which(duplicated(colnames(mod_genes_exp)))]
+# 
+# #colnames(mod_genes_exp)[2357] = "Wscd2.dup"
+# colnames(mod_genes_exp)[993] = "Mia3.dup2"
+# hybrid_blue_nobl = mmhc(mod_genes_exp)#better BIC (higher values better, AIC and BIC rescaled by 2)
+# bnlearn::score(hybrid_blue_nobl, mod_genes_exp)
+# 
+# hybrid_blue_bl = mmhc(mod_genes_exp,blacklist = blacklist_df)
+# score(hybrid_blue_bl, mod_genes_exp)
+# 
+# 
+# hybrid_arcs = arc.strength(hybrid_blue_nobl, data = mod_genes_exp)
+# #strength.plot(hybrid_new_test, hybrid_arcs)
