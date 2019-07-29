@@ -64,5 +64,12 @@
 11. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
 
 12. Networks
+    - ./src/make_bone_geneset.R
+        - Get gene ontology identifiers from AmiGO2.
+            - Use "bone" and "osteo* and "ossif*" as terms. stored in ./data/
+        - also from MGI
+         - human and mouse "osteoporosis" and "bone mineral density" and "osteoblast" and "osteoclast" and "osteocyte"
+        - also from GWAS catalog (nearest gene? mouse and human. what terms?)
+
 
 
