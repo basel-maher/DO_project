@@ -85,7 +85,7 @@ genes = unique(c(local_eqtl_peaks$lodcolumn, distal_eqtl_peaks$lodcolumn))
 gene_annot_file = annot[which(annot$Gene.Name %in% genes),] #use only mapped genes
 gene_annot_file = gene_annot_file[,c(1,2,3,5,6)] #take useful columns
 
-colnames(gene_annot_file) = c("ensembl_gene_id","mgi_symbol","chromosome_name","start_position" ,"transcript_end")
+colnames(gene_annot_file) = c("gene_id","symbol","chromosome_name","start_position" ,"transcript_end")
 write.csv(gene_annot_file, file = "./results/flat/gene_annot_file.csv", quote = FALSE, row.names = FALSE)
 # 
 
@@ -99,13 +99,15 @@ write.csv(gene_annot_file, file = "./results/flat/gene_annot_file.csv", quote = 
 #These use lod thresholds and a distance from the TSS to define distal and local eQTL peaks
 #return dataframes with local or distal eqtl
 
-getLocalEqtl = function(peaks,geneAnnot,lodThresh,localDistFromStart,geneCol1,geneCol2){
+getLocalEqtl = function(peaks,geneAnnot,lodThreshAuto, lodThreshX, localDistFromStart,geneCol1,geneCol2){
   out = merge(peaks,geneAnnot,by.x = geneCol1, by.y = geneCol2)
 
   out$dist_start = abs((out$pos*1000000) - out$start_position) #multiply by a mil to get bp, calculate distance from start
   out = out[which(out$chr == out$chromosome_name),] #must be on same chrom
   out = out[which(out$dist_start <=localDistFromStart),] #must be within a certain distance from start
-  out = out[which(out$lod>=lodThresh),] #must meet or exceed lod thresh
+  idx = which((out$chr != "X") & (out$lod >= lodThreshAuto)) #find autosomal peaks that meet threshold
+  idx = c(idx, which((out$chr == "X") & (out$lod >= lodThreshX))) #find X peaks that meet threshold
+  out = out[idx,] #must meet or exceed lod thresh
   return(out)
 }
 ###########
@@ -114,37 +116,29 @@ getLocalEqtl = function(peaks,geneAnnot,lodThresh,localDistFromStart,geneCol1,ge
 #This function then return a dataframe with trans_eqtls given the arguments. In this case, trans eQTL are
 #defined as being on a different chrom OR same chrom but outside the given transMinDistFromTSS (greater than or equal to this minimum distance)
 
-getDistalEqtl = function(peaks,geneAnnot,lodThresh,distalMinDistFromStart,geneCol1,geneCol2){
+getDistalEqtl = function(peaks,geneAnnot,lodThreshAuto,lodThreshX, distalMinDistFromStart,geneCol1,geneCol2){
   out = merge(peaks,geneAnnot,by.x = geneCol1, by.y = geneCol2)
 
   out$dist_start = abs((out$pos*1000000) - out$start_position) #multiply by a mil to get bp, calculate distance from start
-  out = out[which(out$lod>=lodThresh),]
+  
+  idx = which((out$chr != "X") & (out$lod >= lodThreshAuto)) #find autosomal peaks that meet threshold
+  idx = c(idx, which((out$chr == "X") & (out$lod >= lodThreshX))) #find X peaks that meet threshold
+  out = out[idx,] #must meet or exceed lod thresh
+  
   out$distal = 0 #set col of zeros
-  out$distal[which(out$chr != out$chromosome_name)] = 1 #if not on same chromosome, make = 1
-  out$dist_start[which(out$distal==1)] = "diff_chrom" #annotate as being on a different chromosome
-  #
   out$distal[which(as.numeric(out$dist_start) >=distalMinDistFromStart)] = 1 #if meets distance criterion for distal eqtl, make = 1
+  
+  out$dist_start[which(out$chr != out$chromosome_name)] = "diff_chrom" #if not on same chromosome, make = "diff_chrom"
+  out$distal[which(out$dist_start=="diff_chrom")] = 1 #make = 1 if on a different chrom
+  #
   out = out[which(out$distal == 1),] #subset to only "distal" eqtl
-  out = out[,c(1:13)] # take these columns
-  out = out[which(out$chromosome_name %in% c(seq(1,19,1),"X")),] #take those only on chroms 1:19 and X
+  out = out[,c(1:11)] # take these columns
+  out = out[which(out$chromosome_name %in% c(seq(1,19,1),"X")),] #take those only on chroms 1:19 and X 
   return(out)
 }
 
+local_eqtl = getLocalEqtl(local_eqtl_peaks,gene_annot_file,lodThreshAuto = 9.9, lodThreshX = 10.9, localDistFromStart = 1000000, geneCol1 = "lodcolumn", geneCol2 = "symbol")
+
+distal_eqtl = getDistalEqtl(distal_eqtl_peaks,gene_annot_file,lodThreshAuto = 10.7, lodThreshX = 11, distalMinDistFromStart = 2500000, geneCol1 = "lodcolumn", geneCol2 = "symbol")
 
 
-
-
-
-
-local_autosomal = 9.9
-local_X = 10.9
-
-local_idx = which((local_eqtl_peaks$chr != "X") & (local_eqtl_peaks$lod >= local_autosomal))
-local_idx = c(local_idx, which((local_eqtl_peaks$chr == "X") & (local_eqtl_peaks$lod >= local_X)))
-
-x = 
-distal_autosomal = 10.7
-distal_X = 11
-
-distal_idx = which((distal_eqtl_peaks$chr != "X") & (distal_eqtl_peaks$lod >= distal_autosomal))
-distal_idx = c(distal_idx, which((distal_eqtl_peaks$chr == "X") & (distal_eqtl_peaks$lod >= distal_X)))
