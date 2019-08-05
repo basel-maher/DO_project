@@ -72,7 +72,12 @@
 
 10. Map eQTL
     - ./src/map_local_and_distal_eqtl.R
-    -   outputs: ./results/flat/locaal_eqtl_peaks.csv, ./results/flat/distal_eqtl_peaks.csv, ./results/flat/   gene_annot_file.csv"
+    -   outputs: 
+        - ./results/flat/locaal_eqtl_peaks.csv 
+        - ./results/flat/distal_eqtl_peaks.csv 
+        - ./results/flat/gene_annot_file.csv
+        - ./results/Rdata/local_eqtl.Rdata
+        - ./results/Rdata/distal_eqtl.Rdata
 
 11. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
 

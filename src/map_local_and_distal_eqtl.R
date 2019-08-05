@@ -138,7 +138,16 @@ getDistalEqtl = function(peaks,geneAnnot,lodThreshAuto,lodThreshX, distalMinDist
 }
 
 local_eqtl = getLocalEqtl(local_eqtl_peaks,gene_annot_file,lodThreshAuto = 9.9, lodThreshX = 10.9, localDistFromStart = 1000000, geneCol1 = "lodcolumn", geneCol2 = "symbol")
+save(local_eqtl, file = "./results/Rdata/local_eqtl.Rdata")
+#
 
 distal_eqtl = getDistalEqtl(distal_eqtl_peaks,gene_annot_file,lodThreshAuto = 10.7, lodThreshX = 11, distalMinDistFromStart = 2500000, geneCol1 = "lodcolumn", geneCol2 = "symbol")
 
+###remove -ps pseudogenes, -rs and GM genes from trans eqtl list
+##(what about -rs? related sequence)
+distal_eqtl = distal_eqtl[-grep("-ps",distal_eqtl$lodcolumn),]
+distal_eqtl = distal_eqtl[-grep("-rs",distal_eqtl$lodcolumn),]
+distal_eqtl = distal_eqtl[-grep("Gm[0-9]",distal_eqtl$lodcolumn),]
+
+save(distal_eqtl, file = "./results/Rdata/distal_eqtl.Rdata")
 
