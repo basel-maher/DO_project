@@ -57,9 +57,10 @@ mgi = mgi[-grep("\\(", mgi)]
 mgi = toupper(mgi)
 mgi = unique(mgi)
 superduperset = append(superduperset,mgi)
-superduperset = superduperset[-c(1444,1660)] #contain \
+superduperset = superduperset[-c(1444)] #contain \
+superduperset = superduperset[-c(1660)] #contain \
 superduperset = toupper(superduperset)
 
 superduperset = unique(superduperset)
 ##
-
+write.table(superduperset,"~/Desktop/superduperset.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)

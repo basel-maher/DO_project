@@ -192,8 +192,8 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
      main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
-
-net = blockwiseModules(edata, power = 4,
+#did 4, but try 9
+net = blockwiseModules(edata, power = 9,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = TRUE, pamRespectsDendro = FALSE,
@@ -201,7 +201,9 @@ net = blockwiseModules(edata, power = 4,
                        verbose = 3)
 
 ## 35 modules not including 0, 5736 genes in module 0
-
+#for thresh of 9, 20 mod, 100572 in mod 0
+#thresh 6, 6717 in mod 0, 31 modules
+#
 #get traits we want to look at
 pheno = read.csv("./results/flat/full_pheno_table.csv", stringsAsFactors = FALSE)
 
@@ -242,10 +244,10 @@ MEs = orderMEs(MEs0)
 #cor module eigengenes with traits
 moduleTraitCor = cor(MEs, datTraits, use = "p",method = "p");
 
-moduleTraitPvalue = as.data.frame(matrix(nrow = nrow(moduleTraitCor),ncol = ncol(moduleTraitCor)))# is this correct? what about nSamples for traits?
+moduleTraitPvalue = as.data.frame(matrix(nrow = nrow(moduleTraitCor),ncol = ncol(moduleTraitCor)))
 for(i in 1:ncol(moduleTraitCor)){
   nSamples = length(which(is.na(datTraits[,colnames(moduleTraitCor)[i]]) == FALSE))
-  moduleTraitPvalue[,i] = corPvalueStudent(moduleTraitCor[,i], nSamples)
+  moduleTraitPvalue[,i] = corPvalueStudent(moduleTraitCor[,i], nSamples) # uses sample for each trait. is this correct?
   print(colnames(moduleTraitCor)[i])
   print(nSamples)
   
@@ -302,7 +304,7 @@ combat_annot[,c(4:8)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pat
 modNames = substring(names(MEs), 3)
 geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p"))
 
-MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))#nsamples - Is This Correct? or use number of modules?
+MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))#nsamples - Here it is RNA samples. Is This Correct? or use number of modules? or number of genes?
 geneModuleMembership$gene = colnames(edata)
 #names(geneModuleMembership) = paste("MM", modNames, sep="");
 #names(MMPvalue) = paste("p.MM", modNames, sep="");
@@ -384,7 +386,7 @@ geneModMemAnnot = combat_annot
 #write out net, edata connect and annot. 
 #For blacklist, we would use cis-eqtl
 save(edata, file = "./results/Rdata/edata.RData")
-save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot.RData")
+save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power9.RData")
 
 ########################## CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
 #Done on Rivanna. learn_bn.R. Only need to know number of colors (modules) for SLURM script

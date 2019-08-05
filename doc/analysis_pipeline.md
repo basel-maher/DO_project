@@ -44,6 +44,8 @@
 8. Calc QTL
     - ./src/map_qtl.R
     - will also perform permutation analysis
+        - output in ./results/Rdata/eqtl_perms/   
+        
 
 9. Calc eQTL
 
@@ -56,10 +58,21 @@
     - make an eqtl specific cross file
         - ./src/make_cross_eqtl.R
 
-    - map Cis and trans differently, using different covariates
-10. Calc eQTL perms
+    - calc eqtl perms
+        -  based on mapping local and distal eqtl with varying covariates, we chose to map local
+            eqtl with sex and the first 35 PEER covars, and distal eqtl with all 48 PEER covariates, and not sex.
+            - ./src/calc_eqtl_perms.R
+                - output in ./results/Rdata/eqtl_perms/   
+                - use maximum LODs at 0.05 alpha=0.05 for mapping
+                    - local_autosomal: 9.9
+                    - local_X: 10.9
+                    - distal_autosomal: 10.7
+                    - distal_X: 11
+                
 
-    - Also separately for cis and trans
+10. Map eQTL
+    - ./src/map_local_and_distal_eqtl.R
+    -   outputs: ./results/flat/locaal_eqtl_peaks.csv, ./results/flat/distal_eqtl_peaks.csv, ./results/flat/   gene_annot_file.csv"
 
 11. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
 
