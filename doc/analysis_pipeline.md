@@ -73,7 +73,7 @@
 10. Map eQTL
     - ./src/map_local_and_distal_eqtl.R
     -   outputs: 
-        - ./results/flat/locaal_eqtl_peaks.csv 
+        - ./results/flat/local_eqtl_peaks.csv 
         - ./results/flat/distal_eqtl_peaks.csv 
         - ./results/flat/gene_annot_file.csv
         - ./results/Rdata/local_eqtl.Rdata
