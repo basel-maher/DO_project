@@ -150,4 +150,6 @@ distal_eqtl = distal_eqtl[-grep("-rs",distal_eqtl$lodcolumn),]
 distal_eqtl = distal_eqtl[-grep("Gm[0-9]",distal_eqtl$lodcolumn),]
 
 save(distal_eqtl, file = "./results/Rdata/distal_eqtl.Rdata")
+##CHANGE TO CALCULATE USING MSTRG INSTEAD OF SYMBOL
 
+hist(x$CI, xlab = "Confidence Interval Size (Mbp)", main="eQTL Confidence Intervals")

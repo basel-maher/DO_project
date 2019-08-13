@@ -1,12 +1,12 @@
 library(biomaRt)
 
-bone_terms = read.delim("~/Documents/projects/DO_project/data/GO_term_bone.txt", stringsAsFactors = FALSE, header = FALSE)
+bone_terms = read.delim("./data/GO_term_bone.txt", stringsAsFactors = FALSE, header = FALSE)
 bone_terms = bone_terms$V1
 #
-osteo_terms = read.delim("~/Documents/projects/DO_project/data/GO_term_osteo*.txt", stringsAsFactors = FALSE, header = FALSE)
+osteo_terms = read.delim("./data/GO_term_osteo*.txt", stringsAsFactors = FALSE, header = FALSE)
 osteo_terms = osteo_terms$V1
 #
-ossif_terms = read.delim("~/Documents/projects/DO_project/data/GO_term_ossif*.txt", stringsAsFactors = FALSE, header = FALSE)
+ossif_terms = read.delim("./data/GO_term_ossif*.txt", stringsAsFactors = FALSE, header = FALSE)
 ossif_terms = ossif_terms$V1
 #
 terms = c(ossif_terms, bone_terms, osteo_terms)

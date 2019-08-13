@@ -50,10 +50,10 @@ counts[,colnames(counts)[which(duplicated(colnames(counts)))]]
 #for now, give them a unique ID
 colnames(counts)[which(duplicated(colnames(counts)))] = paste0(colnames(counts)[which(duplicated(colnames(counts)))], "_isoform")
 
-colnames(counts)[4147] = paste0(colnames(counts)[4147],".2")
-colnames(counts)[4148] = paste0(colnames(counts)[4148],".3")
-colnames(counts)[18740] = paste0(colnames(counts)[18740],".2")
-colnames(counts)[21690] = paste0(colnames(counts)[21690],".2")
+which(duplicated(colnames(counts)))
+colnames(counts)[4131] = paste0(colnames(counts)[4131],".2")
+colnames(counts)[4132] = paste0(colnames(counts)[4132],".3")
+colnames(counts)[18687] = paste0(colnames(counts)[18687],".2")
 
 counts = t(counts)
 
@@ -201,7 +201,7 @@ net = blockwiseModules(edata, power = 9,
                        verbose = 3)
 
 ## 35 modules not including 0, 5736 genes in module 0
-#for thresh of 9, 20 mod, 100572 in mod 0
+#for thresh of 9, 20 mod, 10572 in mod 0
 #thresh 6, 6717 in mod 0, 31 modules
 #
 #get traits we want to look at
@@ -217,9 +217,10 @@ datTraits = datTraits[,-c(1:7,16,22)]
 #convert to numeric
 for(i in 1:ncol(datTraits)){datTraits[,i] = as.numeric(datTraits[,i])}
 
-#remove histo columns
-#datTraits = datTraits[,-c(27:44)]
-
+#remove histo columns 
+#datTraits = datTraits[,-c(26:43)]
+#remove adipose
+#datTraits = datTraits[,-c(44:55)]
 
 sizeGrWindow(12, 9)
 # Convert labels to colors for plotting
@@ -281,7 +282,7 @@ labeledHeatmap(Matrix = moduleTraitCor,
                colors = greenWhiteRed(50),
                textMatrix = textMatrix,
                setStdMargins = FALSE,
-               cex.text = 0.30,
+               cex.text = 0.4,
                zlim = c(-1,1),
                cex.lab.x = 0.7,
                cex.lab.y = 0.8,
