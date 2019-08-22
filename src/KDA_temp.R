@@ -19,7 +19,7 @@ bns = list.files("~/Desktop/bn_4/")
 #bns = "hybrid_brown_nobl_4.Rdata"
 #
 x = bn2igraph(brown_bn)
-subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Mia3"))))
+subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Rhpn2"))))
 plot(subgraph,vertex.label.cex=0.9,edge.width=2, vertex.size=25, margin=-0.1, vertex.label.dist=0.2, vertex.label.degree=-pi)
 
 ####
@@ -95,18 +95,20 @@ for(net in bns){
 #kda = kda[-which(kda$num_bone_neib==0),]
 #kda$phyper_adj = p.adjust(kda$phyper, method = "bonferroni")
 
+x = out
 
 
-
-for(i in 1:length(out)){
-  out[[i]] = out[[i]][-which(out[[i]]$num_bone_neib == 0),]
-  out[[i]]$hyper = phyper(q=out[[i]]$num_bone_neib-1, m=out[[i]]$num_bone_genes, n = out[[i]]$num_genes_inMod -  out[[i]]$num_bone_genes_inMod, k=out[[i]]$num_neib, lower.tail = FALSE)
-  out[[i]]$hyper_fdr = p.adjust(out[[i]]$hyper, method="bonferroni")
+for(i in 1:length(x)){
+  x[[i]] = x[[i]][-which(x[[i]]$num_bone_neib == 0),]
+  thresh = mean(x[[i]]$num_neib) - sd(x[[i]]$num_neib)
+  x[[i]] = x[[i]][-which(x[[i]]$num_neib < thresh),]
+  x[[i]]$hyper = phyper(q=x[[i]]$num_bone_neib-1, m=x[[i]]$num_bone_genes, n = x[[i]]$num_genes_inMod -  x[[i]]$num_bone_genes_inMod, k=x[[i]]$num_neib, lower.tail = FALSE)
+  x[[i]]$hyper_fdr = p.adjust(x[[i]]$hyper, method="bonferroni")
   }
 
-all = bind_rows(out)
+all = bind_rows(x)
 
-
+write.csv(all, file="~/Desktop/kda_updatedBoneSet_sansLowlyConn.csv",quote = FALSE)
 
 
 ##fishers exact test
