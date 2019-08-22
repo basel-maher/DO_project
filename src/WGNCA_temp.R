@@ -154,6 +154,10 @@ edata = t(edata)
 #  edata[,col] = qnorm((rank(edata[,col],na.last="keep")-0.5)/sum(!is.na(edata[,col])))
 #}
 ########################
+####
+#remove pseudogenes
+#edata_sans_ps = edata[,-grep("-ps",colnames(edata))]
+#edata_sans_ps = edata_sans_ps[,-grep("-rs",colnames(edata_sans_ps))]
 
 #check data
 gsg = goodSamplesGenes(edata, verbose = 3);
@@ -193,7 +197,7 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 #did 4, but try 9
-net = blockwiseModules(edata, power = 9,
+net = blockwiseModules(edata, power = 4,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = TRUE, pamRespectsDendro = FALSE,
@@ -387,45 +391,45 @@ geneModMemAnnot = combat_annot
 #write out net, edata connect and annot. 
 #For blacklist, we would use cis-eqtl
 save(edata, file = "./results/Rdata/edata.RData")
-save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power9.RData")
+save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power4.RData")
 
 ########################## CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
 #Done on Rivanna. learn_bn.R. Only need to know number of colors (modules) for SLURM script
 
-# resid = edata
+resid = edata
 # #module membership for all genes in all modules (from auto_wgcna.R)
-# connect = geneModMemAnnot
+ connect = geneModMemAnnot
 # 
-# clr = unique(connect$color)
+ clr = unique(connect$color)
 # 
 # mod_genes = connect[which(connect$color==i),"gene"]
 # 
-# mod_genes_membership = connect[which(connect$`colnames(edata)` %in% mod_genes),c("gene","Gene.ID",paste0("ME",i),"color")]
-# mod_genes_membership = mod_genes_membership[which(mod_genes_membership$color == i),]
+ #mod_genes_membership = connect[which(connect$`colnames(edata)` %in% mod_genes),c("gene","Gene.ID",paste0("ME",i),"color")]
+ #mod_genes_membership = mod_genes_membership[which(mod_genes_membership$color == i),]
 # 
-# mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
+ #mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
 # 
-# bn = mmhc(mod_genes_exp)
+ #bn = mmhc(mod_genes_exp)
 # 
-# varName = paste0("hybrid_",i,"_nobl")
+ #varName = paste0("hybrid_",i,"_nobl")
 # 
-# assign(x = varName, value = bn)
-# print(i)
-# for(i in clr){
-#   mod_genes = connect[which(connect$color==i),"gene"]
+ #assign(x = varName, value = bn)
+ #print(i)
+ for(i in clr){
+   mod_genes = connect[which(connect$color==i),"gene"]
 #   
-#   mod_genes_membership = connect[which(connect$`colnames(edata)` %in% mod_genes),c("gene","Gene.ID",paste0("ME",i),"color")]
-#   mod_genes_membership = mod_genes_membership[which(mod_genes_membership$color == i),]
+   mod_genes_membership = connect[which(connect$`colnames(edata)` %in% mod_genes),c("gene","Gene.ID",paste0("ME",i),"color")]
+   mod_genes_membership = mod_genes_membership[which(mod_genes_membership$color == i),]
 #   
-#   mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
+   mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
 # 
-#   bn = mmhc(mod_genes_exp)
+   bn = mmhc(mod_genes_exp)
 #   
-#   varName = paste0("hybrid_",i,"_nobl")
+   varName = paste0("hybrid_",i,"_nobl")
 #   
-#   assign(x = varName, value = bn)
-#   print(i)
-# }
+   assign(x = varName, value = bn)
+   print(i)
+ }
 # 
 # 
 # 
@@ -500,5 +504,11 @@ save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power9.RData")
 # score(hybrid_blue_bl, mod_genes_exp)
 # 
 # 
-# hybrid_arcs = arc.strength(hybrid_blue_nobl, data = mod_genes_exp)
-# #strength.plot(hybrid_new_test, hybrid_arcs)
+mod_genes_membership = geneModMemAnnot[which(geneModMemAnnot$color=="brown"),]
+mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
+#colnames(mod_genes_exp)[which(colnames(mod_genes_exp)=="Ppp2r3d_isoform")] = "Ppp2r3d_isoform"
+hybrid_arcs = arc.strength(bn, data = mod_genes_exp)
+hybrid_arcs = strength.plot(hybrid_new_test, hybrid_arcs)
+boot_arcs = boot.strength(data = mod_genes_exp,cpdag=T, algorithm = "mmhc" )
+attr(boot_arcs, "threshold")
+ave = averaged.network(boot_arcs)

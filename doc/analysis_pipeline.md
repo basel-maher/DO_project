@@ -79,7 +79,7 @@
         - ./results/Rdata/local_eqtl.Rdata
         - ./results/Rdata/distal_eqtl.Rdata
 
-11. eQTL analysis: cis and trans eqtl, trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
+11. eQTL analysis: trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
 
 12. Networks
     - ./src/make_bone_geneset.R
