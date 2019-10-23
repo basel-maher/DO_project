@@ -29,7 +29,7 @@ histo_data = histo_data[,-2]
 #remove "FV" and 'FV0" from identifier in SPEC
 histo_data$SPEC.. = apply(histo_data,1,function(x) sub("FV0","",x[1]))
 histo_data$SPEC.. = apply(histo_data,1,function(x) sub("FV","",x[1]))
-
+histo_data$SPEC.. = apply(histo_data,1,function(x) sub("UVA","",x[1]))
 #rename 1st col
 colnames(histo_data)[1] = c("specimen")
 
@@ -92,7 +92,7 @@ colnames(MAT_data) <- paste("MAT", colnames(MAT_data), sep = "_")
 harvest_data = read.csv("./data/pheno_data/Harvest Records.csv", stringsAsFactors = FALSE)
 
 #subset to most recently completed rows
-harvest_data = harvest_data[1:698,]
+harvest_data = harvest_data[1:824,]
 
 #create full_pheno_table by merging data 
 full_pheno_table = merge(harvest_data, bending_data, by.x="Mouse.ID", by.y = "bending_specimen", all = T,sort = FALSE)

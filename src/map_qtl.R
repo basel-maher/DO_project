@@ -194,7 +194,7 @@ for(i in 1:length(perm_files)){
 }
 
 ##same for norm
-qtl_peaks_norm$perm_thresh = NA
+qtl_peaks_both_norm$perm_thresh = NA
 perm = list.files("./results/Rdata/qtl_perms/")
 perm_files = perm[grep("norm_perms_",perm)]
 
@@ -208,54 +208,78 @@ for(i in 1:length(perm_files)){
   pheno_name = gsub(x = perm_files[i],pattern = "norm_perms_",replacement = "")
   pheno_name = gsub(x = pheno_name,pattern = ".Rdata",replacement = "")
   
-  pheno_rows = which(qtl_peaks_norm$lodcolumn == pheno_name)
+  pheno_rows = which(qtl_peaks_both_norm$lodcolumn == pheno_name)
   
   for(i in 1:length(pheno_rows)){
-    if(qtl_peaks_norm$chr[pheno_rows[i]] == "X"){
-      qtl_peaks_norm$perm_thresh[[pheno_rows[i]]] = perm_x
-    } else {qtl_peaks_norm$perm_thresh[[pheno_rows[i]]] = perm_a}
+    if(qtl_peaks_both_norm$chr[pheno_rows[i]] == "X"){
+      qtl_peaks_both_norm$perm_thresh[[pheno_rows[i]]] = perm_x
+    } else {qtl_peaks_both_norm$perm_thresh[[pheno_rows[i]]] = perm_a}
   }
 }
 
-
+qtl = qtl_peaks_both_norm[which(qtl_peaks_both_norm$lod >= qtl_peaks_both_norm$perm_thresh),]
 ###
+
 TMD_blup = scan1blup(apr,pheno = pheno_combined[,"uCT_Ct.TMD"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(TMD_blup, file = "./results/Rdata/TMD_blup.Rdata")
-load("./results/Rdata/TMD_blup.Rdata")
+
+#load("./results/Rdata/TMD_blup.Rdata")
+png("~/Desktop/TMD.png")
+plot_coefCC(TMD_blup[4000:7500,], cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=45), main = "TMD")
+dev.off() 
+
+
 plot_coefCC(TMD_blup, cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=45), main = "TMD")
+
 TMD_coef_scan = scan1coef(apr,pheno = pheno_combined[,"uCT_Ct.TMD"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 
 pMOI_blup = scan1blup(apr,pheno = pheno_combined[,"uCT_pMOI"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(pMOI_blup, file = "./results/Rdata/pMOI_blup.Rdata")
 load("./results/Rdata/pMOI_blup.Rdata")
-plot_coefCC(pMOI_blup, cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=47), main = "pMOI")
+
+png("~/Desktop/pMOI.png")
+plot_coefCC(pMOI_blup[4000:7500,], cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=47), main = "pMOI")
+dev.off()
 
 imax_blup = scan1blup(apr,pheno = pheno_combined[,"uCT_Imax"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(imax_blup, file = "./results/Rdata/imax_blup.Rdata")
 load("./results/Rdata/imax_blup.Rdata")
-plot_coefCC(imax_blup, cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=48), main = "Imax")
+
+png("~/Desktop/imax.png")
+plot_coefCC(imax_blup[4000:7500,], cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=48), main = "Imax")
+dev.off()
 
 ttAr_blup = scan1blup(apr,pheno = pheno_combined[,"uCT_Tt.Ar"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(ttAr_blup, file = "./results/Rdata/ttAr_blup.Rdata")
 load("./results/Rdata/ttAr_blup.Rdata")
-plot_coefCC(ttAr_blup, cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=43), main = "Tt.Ar")
+
+png("~/Desktop/ttar.png")
+plot_coefCC(ttAr_blup[4000:7500,], cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=43), main = "Tt.Ar")
+dev.off()
 
 maAr_blup = scan1blup(apr,pheno = pheno_combined[,"uCT_Ma.Ar"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(maAr_blup, file = "./results/Rdata/maAr_blup.Rdata")
 load("./results/Rdata/maAr_blup.Rdata")
-plot_coefCC(maAr_blup, cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=42), main = "Ma.Ar")
+
+png("~/Desktop/Ma.Ar.png")
+plot_coefCC(maAr_blup[4000:7500,], cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=42), main = "Ma.Ar")
+dev.off()
 
 ML_blup = scan1blup(apr,pheno = pheno_combined[,"ML" ], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(ML_blup, file = "./results/Rdata/ML_blup.Rdata")
 load("./results/Rdata/ML_blup.Rdata")
-plot_coefCC(ML_blup, cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=10),main = "ML")
 
+png("~/Desktop/ml.png")
+plot_coefCC(ML_blup[4000:7500,], cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=10),main = "ML")
+dev.off()
 
 porosity_blup = scan1blup(apr,pheno = pheno_combined[,"uCT_Ct.porosity"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(porosity_blup, file = "./results/Rdata/porosity_blup.Rdata")
 load("./results/Rdata/porosity_blup.Rdata")
-plot_coefCC(porosity_blup, cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=46),main="Ct.Porosity")
 
+png("~/Desktop/porosity.png")
+plot_coefCC(porosity_blup[4000:7500,], cross_basic$pmap,legend = "topleft",scan1_output = subset(DO_qtl_scan_normal, lodcolumn=46),main="Ct.Porosity")
+dev.off()
 
 #
 TMD_mark = find_marker(cross_basic$pmap, chr = 1, pos = 155.10491)
@@ -282,5 +306,84 @@ por_coef = porosity_blup[por_mark,1:8]
 
 cor(pMOI_coef, TMD_coef, method = "k")
 
+###
 
+
+load("./results/Rdata/cross_eqtl.Rdata")
+
+
+
+#get the X chrom covars from the cross file
+Xcovar <- get_x_covar(cross_eqtl)
+
+
+#create a covar object from covariates in cross file
+#must be numeric
+covar = as.matrix(cross_eqtl$covar)
+covar[,"sex"] = (covar[,"sex"] == "M")*1 #convert sex to 1's and 0's
+covar[,1] = as.factor(covar[,1]) #sac date to factors
+covar[,6] = as.factor(covar[,6]) #generation to factors
+
+covar = apply(covar,2,as.numeric)
+rownames(covar) = rownames(cross_eqtl$covar)
+
+##############
+#eQTL mapping
+
+qsox1_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"MSTRG.1313"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+save(qsox1_blup, file = "./results/Rdata/qsox1_blup.Rdata")
+
+png("~/Desktop/qsox1.png")
+plot_coefCC(qsox1_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Qsox1")
+dev.off()
+#load("./results/Rdata/TMD_blup.Rdata")
+#Lhx4 :NA
+#Acbd6: MSTRG.1312
+Acbd6_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"MSTRG.1312"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+png("~/Desktop/acbd6.png")
+plot_coefCC(Acbd6_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Acbd6")
+dev.off()
+#Cep350: MSTRG.1316	
+
+Cep350_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"MSTRG.1316"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+png("~/Desktop/cep350.png")
+plot_coefCC(Cep350_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Cep350")
+dev.off()
+#$Gm37571: NA
+#Gm37539: NA 
+#Xpr1: MSTRG.1309	
+Xpr1_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"MSTRG.1309"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+png("~/Desktop/xpr1.png")
+plot_coefCC(Xpr1_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Xpr1")
+dev.off()
+
+#Tor1aip2: MSTRG.1324
+Tor1aip2_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"MSTRG.1324"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+png("~/Desktop/tor1aip2.png")
+plot_coefCC(Tor1aip2_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Tor1aip2")
+dev.off()
+#Tdrd5: ENSMUSG00000060985
+Tdrd5_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"ENSMUSG00000060985"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+png("~/Desktop/tdrd5.png")
+plot_coefCC(Tdrd5_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Tdrd5")
+dev.off()
+#Stx6: MSTRG.1305	
+Stx6_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"MSTRG.1305"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+png("~/Desktop/stx6.png")
+plot_coefCC(Stx6_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Stx6")
+dev.off()
+#Mr1: MSTRG.1304	
+Mr1_blup = scan1blup(apr,pheno = cross_eqtl$pheno[,"MSTRG.1304"], kinship = k_loco[["1"]], addcovar = covar[,c(2,17:51)],cores = 2)
+png("~/Desktop/mr1.png")
+plot_coefCC(Mr1_blup[4000:7500,], cross_eqtl$pmap,legend = "topleft", main = "Mr1")
+dev.off()
+
+##
+TMD_mark = find_marker(cross_basic$pmap, chr = 1, pos = 155.10491)
+TMD_coef = TMD_blup[TMD_mark,1:8]
+
+mr1_mark = find_marker(cross_eqtl$pmap, chr = 1, pos = 155.10491)
+mr1_coef = Mr1_blup[mr1_mark,1:8]
+
+cor(TMD_coef, mr1_coef, method = "k")
 

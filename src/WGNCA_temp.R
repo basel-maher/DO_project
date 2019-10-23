@@ -62,7 +62,7 @@ counts = t(counts)
 
 
 #vst from deseq2
-vst = varianceStabilizingTransformation(as.matrix(counts))
+vst = DESeq2::varianceStabilizingTransformation(as.matrix(counts))
 
 #get batch. What I did here is I got batch from the file names of the alignment output for RNA-seq
 f = list.files("./results/flat/RNA-seq/sums/")
@@ -247,7 +247,7 @@ nSamples = nrow(edata);
 MEs0 = moduleEigengenes(edata, moduleColors)$eigengenes
 MEs = orderMEs(MEs0)
 #cor module eigengenes with traits
-moduleTraitCor = cor(MEs, datTraits, use = "p",method = "p");
+moduleTraitCor = cor(MEs, datTraits, use = "p",method = "s");
 
 moduleTraitPvalue = as.data.frame(matrix(nrow = nrow(moduleTraitCor),ncol = ncol(moduleTraitCor)))
 for(i in 1:ncol(moduleTraitCor)){
@@ -261,12 +261,23 @@ nSamples=nrow(edata)
 colnames(moduleTraitPvalue) = colnames(moduleTraitCor)
 rownames(moduleTraitPvalue) = rownames(moduleTraitCor)
 
+##remove everything but uCT
+#moduleTraitPvalue = moduleTraitPvalue[,c(44:61)]
+#moduleTraitCor = moduleTraitCor[,c(44:61)]
+
+moduleTraitPvalue = moduleTraitPvalue[,c(11:61)]
+moduleTraitCor = moduleTraitCor[,c(11:61)]
 
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)
+
+sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/36))))),]
+
 sizeGrWindow(10,6)
 # Will display correlations and their p-values
 textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
                    signif(moduleTraitPvalue, 1), ")", sep = "");
+textMatrix = signif(moduleTraitPvalue, 1)
+
 dim(textMatrix) = dim(moduleTraitCor)
 par(mar = c(6, 8.5, 3, 3));
 
@@ -276,21 +287,33 @@ trait_names = gsub(pattern = "\\.\\.",replacement = "\\.",x = trait_names)
 trait_names = gsub(pattern = "\\.\\.",replacement = "\\.",x = trait_names)
 trait_names[8] = "Adiposity"
 
+#only trabecular traits
+moduleTraitCor = moduleTraitCor[,c(34:41)]
+#reomve grey
+moduleTraitCor = moduleTraitCor[-37,]
+trait_names = colnames(moduleTraitCor)
+trait_names = gsub(pattern = "uCT_",replacement = "",x = trait_names)
+MEs = MEs[,-37]
+textMatrix = signif(moduleTraitPvalue, 1)
 
+
+dim(textMatrix) = dim(moduleTraitCor)
+textMatrix = textMatrix[-37,c(34:41)]
 # Display the correlation values within a heatmap plot
+par(mar=c(4.1, 13.1, 3.1, 2.1))
 labeledHeatmap(Matrix = moduleTraitCor,
                xLabels = trait_names,
                yLabels = names(MEs),
                ySymbols = names(MEs),
                colorLabels = FALSE,
-               colors = greenWhiteRed(50),
+               colors = blueWhiteRed(50),
                textMatrix = textMatrix,
-               setStdMargins = FALSE,
-               cex.text = 0.4,
+               setStdMargins = F,
+               cex.text = 0.6,
                zlim = c(-1,1),
-               cex.lab.x = 0.7,
-               cex.lab.y = 0.8,
-               verticalSeparator.x = c(1:length(names(datTraits))),
+               cex.lab.x = 0.85,
+               cex.lab.y = 0.7,
+               verticalSeparator.x = c(1:length(trait_names)),
                horizontalSeparator.y = c(1:length(names(MEs))),
                main = paste("Module-trait relationships"))
 ###
@@ -306,7 +329,7 @@ combat_annot$color = moduleColors
 combat_annot[,c(4:8)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$Gene.Name),c(1,3,4,5,6)]
 
 
-modNames = substring(names(MEs), 3)
+#modNames = substring(names(MEs), 3)
 geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p"))
 
 MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))#nsamples - Here it is RNA samples. Is This Correct? or use number of modules? or number of genes?
@@ -512,3 +535,19 @@ hybrid_arcs = strength.plot(hybrid_new_test, hybrid_arcs)
 boot_arcs = boot.strength(data = mod_genes_exp,cpdag=T, algorithm = "mmhc" )
 attr(boot_arcs, "threshold")
 ave = averaged.network(boot_arcs)
+
+
+#plot MEred with Tb.N
+
+tbn = datTraits$uCT_Tb.N
+red = MEs$MEred
+x = as.data.frame(t(rbind(tbn,red)))
+
+ggplot(x, aes(x = tbn, y = red)) +
+  geom_point(aes(col = "#C42126")) +theme_bw() +
+  theme(plot.title = element_text(size = 12, family = "Tahoma", face = "bold", hjust=0.5),
+        text = element_text(size = 12, family = "Tahoma"), legend.position = "none") +
+  scale_fill_brewer(palette="Dark2") + labs(title = "Red Module Eigengene vs. Trabecular Number",x="Trabecular Number", y="MERed Eigengene")+geom_smooth(method = "lm", color="red")
+
+
+
