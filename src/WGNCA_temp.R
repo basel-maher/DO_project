@@ -19,7 +19,10 @@ options(stringsAsFactors = FALSE)
 counts = read.csv("./results/flat/genes_over_6reads_in_morethan_38samps_tpm_over0.1_38samps_COUNTS.csv", stringsAsFactors = FALSE,row.names = 1,check.names = FALSE)
 
 #read in an annotation file. This is output from the RNA-seq pipeline
-annot_file = read.delim("./data/314-FarberDO2_S6.gene_abund.tab",header = TRUE)
+#annot_file = read.delim("./data/314-FarberDO2_S6.gene_abund.tab",header = TRUE) #this looks crappy
+annot_file = read.delim("./data/all_gene_abundances", stringsAsFactors = F)
+#annot_file = annot_file[,c(1,2,3)]
+annot_file = unique(annot_file)
 #
 #remove transcripts not on somatic and X chroms
 chr = c(seq(1:19),"X")
@@ -45,15 +48,17 @@ counts = counts[-x,]
 counts = t(counts)
 
 colnames(counts) = annot_file[match(colnames(counts),annot_file$Gene.ID),"Gene.Name"]
-counts[,colnames(counts)[which(duplicated(colnames(counts)))]]
+
 
 #for now, give them a unique ID
 colnames(counts)[which(duplicated(colnames(counts)))] = paste0(colnames(counts)[which(duplicated(colnames(counts)))], "_isoform")
 
 which(duplicated(colnames(counts)))
-colnames(counts)[4131] = paste0(colnames(counts)[4131],".2")
-colnames(counts)[4132] = paste0(colnames(counts)[4132],".3")
-colnames(counts)[18687] = paste0(colnames(counts)[18687],".2")
+colnames(counts)[4212] = paste0(colnames(counts)[4212],".2")
+colnames(counts)[4213] = paste0(colnames(counts)[4213],".3")
+#colnames(counts)[4133] = paste0(colnames(counts)[4133],".2")
+#colnames(counts)[4134] = paste0(colnames(counts)[4134],".3")
+#colnames(counts)[18694] = paste0(colnames(counts)[18694],".2")
 
 counts = t(counts)
 
@@ -63,7 +68,9 @@ counts = t(counts)
 
 #vst from deseq2
 vst = DESeq2::varianceStabilizingTransformation(as.matrix(counts))
-
+c = as.numeric((unlist(strsplit(colnames(vst),"-"))))
+c = c[-which(is.na(c))]
+colnames(vst) = c
 #get batch. What I did here is I got batch from the file names of the alignment output for RNA-seq
 f = list.files("./results/flat/RNA-seq/sums/")
 p1 = f[grep(pattern = "Pool1",f)]
@@ -129,6 +136,7 @@ covs[which(rownames(covs)%in% b3==FALSE),"batch3"] = 0
 covs = as.data.frame(covs[,2:9])
 
 covs$batch = NA
+
 covs[which(covs$batch1 == 1),"batch"] = 1
 covs[which(covs$batch2 == 1),"batch"] = 2
 covs[which(covs$batch3 == 1),"batch"] = 3
@@ -270,7 +278,7 @@ moduleTraitCor = moduleTraitCor[,c(11:61)]
 
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
-sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/36))))),]
+sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/length(unique(net$colors))))))),]#includes grey module
 
 sizeGrWindow(10,6)
 # Will display correlations and their p-values
@@ -287,6 +295,8 @@ trait_names = gsub(pattern = "\\.\\.",replacement = "\\.",x = trait_names)
 trait_names = gsub(pattern = "\\.\\.",replacement = "\\.",x = trait_names)
 trait_names[8] = "Adiposity"
 
+####
+####
 #only trabecular traits
 moduleTraitCor = moduleTraitCor[,c(34:41)]
 #reomve grey
@@ -295,7 +305,8 @@ trait_names = colnames(moduleTraitCor)
 trait_names = gsub(pattern = "uCT_",replacement = "",x = trait_names)
 MEs = MEs[,-37]
 textMatrix = signif(moduleTraitPvalue, 1)
-
+####
+####
 
 dim(textMatrix) = dim(moduleTraitCor)
 textMatrix = textMatrix[-37,c(34:41)]
