@@ -1,5 +1,26 @@
 library(biomaRt)
 library(tidyverse)
+###
+#from https://www.r-bloggers.com/converting-mouse-to-human-gene-names-with-biomart-package/
+
+# Basic function to convert human to mouse gene names
+convertHumanGeneList <- function(x){
+  
+  require("biomaRt")
+  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+  
+  genesV2 = getLDS(attributes = c("hgnc_symbol"), filters = "hgnc_symbol", values = x , mart = human, attributesL = c("mgi_symbol"), martL = mouse, uniqueRows=T)
+  
+  humanx <- unique(genesV2[, 2])
+  
+  # Print the first 6 genes found to the screen
+  print(head(humanx))
+  return(humanx)
+}
+
+###
+
 
 #Using AmiGO2, downloaded GO terms for the following terms (osteo, bone, ossif). Accessed 7/28/19
 #Used filters: is_obsolete:False and idspace: GO
@@ -60,11 +81,15 @@ for(i in terms){
   }
   
 }
+genes_hum = genes_hum[-1,1]
+genes_hum = unique(genes_hum)
+mussed_human_genes = convertHumanGeneList(genes_hum)
 
+genes_mus= genes_mus[-1,1]
+genes_mus = unique(genes_mus)
 
+genes = c(mussed_human_genes, genes_mus)
 
-genes = rbind(genes_hum, genes_mus)
-genes = genes[,1]
 genes=tolower(genes)
 unq_genes = unique(genes)
 
@@ -88,25 +113,36 @@ catalog_genes = trimws(catalog_genes,"both") #trim whitespace
 
 catalog_genes = tolower(catalog_genes)
 catalog_genes = unique(catalog_genes)
+
+mussed_human_genes = convertHumanGeneList(catalog_genes)
+mussed_human_genes = unique(mussed_human_genes)
 #
-superduperset = append(genes, catalog_genes)
+superduperset = append(genes, mussed_human_genes)
 superduperset = unique(superduperset)
 
 #add MGI genes. manually downloaded osteoporosis, bone mineral density, osteoblast clast and cyte. human and mouse genes
-mgi = read.delim("~/Downloads/MGIhdpQuery_markers_20190728_224719.txt",stringsAsFactors = FALSE)
-mgi = mgi$Gene.Symbol
-#remove genes with "("
-mgi = mgi[-grep("\\(", mgi)]
+mgi = read.delim("./data/MGIhdpQuery_markers_20190728_224719.txt",stringsAsFactors = FALSE)
 
-mgi = mgi[-which(mgi == "917M")]
+mgi_mouse = mgi[which(mgi$Organism=="mouse"),]
+mgi_mouse = mgi_mouse$Gene.Symbol
+#remove genes with "("
+mgi_mouse = mgi_mouse[-grep("\\(", mgi_mouse)]
+mgi_mouse = mgi_mouse[-which(mgi_mouse == "917M")]
+
+
+mgi_hum = mgi[which(mgi$Organism=="human"),]
+mgi_hum = mgi_hum$Gene.Symbol
+mussed_human_genes = convertHumanGeneList(mgi_hum)
+
+mgi = c(mgi_mouse, mussed_human_genes)
+
 mgi = tolower(mgi)
 mgi = unique(mgi)
 
 superduperset = append(superduperset,mgi)
 
-superduperset = superduperset[-grep("/", superduperset)] #contain /
 superduperset = na.omit(superduperset)
 
 superduperset = unique(superduperset)
 ##
-write.table(superduperset,"~/Desktop/superduperset.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
+write.table(superduperset,"./results/flat/superduperset.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
