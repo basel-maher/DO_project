@@ -7,6 +7,7 @@ library(DESeq2)
 library("igraph")
 library("bnlearn")
 library("parallel")
+library(rtracklayer)
 ############
 options(stringsAsFactors = FALSE)
 #
@@ -16,19 +17,22 @@ options(stringsAsFactors = FALSE)
 #For now try non-quantile normalized data, compare with q-normed
 
 # read in the RNA-seq processed counts file
-counts = read.csv("./results/flat/genes_over_6reads_in_morethan_38samps_tpm_over0.1_38samps_COUNTS.csv", stringsAsFactors = FALSE,row.names = 1,check.names = FALSE)
+counts = read.csv("./results/flat/RNA-seq/genes_over_6reads_in_morethan_38samps_tpm_over0.1_38samps_COUNTS.csv", stringsAsFactors = FALSE,row.names = 1,check.names = FALSE)
 
 #read in an annotation file. This is output from the RNA-seq pipeline
 #annot_file = read.delim("./data/314-FarberDO2_S6.gene_abund.tab",header = TRUE) #this looks crappy
-annot_file = read.delim("./data/all_gene_abundances", stringsAsFactors = F)
-#annot_file = annot_file[,c(1,2,3)]
-annot_file = unique(annot_file)
-#
+annot_file = readGFF("./results/flat/RNA-seq/mus_stringtie_merged.gtf")
+annot_file = annot_file[which(annot_file$type=="transcript"),]
 #remove transcripts not on somatic and X chroms
 chr = c(seq(1:19),"X")
-rmv = annot_file[which(annot_file$Reference %in% chr == FALSE),"Gene.ID"]
+annot_file = annot_file[which(annot_file$seqid %in% chr),]
 
-counts = counts[-which(rownames(counts) %in% rmv),]
+
+annot_file = annot_file[,c(9,11)]
+annot_file = unique(annot_file)
+#
+
+counts = counts[which(rownames(counts) %in% annot_file$gene_id),]
 #
 
 #find and remove features that have fewer than 10 reads in more than 90% (173) of samples 
@@ -40,22 +44,24 @@ for(i in 1:nrow(counts)){
   }
 }
 
-#253 genes removed
+#311 genes removed
 counts = counts[-x,]
 
 
 #some genes are duplicated
 counts = t(counts)
 
-colnames(counts) = annot_file[match(colnames(counts),annot_file$Gene.ID),"Gene.Name"]
+colnames(counts) = annot_file[match(colnames(counts),annot_file$gene_id),"gene_name"]
 
 
 #for now, give them a unique ID
 colnames(counts)[which(duplicated(colnames(counts)))] = paste0(colnames(counts)[which(duplicated(colnames(counts)))], "_isoform")
 
 which(duplicated(colnames(counts)))
-colnames(counts)[4212] = paste0(colnames(counts)[4212],".2")
-colnames(counts)[4213] = paste0(colnames(counts)[4213],".3")
+colnames(counts)[3570] = paste0(colnames(counts)[3570],".2")
+colnames(counts)[5342] = paste0(colnames(counts)[5342],".2")
+colnames(counts)[6661] = paste0(colnames(counts)[6661],".3")
+
 #colnames(counts)[4133] = paste0(colnames(counts)[4133],".2")
 #colnames(counts)[4134] = paste0(colnames(counts)[4134],".3")
 #colnames(counts)[18694] = paste0(colnames(counts)[18694],".2")
@@ -69,17 +75,21 @@ counts = t(counts)
 #vst from deseq2
 vst = DESeq2::varianceStabilizingTransformation(as.matrix(counts))
 c = as.numeric((unlist(strsplit(colnames(vst),"-"))))
-c = c[-which(is.na(c))]
+#c = c[-which(is.na(c))]
 colnames(vst) = c
 #get batch. What I did here is I got batch from the file names of the alignment output for RNA-seq
+#DOESNT TAKE RE-POOL INTO ACCOUNT, OR DIFFERENT RUN DATES FOR SPLIT POOLS
 f = list.files("./results/flat/RNA-seq/sums/")
 p1 = f[grep(pattern = "Pool1",f)]
 p2 = f[grep(pattern = "Pool2",f)]
-p3 = f[grep(pattern = "FarberDO2",f)]
+p3 = f[grep(pattern = "SetA",f)]
+p4 = f[grep(pattern = "setB",f)]
 
 b1 = c()
 b2 = c()
 b3 = c()
+b4 = c()
+
 for(i in 1:length(p1)){
   b1 = c(b1,strsplit(strsplit(p1[i],"Pool1_")[[1]][2],"-")[[1]][1])
   b1 = unique(b1)
@@ -91,8 +101,13 @@ for(i in 1:length(p2)){
 }
 
 for(i in 1:length(p3)){
-  b3 = c(b3,strsplit(strsplit(p3[i],"fastq_")[[1]][2],"-")[[1]][1])
+  b3 = c(b3,strsplit(strsplit(strsplit(p3[i],"SetA_")[[1]][2],"_")[[1]][2],"-")[[1]][1])
   b3 = unique(b3)
+}
+
+for(i in 1:length(p4)){
+  b4 = c(b4,strsplit(strsplit(strsplit(p4[i],"setB_")[[1]][2],"_")[[1]][2],"-")[[1]][1])
+  b4 = unique(b4)
 }
 
 
@@ -110,6 +125,8 @@ covs$female = NA
 covs$batch1=NA
 covs$batch2=NA
 covs$batch3=NA
+covs$batch4=NA
+
 
 
 #covs$male = as.numeric(covs$sex=="M")
@@ -124,6 +141,9 @@ covs[which(rownames(covs)%in% b2==FALSE),"batch2"] = 0
 covs$batch3[match(b3,rownames(covs))] = 1
 covs[which(rownames(covs)%in% b3==FALSE),"batch3"] = 0
 
+covs$batch4[match(b4,rownames(covs))] = 1
+covs[which(rownames(covs)%in% b4==FALSE),"batch4"] = 0
+
 
 #cc = as.matrix(covs[,c(3,5:8)])
 #rownames(cc) = rownames(covs)
@@ -133,13 +153,14 @@ covs[which(rownames(covs)%in% b3==FALSE),"batch3"] = 0
 
 #cc[,c(1:5)] = as.integer(cc[,])
 
-covs = as.data.frame(covs[,2:9])
+covs = as.data.frame(covs[,2:10])
 
 covs$batch = NA
 
 covs[which(covs$batch1 == 1),"batch"] = 1
 covs[which(covs$batch2 == 1),"batch"] = 2
 covs[which(covs$batch3 == 1),"batch"] = 3
+covs[which(covs$batch4 == 1),"batch"] = 4
 
 
 batch = covs$batch
@@ -212,10 +233,12 @@ net = blockwiseModules(edata, power = 4,
                        saveTOMs = FALSE,
                        verbose = 3)
 
-## 35 modules not including 0, 5736 genes in module 0
+## 4: 39 modules not including 0, 6004 genes in module 0
 #for thresh of 9, 20 mod, 10572 in mod 0
 #thresh 6, 6717 in mod 0, 31 modules
 #
+
+
 #get traits we want to look at
 pheno = read.csv("./results/flat/full_pheno_table.csv", stringsAsFactors = FALSE)
 
@@ -237,6 +260,8 @@ for(i in 1:ncol(datTraits)){datTraits[,i] = as.numeric(datTraits[,i])}
 sizeGrWindow(12, 9)
 # Convert labels to colors for plotting
 mergedColors = labels2colors(net$colors)
+
+
 # Plot the dendrogram and the module colors underneath
 plotDendroAndColors(net$dendrograms[[1]], mergedColors[net$blockGenes[[1]]],
                     "Module colors",
@@ -254,6 +279,9 @@ nSamples = nrow(edata);
 # Recalculate MEs with color labels
 MEs0 = moduleEigengenes(edata, moduleColors)$eigengenes
 MEs = orderMEs(MEs0)
+
+#REMOVE GREY
+MEs = MEs[,-which(colnames(MEs) == "MEgrey")]
 #cor module eigengenes with traits
 moduleTraitCor = cor(MEs, datTraits, use = "p",method = "s");
 
@@ -273,12 +301,20 @@ rownames(moduleTraitPvalue) = rownames(moduleTraitCor)
 #moduleTraitPvalue = moduleTraitPvalue[,c(44:61)]
 #moduleTraitCor = moduleTraitCor[,c(44:61)]
 
-moduleTraitPvalue = moduleTraitPvalue[,c(11:61)]
-moduleTraitCor = moduleTraitCor[,c(11:61)]
+#moduleTraitPvalue = moduleTraitPvalue[,c(11:61)]
+#moduleTraitCor = moduleTraitCor[,c(11:61)]
+
+#moduleTraitPvalue = as.matrix(moduleTraitPvalue)
+
+#keep all but  weight, length, glucose , fat pads, muscle masses and MAT
+moduleTraitPvalue = moduleTraitPvalue[,c(11:62)]
+moduleTraitCor = moduleTraitCor[,c(11:62)]
+
 
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
-sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/length(unique(net$colors))))))),]#includes grey module
+
+sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/ncol(MEs)))))),]#includes grey module
 
 sizeGrWindow(10,6)
 # Will display correlations and their p-values
@@ -299,8 +335,7 @@ trait_names[8] = "Adiposity"
 ####
 #only trabecular traits
 moduleTraitCor = moduleTraitCor[,c(34:41)]
-#reomve grey
-moduleTraitCor = moduleTraitCor[-37,]
+
 trait_names = colnames(moduleTraitCor)
 trait_names = gsub(pattern = "uCT_",replacement = "",x = trait_names)
 MEs = MEs[,-37]
@@ -336,23 +371,31 @@ combat_annot = as.data.frame(colnames(edata))
 combat_annot$module = net$colors
 combat_annot$color = moduleColors
 
+#REMOVE GREY
+rmv = combat_annot[which(combat_annot$color == "grey"),"colnames(edata)"]
+
+combat_annot = combat_annot[-which(combat_annot$`colnames(edata)` %in% rmv),]
+edata = edata[,-(which(colnames(edata) %in% rmv))]
+
 #the gsub allows for matching of genes that had _isoform* added to them
-combat_annot[,c(4:8)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$Gene.Name),c(1,3,4,5,6)]
+combat_annot[,c(4:5)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
 
 
 #modNames = substring(names(MEs), 3)
-geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p"))
+geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p")) # spearman or kendall? using pearson here
 
 MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))#nsamples - Here it is RNA samples. Is This Correct? or use number of modules? or number of genes?
 geneModuleMembership$gene = colnames(edata)
 #names(geneModuleMembership) = paste("MM", modNames, sep="");
 #names(MMPvalue) = paste("p.MM", modNames, sep="");
 
-combat_annot[9:(ncol(geneModuleMembership)+8)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),c(1:ncol(geneModuleMembership))]
+
+combat_annot[6:(ncol(geneModuleMembership)+5)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$gene_name),]
 
 
 #which(moduleColors=="red")
 #annot_file_resid[which(moduleColors=="red"),]
+moduleColors = moduleColors[-which(moduleColors=="grey")] #check that this didnt screw up the hub calculation on following line
 hubs = chooseTopHubInEachModule(edata,moduleColors)
 ####topGO###
 #allGenes = select(Mus.musculus, "ENSMUSG00000066438", columns, "ENSEMBL")
