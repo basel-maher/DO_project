@@ -6,19 +6,21 @@ library(ggplot2)
 library(ggpubr)
 options(stringsAsFactors = FALSE)
 
+
+#3FIX IN THIS FILE: gene COLUMN IS NA FOR GENES WITH ISOFORM
 load("./results/Rdata/geneModMemAnnot_power4.RData")
-#load("~/Desktop/geneModMemAnnot_power9.RData")
-#
+
+#required to make plots and such. conver bn to igraph object
 bn2igraph <- function(g.bn){
   g <- igraph.from.graphNEL(as.graphNEL(g.bn))
 }
 
 #gene superset
-superset = read.delim("~/Desktop/superduperset.txt", stringsAsFactors = FALSE, header = FALSE)
+superset = read.delim("./results/flat/superduperset.txt", stringsAsFactors = FALSE, header = FALSE)
 superset = superset[,1]
 
 #BNs learned on high performance computing cluster
-bns = list.files("~/Desktop/bn_4/")
+bns = list.files("./results/flat/networks/bn_4/")
 #bns = "hybrid_brown_nobl_4.Rdata"
 #
 x = bn2igraph(brown_bn)
@@ -33,12 +35,17 @@ for(net in bns){
   print(counter)
   color = strsplit(net,"_")[[1]][2]
   #print(color)
-  load(paste0("~/Desktop/bn_4/",net))
+  load(paste0("./results/flat/networks/bn_4/",net))
   obj_name = paste0(color,"_bn")
   assign(x = obj_name ,bn)
   
   z = bn2igraph(get(obj_name)) #get "gets" an object from env based on name. otherwise its just a string here
   mod_genes = geneModMemAnnot[which(geneModMemAnnot$color == color),"gene"]
+  
+  if(length(which(is.na(mod_genes))) > 0){
+    mod_genes = mod_genes[-which(is.na(mod_genes))]
+  }
+  
   #mod_genes = colnames(resid)[which(colnames(resid) %in% mod_genes)]
   ##when to drop lowly connected nodes?
   #low = arcs(get(obj_name))[which(neighborhood.size(z,nodes = arcs(get(obj_name)),order = 3)==2)]
@@ -127,8 +134,8 @@ for(i in 1:length(kda_full)){
   thresh = mean(kda_full[[i]]$num_neib) - sd(kda_full[[i]]$num_neib)
   kda_full[[i]] = kda_full[[i]][-which(kda_full[[i]]$num_neib < thresh),]
   kda_full[[i]]$hyper = phyper(q=kda_full[[i]]$num_bone_neib, m=kda_full[[i]]$num_bone_genes, n = kda_full[[i]]$num_genes_inMod -  kda_full[[i]]$num_bone_genes_inMod, k=kda_full[[i]]$num_neib, lower.tail = FALSE)
-  kda_full[[i]]$hyperZhang = phyper(q=kda_full[[i]]$num_bone_neib-1, m=1631, n = 16816-1631, k=kda_full[[i]]$num_neib, lower.tail = FALSE)#includes self
-  #kda_full[[i]]$hyperZhang = phyper(q=kda_full[[i]]$num_bone_neib-1, m=2532, n = 16816-2532, k=kda_full[[i]]$num_neib, lower.tail = FALSE)#includes self
+  #kda_full[[i]]$hyperZhang = phyper(q=kda_full[[i]]$num_bone_neib-1, m=1631, n = 16816-1631, k=kda_full[[i]]$num_neib, lower.tail = FALSE)#includes self
+  kda_full[[i]]$hyperZhang = phyper(q=kda_full[[i]]$num_bone_neib-1, m=length(superset), n = nrow(zhang)-length(superset), k=kda_full[[i]]$num_neib, lower.tail = FALSE)#includes self
   
   ####SHOULD n BE 16816 - 1631?
   #subtract 1 for prob P[X>=x] (null hyp)
@@ -244,9 +251,10 @@ for(i in which(all$gene %in% zhang$gene)){
 # 
 
 
-sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/36))))),]
+#sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/36))))),]
+sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/length(unique(zhang$color))))))),]
 sig_mod = rownames(sig_mod)
-sig_mod = unlist(strsplit(sig_mod, "ME"))[seq(2,46,by = 2)]
+sig_mod = unlist(strsplit(sig_mod, "ME"))[seq(2,length(sig_mod)*2,by = 2)]
 
 zhang = zhang[which(zhang$color %in% sig_mod),]
 
