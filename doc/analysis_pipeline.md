@@ -14,42 +14,43 @@
         - Generate ./data/GIGAMUGA/merged/Merged_FinalReport.txt. 
             - This is done in ./src/fix_geneseek.R
 
-2. Convert Geneseek FinalReports files to a format r/qtl2 understands. This encodes the DO genotypes.
+3. Convert Geneseek FinalReports files to a format r/qtl2 understands. This encodes the DO genotypes.
     - From https://kbroman.org/qtl2/pages/prep_do_data.html
     - use ./src/geneseek2qtl2_mod.R
     - output is in results/GIGAMUGA/qtl_batches1-4
 
-3. Remove bad samples and markers using Argyle.
+4. Remove bad samples and markers using Argyle.
     - use ./src/GIGAMUGA_QC.Rmd
     - output ./results/GIGAMUGA/geno.final_merged.RDS
 
 
-4. Create cross file for QTL mapping. 
+5. Create cross file for QTL mapping. 
     - ./src/make_crossfile.R
 
-5. calculate genotype and allele probs, as well as kinship matrices 
+6. calculate genotype and allele probs, as well as kinship matrices 
     - how is kinship calculated?
     - ./src/calc_probs.R
 
-6. more QC - Broman et al.
+7. more QC - Broman et al.
     - script adapted from https://github.com/kbroman/Paper_MPPdiag/blob/master/R/diagnostics.Rmd
     - cite paper
     - This is largely buggy, but everything looked fine. Led to the removal of several hundred markers (479)that had greater than 5% genotyping errors.
     - output is cross_basic_cleaned (./results/Rdata/cross_basic_cleaned.Rdata)
     - 109,427 markers remaining
 
-7. recalculate genotype and allele probs using the new cross_basic_cleaned
+8. recalculate genotype and allele probs using the new cross_basic_cleaned
     - ./src/calc_probs.R
 
-8. Calc QTL
+9. Calc QTL
     - ./src/map_qtl.R
     - will also perform permutation analysis
         - output in ./results/Rdata/eqtl_perms/   
         
 
-9. Calc eQTL
+10. Calc eQTL
 
     - separate instructions for sequencing data preprocessing?
+        -probably. go to rna_seq_pipeline.md
     - PEER stuff
 
     - after RNA-seq preprocessing, normalize the counts
@@ -70,7 +71,7 @@
                     - distal_X: 11
                 
 
-10. Map eQTL
+11. Map eQTL
     - ./src/map_local_and_distal_eqtl.R
     -   outputs: 
         - ./results/flat/local_eqtl_peaks.csv 
@@ -79,9 +80,9 @@
         - ./results/Rdata/local_eqtl.Rdata
         - ./results/Rdata/distal_eqtl.Rdata
 
-11. eQTL analysis: trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
+12. eQTL analysis: trans eQTL hotspots, mediation analysis, NEO structural equation  modeling
 
-12. Networks
+13. Networks
     - ./src/make_bone_geneset.R
         - Get gene ontology identifiers from AmiGO2.
             - Use "bone" and "osteo* and "ossif*" as terms. stored in ./data/
