@@ -314,7 +314,7 @@ moduleTraitCor = moduleTraitCor[,c(11:62)]
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
 
-sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/ncol(MEs)))))),]#includes grey module
+sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/ncol(MEs)))))),]
 
 sizeGrWindow(10,6)
 # Will display correlations and their p-values
@@ -375,22 +375,22 @@ combat_annot$color = moduleColors
 rmv = combat_annot[which(combat_annot$color == "grey"),"colnames(edata)"]
 
 combat_annot = combat_annot[-which(combat_annot$`colnames(edata)` %in% rmv),]
-edata = edata[,-(which(colnames(edata) %in% rmv))]
+edata_trim = edata[,-(which(colnames(edata) %in% rmv))]
 
 #the gsub allows for matching of genes that had _isoform* added to them
-combat_annot[,c(4:5)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
+combat_annot[,c(3:4)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
 
 
 #modNames = substring(names(MEs), 3)
-geneModuleMembership = as.data.frame(cor(edata, MEs, use = "p")) # spearman or kendall? using pearson here
+geneModuleMembership = as.data.frame(cor(edata_trim, MEs, use = "p")) # spearman or kendall? using pearson here
 
 MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))#nsamples - Here it is RNA samples. Is This Correct? or use number of modules? or number of genes?
-geneModuleMembership$gene = colnames(edata)
+geneModuleMembership$gene = colnames(edata_trim)
 #names(geneModuleMembership) = paste("MM", modNames, sep="");
 #names(MMPvalue) = paste("p.MM", modNames, sep="");
 
 
-combat_annot[6:(ncol(geneModuleMembership)+5)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$gene_name),]
+combat_annot[5:(ncol(geneModuleMembership)+4)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),]
 
 
 #which(moduleColors=="red")
@@ -467,7 +467,7 @@ geneModMemAnnot = combat_annot
 
 #write out net, edata connect and annot. 
 #For blacklist, we would use cis-eqtl
-save(edata, file = "./results/Rdata/edata.RData")
+save(edata_trim, file = "./results/Rdata/edata.RData")
 save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power4.RData")
 
 ########################## CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
