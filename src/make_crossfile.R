@@ -54,6 +54,9 @@ rownames(do_covar) = do_covar$Mouse.ID
 
 #use only those with genotyping info
 do_covar = do_covar[which(do_covar$Mouse.ID %in% colnames(geno)),]
+
+#remove gen34 and 35 cols, these mice go up to 33
+do_covar = do_covar[,-c(18,19)]
 write.csv(do_covar, "./results/flat/do_covar.csv", quote = FALSE,row.names = FALSE)
 
 
