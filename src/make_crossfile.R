@@ -102,6 +102,5 @@ cross_combined = pull_markers(cross_combined, rownames(geno))
 
 cross_basic = cross_combined
 save(cross_basic, file ="../../results/Rdata/cross_basic.Rdata")
-
 ##
 
