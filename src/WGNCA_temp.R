@@ -226,7 +226,7 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 #did 4, but try 9
-net = blockwiseModules(edata, power = 4,
+net = blockwiseModules(edata, power = 7,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = TRUE, pamRespectsDendro = FALSE,
@@ -234,9 +234,8 @@ net = blockwiseModules(edata, power = 4,
                        verbose = 3)
 
 ## 4: 39 modules not including 0, 6004 genes in module 0
-#for thresh of 9, 20 mod, 10572 in mod 0
-#thresh 6, 6717 in mod 0, 31 modules
-#
+##7: 21 mods no 0, 8814 in mod 0
+saveRDS(net, file="./results/Rdata/networks/wgcna_7.RDS")
 
 
 #get traits we want to look at
@@ -307,8 +306,8 @@ rownames(moduleTraitPvalue) = rownames(moduleTraitCor)
 #moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
 #keep all but  weight, length, glucose , fat pads, muscle masses and MAT
-moduleTraitPvalue = moduleTraitPvalue[,c(11:62)]
-moduleTraitCor = moduleTraitCor[,c(11:62)]
+moduleTraitPvalue = moduleTraitPvalue[,c(11:61)]
+moduleTraitCor = moduleTraitCor[,c(11:61)]
 
 
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)
@@ -377,6 +376,8 @@ rmv = combat_annot[which(combat_annot$color == "grey"),"colnames(edata)"]
 combat_annot = combat_annot[-which(combat_annot$`colnames(edata)` %in% rmv),]
 edata_trim = edata[,-(which(colnames(edata) %in% rmv))]
 
+#have to run this sometimes?
+combat_annot = combat_annot[,-2]
 #the gsub allows for matching of genes that had _isoform* added to them
 combat_annot[,c(3:4)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
 
@@ -403,7 +404,7 @@ hubs = chooseTopHubInEachModule(edata,moduleColors)
 #interesting.genes<-res$ENSEMBL
 #allGenes = colnames(edata)
 allGenes = combat_annot$gene
-interesting.genes = combat_annot[which(combat_annot$color == "brown"),"gene"]
+interesting.genes = combat_annot[which(combat_annot$color == "turquoise"),"gene"]
 #blue is bone module, 2386 genes
 geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
 names(geneList)<-allGenes
@@ -467,8 +468,8 @@ geneModMemAnnot = combat_annot
 
 #write out net, edata connect and annot. 
 #For blacklist, we would use cis-eqtl
-save(edata_trim, file = "./results/Rdata/edata.RData")
-save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power4.RData")
+save(edata_trim, file = "./results/Rdata/edata_7.RData")
+save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power7.RData")
 
 ########################## CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
 #Done on Rivanna. learn_bn.R. Only need to know number of colors (modules) for SLURM script

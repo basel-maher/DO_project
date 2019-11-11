@@ -7,8 +7,7 @@ library(ggpubr)
 options(stringsAsFactors = FALSE)
 
 
-#3FIX IN THIS FILE: gene COLUMN IS NA FOR GENES WITH ISOFORM
-load("./results/Rdata/geneModMemAnnot_power4.RData")
+load("./results/Rdata/networks/geneModMemAnnot_power7.RData")
 
 #required to make plots and such. conver bn to igraph object
 bn2igraph <- function(g.bn){
@@ -16,14 +15,14 @@ bn2igraph <- function(g.bn){
 }
 
 #gene superset
-superset = read.delim("./results/flat/superduperset.txt", stringsAsFactors = FALSE, header = FALSE)
+superset = read.delim("./results/flat/superduperset_GO_MGI_IMPC.txt", stringsAsFactors = FALSE, header = FALSE)
 superset = superset[,1]
 
 #BNs learned on high performance computing cluster
-bns = list.files("./results/flat/networks/bn_4/")
+bns = list.files("~/Desktop/bn_7/")
 #bns = "hybrid_brown_nobl_4.Rdata"
 #
-x = bn2igraph(brown_bn)
+x = bn2igraph(turquoise_bn)
 subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Qsox1"))))
 plot(subgraph,vertex.label.cex=0.9,edge.width=2, vertex.size=25, margin=-0.1, vertex.label.dist=0.2, vertex.label.degree=-pi)
 
@@ -35,7 +34,7 @@ for(net in bns){
   print(counter)
   color = strsplit(net,"_")[[1]][2]
   #print(color)
-  load(paste0("./results/flat/networks/bn_4/",net))
+  load(paste0("~/Desktop/bn_7/",net))
   obj_name = paste0(color,"_bn")
   assign(x = obj_name ,bn)
   
@@ -257,6 +256,7 @@ sig_mod = rownames(sig_mod)
 sig_mod = unlist(strsplit(sig_mod, "ME"))[seq(2,length(sig_mod)*2,by = 2)]
 
 zhang = zhang[which(zhang$color %in% sig_mod),]
+
 
 #######
 #some analysis#

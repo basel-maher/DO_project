@@ -126,7 +126,8 @@ full_pheno_table = as.data.frame(full_pheno_table,stringsAsFactors = FALSE)
 #remove unnecessary cols
 #removed bending_femur_length, uCT_sex, uCT_batch, uCT_femur_length
 
-full_pheno_table = full_pheno_table[,-c(23,54:56)] 
+full_pheno_table = full_pheno_table[,-c(23,24,55:57)] 
+
 
 #rename some cols
 colnames(full_pheno_table)[2:22] = c("sac_date","coat_color","sac_time","sex","DOB","age_at_sac_days","body_weight","body_length",

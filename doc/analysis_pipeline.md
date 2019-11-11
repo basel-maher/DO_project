@@ -52,6 +52,8 @@
     - separate instructions for sequencing data preprocessing?
         -probably. go to rna_seq_pipeline.md
     - PEER stuff
+        -used VST + qnormed counts
+        - 48 PEER factors, no covars and no intercept
 
     - after RNA-seq preprocessing, normalize the counts
         - ./src/normalize_RNAseq.R

@@ -41,11 +41,11 @@ for(i in quant_pheno_columns){
 
 #which traits require FL as covar? bending traits?
 DO_qtl_scan = scan1(apr, cross_basic$pheno[,c(6:70,72,74,76)], k_loco, Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
-#save(DO_qtl_scan,file = "./results/Rdata/DO_qtl_scan.Rdata")
+save(DO_qtl_scan,file = "./results/Rdata/DO_qtl_scan.Rdata")
 load("./results/Rdata/DO_qtl_scan.Rdata")
 
 DO_qtl_scan_binary = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
-#save(DO_qtl_scan_binary,file = "./results/Rdata/DO_qtl_scan_binary.Rdata")
+save(DO_qtl_scan_binary,file = "./results/Rdata/DO_qtl_scan_binary.Rdata")
 load("./results/Rdata/DO_qtl_scan_binary.Rdata")
 
 #find peaks and bind them together
@@ -53,12 +53,12 @@ qtl_peaks = find_peaks(DO_qtl_scan, cross_basic$pmap, threshold=4, drop=1.5)
 qtl_peaks_binary = find_peaks(DO_qtl_scan_binary, cross_basic$pmap, threshold=4, drop=1.5)
 
 qtl_peaks_both = rbind(qtl_peaks,qtl_peaks_binary)
-write.csv(qtl_peaks_both, file = "qtl_peaks.csv",row.names = FALSE,quote = FALSE)
+write.csv(qtl_peaks_both, file = "./results/flat/qtl_peaks.csv",row.names = FALSE,quote = FALSE)
 
 
 ####try while Normal####
-norm_pheno = as.data.frame(log10(cross_basic$pheno[,c(6:14,16,17,21,23:32,34,35,37:41,43:49,51,52,54:58,60:70,72,74,76)]))
-pheno_combined = cbind(norm_pheno, cross_basic$pheno[,c(15,18,19,20,22,33,36,42,50,53,59)])
+norm_pheno = as.data.frame(log10(cross_basic$pheno[,c(6:14,16,17,21,23:33,34,35,37:41,43:49,51,52,54:58,61:70,72,74,76)]))
+pheno_combined = cbind(norm_pheno, cross_basic$pheno[,c(15,18,19,20,22,36,42,50,53,59,60)])
 is.na(pheno_combined) = sapply(pheno_combined, is.infinite) #convert is.infinite to NA. Basically getting rid of zero observations.
 
 pheno_combined = as.matrix(pheno_combined)
