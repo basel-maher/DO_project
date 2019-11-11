@@ -96,30 +96,30 @@ unq_genes = unique(genes)
 #unq_genes = toupper(unq_genes)
 ############################
 #make set from gwascatalog (All associations V1.0.2, accessed 8/22/2019 )
-g_catalog = read_tsv("./data/gwas_catalog_v1.0.2-associations_e96_r2019-07-30.tsv")#
-terms = c("bone","bone mineral density", "osteoporo","osteoblast","osteoclast","osteocy")
-x = g_catalog[grep(pattern = paste(terms,collapse = "|"), g_catalog$`DISEASE/TRAIT`,ignore.case = TRUE),]#filter by terms
-
-#remove terms that include lead, medication, graft and arthritis, chemotherapy, asthma and alcohol
-terms = c("lead","medication", "graft","arthritis","chemotherapy","asthma", "alcohol")
-x = x[-(grep(pattern = paste(terms,collapse = "|"), x$`DISEASE/TRAIT`,ignore.case = TRUE)),]
-
-#
-catalog_genes = x$`REPORTED GENE(S)` #get genes
-catalog_genes = na.omit(catalog_genes) #remove NAs
-catalog_genes = catalog_genes[-which(catalog_genes=="intergenic")] #remove the term intergenic
-catalog_genes = unlist(str_split(catalog_genes,",")) #split elements with multiple genes separated by a comma
-catalog_genes = trimws(catalog_genes,"both") #trim whitespace
-
-catalog_genes = tolower(catalog_genes)
-catalog_genes = unique(catalog_genes)
-
-mussed_human_genes = convertHumanGeneList(catalog_genes)
-mussed_human_genes = unique(mussed_human_genes)
-#
-superduperset = append(genes, mussed_human_genes)
-superduperset = unique(superduperset)
-
+# g_catalog = read_tsv("./data/gwas_catalog_v1.0.2-associations_e96_r2019-07-30.tsv")#
+# terms = c("bone","bone mineral density", "osteoporo","osteoblast","osteoclast","osteocy")
+# x = g_catalog[grep(pattern = paste(terms,collapse = "|"), g_catalog$`DISEASE/TRAIT`,ignore.case = TRUE),]#filter by terms
+# 
+# #remove terms that include lead, medication, graft and arthritis, chemotherapy, asthma and alcohol
+# terms = c("lead","medication", "graft","arthritis","chemotherapy","asthma", "alcohol")
+# x = x[-(grep(pattern = paste(terms,collapse = "|"), x$`DISEASE/TRAIT`,ignore.case = TRUE)),]
+# 
+# #
+# catalog_genes = x$`REPORTED GENE(S)` #get genes
+# catalog_genes = na.omit(catalog_genes) #remove NAs
+# catalog_genes = catalog_genes[-which(catalog_genes=="intergenic")] #remove the term intergenic
+# catalog_genes = unlist(str_split(catalog_genes,",")) #split elements with multiple genes separated by a comma
+# catalog_genes = trimws(catalog_genes,"both") #trim whitespace
+# 
+# catalog_genes = tolower(catalog_genes)
+# catalog_genes = unique(catalog_genes)
+# 
+# mussed_human_genes = convertHumanGeneList(catalog_genes)
+# mussed_human_genes = unique(mussed_human_genes)
+# #
+# superduperset = append(unq_genes, mussed_human_genes)
+# superduperset = unique(superduperset)
+# 
 #add MGI genes. manually downloaded osteoporosis, bone mineral density, osteoblast clast and cyte. human and mouse genes
 mgi = read.delim("./data/MGIhdpQuery_markers_20190728_224719.txt",stringsAsFactors = FALSE)
 
@@ -139,10 +139,24 @@ mgi = c(mgi_mouse, mussed_human_genes)
 mgi = tolower(mgi)
 mgi = unique(mgi)
 
-superduperset = append(superduperset,mgi)
+#superduperset = append(superduperset,mgi)
+superduperset = append(mgi, unq_genes)
+
+
+
+###########Add IMPC genes that have a nominally significant (0.05), weight corrected genotype effect
+impc = read.delim("./data/IMPC_BMD_Results.csv",stringsAsFactors = FALSE, sep=",")
+impc = impc[which(impc$genotype_p_value <0.05),]
+impc = impc$Gene
+impc = unique(impc)
+
+superduperset = append(superduperset, impc)
 
 superduperset = na.omit(superduperset)
 
 superduperset = unique(superduperset)
+
+superduperset = superduperset[-grep("\\.", superduperset)]
+
 ##
-write.table(superduperset,"./results/flat/superduperset.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
+write.table(superduperset,"./results/flat/superduperset_GO_MGI_IMPC.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
