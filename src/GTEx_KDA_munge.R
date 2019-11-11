@@ -1,6 +1,7 @@
 ##munge GTEx v7 morris output files
 
-files = list.files("~/Desktop/coloc_results_1mbp/")
+#files = list.files("~/Desktop/coloc_results_1mbp/")
+files = list.files("./results/flat/coloc/coloc_results_1mbp/")
 
 #tis_name = c()
 
@@ -11,7 +12,8 @@ files = list.files("~/Desktop/coloc_results_1mbp/")
 all_coloc_results = data.frame(matrix(nrow=1,ncol=9))
 
 for(f in files){
-  x = read.delim(paste0("~/Desktop/coloc_results_1mbp/",f),header = F,sep = "", stringsAsFactors = FALSE)
+  #x = read.delim(paste0("~/Desktop/coloc_results_1mbp/",f),header = F,sep = "", stringsAsFactors = FALSE)
+  x = read.delim(paste0("./results/flat/coloc/coloc_results_1mbp/",f),header = F,sep = "", stringsAsFactors = FALSE)
   x=x[-1,-1]
   dim(x) = c(9,length(x)/9)
   x = as.data.frame(x)
@@ -22,7 +24,9 @@ for(f in files){
 
 all_coloc_results = all_coloc_results[-1,]
 
-m = read.delim("~/Desktop/GWAS_project/morris_ukbb/morris_lead_snp_genes_1mbp.txt",header=T)
+#m = read.delim("~/Desktop/GWAS_project/morris_ukbb/morris_lead_snp_genes_1mbp.txt",header=T)
+m = read.delim("./results/flat/coloc/morris_lead_snp_genes_1mbp.txt",header=T)
+
 
 all_coloc_results$gene = NA
 for(i in 1:nrow(all_coloc_results)){
@@ -34,7 +38,8 @@ colnames(all_coloc_results)= c("BMD","tissue","n","H0","H1","H2","H3","H4","gene
 
 coloc_over75 = all_coloc_results[which(as.numeric(all_coloc_results$H4) >= 0.75),]
 
-coloc_gefos = read.delim("~/Desktop/GWAS_project/project_extension/coloc_v7/coloc_v7_all_results_int.txt")
+#coloc_gefos = read.delim("~/Desktop/GWAS_project/project_extension/coloc_v7/coloc_v7_all_results_int.txt")
+coloc_gefos = read.delim("./results/flat/coloc/coloc_v7_all_results_int.txt")
 genes = tolower(coloc_gefos$gene)
 genes = append(genes, tolower(coloc_over75$gene))
 
@@ -50,6 +55,8 @@ coloc$gene = tolower(coloc$gene)
 
 aa = coloc[order(coloc$gene, coloc$H4,decreasing = T), ] #sort by id and reverse of abs(value)
 aa = aa[ !duplicated(aa$gene), ]  
+##
+write.csv(aa,file = "./results/flat/coloc/all_coloc_greaterorover75",quote = F,row.names = F)
 
 zhang$coloc_H0 = NA
 zhang$coloc_H1 = NA
