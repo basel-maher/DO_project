@@ -1,6 +1,8 @@
 #library(devtools)
 #install_github("oliviasabik/RACER") 
 library(RACER)
+library(tidyverse)
+library(data.table)
 
 bmd = read.delim("~/Desktop/gefos_FNBMD_pooled_allChrom.txt",stringsAsFactors = FALSE)
 lsbmd = read.delim("~/Desktop/gefos_LSBMD_pooled_allChrom.txt",stringsAsFactors = FALSE)
@@ -8,14 +10,23 @@ lsbmd = read.delim("~/Desktop/gefos_LSBMD_pooled_allChrom.txt",stringsAsFactors 
 #gtex = read.delim("~/Desktop/Artery_Tibial", stringsAsFactors = F, header = FALSE, sep = " ")
 #gtex = read.delim("~/Desktop/Skin_Sun_Exposed_Lower_leg", stringsAsFactors = F, header = FALSE, sep = " ")#800kb region missing
 gtex = read.delim("~/Desktop/Skin_Sun_Exposed_Lower_leg83", stringsAsFactors = F, header = FALSE, sep = "\t")#800kb region missing
+gtex = fread("~/Desktop/Heart_Left_Ventricle", stringsAsFactors = F, header = FALSE, sep = "\t",sep2 = " ")#800kb region missing
+
 
 #gtex = read.delim("~/Desktop/GWAS_project/morris_ukbb/GTEx_processed/Skin_Sun_Exposed_Lower_leg", stringsAsFactors = F, header = FALSE, sep = " ")#800kb region missing
 
 gtex_brain = read.delim("~/Desktop/Brain_Frontal_Cortex_BA9", stringsAsFactors = F, header = FALSE, sep = " ")
 
 #gtex = gtex[which(gtex$V9 == "RHPN2"),]
-gtex = gtex[which(gtex$V9 == "ACP2"),]
+gtex = gtex[which(gtex$V14 == "ACP2"),]
 gtex = gtex[grep("ENSG00000134575", gtex$V1),]#ACP2
+
+df <- gsub(pattern=" ", replacement="\t", gtex$V9, fixed = TRUE)
+df <- do.call(rbind.data.frame, strsplit(df, split = "\t"))
+
+gtex <- cbind(gtex[, c(1:8)],
+                df,
+                df[, c(1:ncol(df))])
 
 lookup = read.delim("~/Desktop/chr11_lookup",stringsAsFactors = FALSE, header=F)
 
