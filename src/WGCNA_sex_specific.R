@@ -11,7 +11,7 @@ library(rtracklayer)
 ############
 options(stringsAsFactors = FALSE)
 #
-
+set.seed(8675309)
 #read in VST transformed, quantile-normalized data (produced in ./src/normalize_RNAseq.R)
 #load("./results/Rdata/counts_vst_qnorm.Rdata")
 #For now try non-quantile normalized data, compare with q-normed
@@ -180,8 +180,11 @@ gsg$allOK
 
 males = x[which(x$sex=="M"),"Mouse.ID"]
 edata_m = edata[which(rownames(edata) %in% males),]
+save(edata_m, file = "./results/Rdata/networks/edata_m")
 edata_f = edata[which(rownames(edata) %in% males == FALSE),]
-##
+save(edata_f, file = "./results/Rdata/networks/edata_f")
+
+m##
 
 
 #cluster samples
@@ -429,6 +432,8 @@ geneModuleMembership_f$gene = colnames(edata_trim_f)
 combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[match(geneModuleMembership_f$gene,combat_annot_f$`colnames(edata_f)`),]
 
 
+save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
 
 
 
