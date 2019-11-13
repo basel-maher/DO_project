@@ -41,11 +41,22 @@ for(i in quant_pheno_columns){
 
 #which traits require FL as covar? bending traits?
 DO_qtl_scan = scan1(apr, cross_basic$pheno[,c(6:70,72,74,76)], k_loco, Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
-save(DO_qtl_scan,file = "./results/Rdata/DO_qtl_scan.Rdata")
+#save(DO_qtl_scan,file = "./results/Rdata/DO_qtl_scan.Rdata")
+
+##NO GEN COVAR
 load("./results/Rdata/DO_qtl_scan.Rdata")
+DO_qtl_scan_noGen = scan1(apr, cross_basic$pheno[,c(6:70,72,74,76)], k_loco, Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight")],cores = 2)
+DO_qtl_scan_binary_noGen = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight")],cores = 2)
+
+
+
+qtl_peaks_noGen = find_peaks(DO_qtl_scan_noGen, cross_basic$pmap, threshold=4, drop=1.5)
+qtl_peaks_binary_noGen = find_peaks(DO_qtl_scan_binary_noGen, cross_basic$pmap, threshold=4, drop=1.5)
+qtl_peaks_both_noGen = rbind(qtl_peaks_noGen,qtl_peaks_binary_noGen)
+####
 
 DO_qtl_scan_binary = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
-save(DO_qtl_scan_binary,file = "./results/Rdata/DO_qtl_scan_binary.Rdata")
+#save(DO_qtl_scan_binary,file = "./results/Rdata/DO_qtl_scan_binary.Rdata")
 load("./results/Rdata/DO_qtl_scan_binary.Rdata")
 
 #find peaks and bind them together
@@ -74,19 +85,39 @@ is.na(new_covar) = sapply(new_covar, is.infinite) #convert is.infinite to NA. Ba
 ####remove glucose measurements for decap, non fasted, etc
 
 DO_qtl_scan_normal = scan1(apr, pheno_combined, k_loco, Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
-save(DO_qtl_scan_normal,file = "./results/Rdata/DO_qtl_scan_norm.Rdata")
+#save(DO_qtl_scan_normal,file = "./results/Rdata/DO_qtl_scan_norm.Rdata")
 load("./results/Rdata/DO_qtl_scan_norm.Rdata")
 
 qtl_peaks_norm = find_peaks(DO_qtl_scan_normal, cross_basic$pmap, threshold=4, drop=1.5)
 ##cant account for kinship in binary model
 DO_qtl_scan_binary_norm = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
-save(DO_qtl_scan_binary_norm,file = "./results/Rdata/DO_qtl_scan_bin_norm.Rdata")
+#save(DO_qtl_scan_binary_norm,file = "./results/Rdata/DO_qtl_scan_bin_norm.Rdata")
 load("./results/Rdata/DO_qtl_scan_bin_norm.Rdata")
 
 
 qtl_peaks_bin_norm = find_peaks(DO_qtl_scan_binary_norm, cross_basic$pmap, threshold=4, drop=1.5)
 qtl_peaks_both_norm = rbind(qtl_peaks_norm,qtl_peaks_bin_norm)
 
+
+##
+##
+## NO GEN COVAR
+##
+DO_qtl_scan_normal_noGen = scan1(apr, pheno_combined, k_loco, Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight")],cores = 2)
+#save(DO_qtl_scan_normal,file = "./results/Rdata/DO_qtl_scan_norm.Rdata")
+load("./results/Rdata/DO_qtl_scan_norm.Rdata")
+
+qtl_peaks_norm_noGen = find_peaks(DO_qtl_scan_normal_noGen, cross_basic$pmap, threshold=4, drop=1.5)
+##cant account for kinship in binary model
+DO_qtl_scan_binary_norm_noGen = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight")],cores = 2)
+#save(DO_qtl_scan_binary_norm,file = "./results/Rdata/DO_qtl_scan_bin_norm.Rdata")
+load("./results/Rdata/DO_qtl_scan_bin_norm.Rdata")
+
+
+qtl_peaks_bin_norm_noGen = find_peaks(DO_qtl_scan_binary_norm_noGen, cross_basic$pmap, threshold=4, drop=1.5)
+qtl_peaks_both_norm_noGen = rbind(qtl_peaks_norm_noGen,qtl_peaks_bin_norm_noGen)
+
+#########
 ##look at work post yield and toughness. Chr2 , goes away when normalized. Due to extreme phenotypes?
 # WPY = scan1coef(apr[,2], pheno = cross_basic$pheno[,"bending_work_post_yield"],kinship = k_loco[["2"]], covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 # WPY = clean_scan1(WPY)
@@ -133,13 +164,13 @@ qtl_peaks_both_norm = rbind(qtl_peaks_norm,qtl_peaks_bin_norm)
 ####
 ### interactive model w/ sex
 DO_qtl_int = scan1(apr, cross_basic$pheno[,c(6:70,72,74,76)], k_loco, Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = covar[,"sex"],cores = 2)
-save(DO_qtl_int,file = "./results/Rdata/DO_qtl_int.Rdata")
+#save(DO_qtl_int,file = "./results/Rdata/DO_qtl_int.Rdata")
 load("./results/Rdata/DO_qtl_int.Rdata")
 qtl_peaks_int = find_peaks(DO_qtl_int, cross_basic$pmap, threshold=4, drop=1.5)
 
 
 DO_qtl_int_binary = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = covar[,"sex"],cores = 2)
-save(DO_qtl_int_binary,file = "./results/Rdata/DO_qtl_int_binary.Rdata")
+#save(DO_qtl_int_binary,file = "./results/Rdata/DO_qtl_int_binary.Rdata")
 load("./results/Rdata/DO_qtl_int_binary.Rdata")
 
 qtl_peaks_binary_int = find_peaks(DO_qtl_int_binary, cross_basic$pmap, threshold=4, drop=1.5)
