@@ -180,9 +180,9 @@ gsg$allOK
 
 males = x[which(x$sex=="M"),"Mouse.ID"]
 edata_m = edata[which(rownames(edata) %in% males),]
-save(edata_m, file = "./results/Rdata/networks/edata_m")
+save(edata_m, file = "./results/Rdata/networks/edata_m.Rdata")
 edata_f = edata[which(rownames(edata) %in% males == FALSE),]
-save(edata_f, file = "./results/Rdata/networks/edata_f")
+save(edata_f, file = "./results/Rdata/networks/edata_f.Rdata")
 
 m##
 
@@ -432,9 +432,14 @@ geneModuleMembership_f$gene = colnames(edata_trim_f)
 combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[match(geneModuleMembership_f$gene,combat_annot_f$`colnames(edata_f)`),]
 
 
-save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
-save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
+save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
 
+save(moduleTraitPvalue_f, file = "./results/Rdata/networks/moduleTraitPvalue_f.RData")
+save(moduleTraitPvalue_m, file = "./results/Rdata/networks/moduleTraitPvalue_m.RData")
+
+save(moduleTraitCor_f, file = "./results/Rdata/networks/moduleTraitCor_f.RData")
+save(moduleTraitCor_m, file = "./results/Rdata/networks/moduleTraitCor_m.RData")
 
 
 
