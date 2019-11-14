@@ -6,8 +6,22 @@ library(ggplot2)
 library(ggpubr)
 options(stringsAsFactors = FALSE)
 
+#load("./results/Rdata/networks/moduleTraitPvalue_f.RData")
+#moduleTraitPvalue = moduleTraitPvalue_f
 
-load("./results/Rdata/networks/geneModMemAnnot_power7.RData")
+#load("./results/Rdata/networks/moduleTraitPvalue_m.RData")
+#moduleTraitPvalue = moduleTraitPvalue_m
+
+
+load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
+
+#load("./results/Rdata/networks/geneModMemAnnot_power7.RData")
+#load("./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
+#load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
+
+#use this for secx specific networks, but not full nets
+#geneModMemAnnot = combat_annot_m
 
 #required to make plots and such. conver bn to igraph object
 bn2igraph <- function(g.bn){
@@ -19,7 +33,7 @@ superset = read.delim("./results/flat/superduperset_GO_MGI_IMPC.txt", stringsAsF
 superset = superset[,1]
 
 #BNs learned on high performance computing cluster
-bns = list.files("~/Desktop/bn_7/")
+bns = list.files("~/Desktop/bn_4/")
 #bns = "hybrid_brown_nobl_4.Rdata"
 #
 x = bn2igraph(turquoise_bn)
@@ -34,7 +48,7 @@ for(net in bns){
   print(counter)
   color = strsplit(net,"_")[[1]][2]
   #print(color)
-  load(paste0("~/Desktop/bn_7/",net))
+  load(paste0("~/Desktop/bn_4/",net))
   obj_name = paste0(color,"_bn")
   assign(x = obj_name ,bn)
   
@@ -256,7 +270,7 @@ sig_mod = rownames(sig_mod)
 sig_mod = unlist(strsplit(sig_mod, "ME"))[seq(2,length(sig_mod)*2,by = 2)]
 
 zhang = zhang[which(zhang$color %in% sig_mod),]
-
+zhang_full = zhang
 
 #######
 #some analysis#
