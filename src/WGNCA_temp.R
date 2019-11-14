@@ -10,6 +10,7 @@ library("parallel")
 library(rtracklayer)
 ############
 options(stringsAsFactors = FALSE)
+set.seed(8675309)
 #
 
 #read in VST transformed, quantile-normalized data (produced in ./src/normalize_RNAseq.R)
@@ -187,6 +188,7 @@ edata = t(edata)
 #remove pseudogenes
 #edata_sans_ps = edata[,-grep("-ps",colnames(edata))]
 #edata_sans_ps = edata_sans_ps[,-grep("-rs",colnames(edata_sans_ps))]
+save(edata, file = "./results/Rdata/networks/edata_full.Rdata")
 
 #check data
 gsg = goodSamplesGenes(edata, verbose = 3);
@@ -226,7 +228,7 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 #did 4, but try 9
-net = blockwiseModules(edata, power = 7,
+net = blockwiseModules(edata, power = 4,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = TRUE, pamRespectsDendro = FALSE,
@@ -235,7 +237,7 @@ net = blockwiseModules(edata, power = 7,
 
 ## 4: 39 modules not including 0, 6004 genes in module 0
 ##7: 21 mods no 0, 8814 in mod 0
-saveRDS(net, file="./results/Rdata/networks/wgcna_7.RDS")
+saveRDS(net, file="./results/Rdata/networks/wgcna_4.RDS")
 
 
 #get traits we want to look at
@@ -312,6 +314,8 @@ moduleTraitCor = moduleTraitCor[,c(11:61)]
 
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
+save(moduleTraitPvalue, file = "./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
+save(moduleTraitCor, file = "./results/Rdata/networks/moduleTraitCor_full_4.RData")
 
 sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/ncol(MEs)))))),]
 
