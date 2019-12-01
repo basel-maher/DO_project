@@ -172,7 +172,7 @@ qtl_peaks_both_int = rbind(qtl_peaks_int_bin_norm,qtl_peaks_int_norm)
 
 
 
-#####
+#####get qtl that pass perm threshold
 qtl_peaks_both$perm_thresh = NA
 
 perm = list.files("./results/Rdata/qtl_perms/")

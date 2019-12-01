@@ -37,4 +37,3 @@ save(out_eqtl_local,file ="out_eqtl_local.Rdata")
 
 local_qtl_peaks = find_peaks(out_eqtl_local, cross_basic$pmap, threshold=4, drop=1.5)
 
-

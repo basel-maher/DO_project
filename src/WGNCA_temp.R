@@ -208,7 +208,7 @@ plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="",
 #pick the soft thresholding power
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
-sft = pickSoftThreshold(edata, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE)
+sft = pickSoftThreshold(edata, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor", corOptions = list(maxPOutliers =0.1))
 # Plot the results:
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
@@ -228,17 +228,17 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 #did 4, but try 9
-net = blockwiseModules(edata, power = 4,
+#7 bicor
+net = blockwiseModules(edata, power = 7,
                        TOMType = "signed", minModuleSize = 30,
-                       reassignThreshold = 0, mergeCutHeight = 0.25,
-                       numericLabels = TRUE, pamRespectsDendro = FALSE,
+                       reassignThreshold = 0, mergeCutHeight = 0.15,
+                       numericLabels = TRUE,
                        saveTOMs = FALSE,
-                       verbose = 3)
+                       verbose = 3, corType = "bicor", maxPOutliers = 0.1)
 
 ## 4: 39 modules not including 0, 6004 genes in module 0
 ##7: 21 mods no 0, 8814 in mod 0
-saveRDS(net, file="./results/Rdata/networks/wgcna_4.RDS")
-
+saveRDS(net, file="./results/Rdata/networks/wgcna_7_BICOR.RDS")
 
 #get traits we want to look at
 pheno = read.csv("./results/flat/full_pheno_table.csv", stringsAsFactors = FALSE)
@@ -269,6 +269,7 @@ plotDendroAndColors(net$dendrograms[[1]], mergedColors[net$blockGenes[[1]]],
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05)
 
+
 # Construct numerical labels corresponding to the colors
 moduleLabels = net$colors
 moduleColors = labels2colors(net$colors)
@@ -280,6 +281,28 @@ nSamples = nrow(edata);
 # Recalculate MEs with color labels
 MEs0 = moduleEigengenes(edata, moduleColors)$eigengenes
 MEs = orderMEs(MEs0)
+
+####
+####
+###
+# MEDiss = 1-cor(MEs);
+# METree = hclust(as.dist(MEDiss), method = "average");# Plot the result
+# sizeGrWindow(7, 6)
+# plot(METree, main = "Clustering of module eigengenes",xlab = "", sub = "")
+# abline(h=0.15, col = "red")
+# 
+# # Call an automatic merging function
+# merge = mergeCloseModules(exprData = edata, moduleColors, cutHeight = 0.2, verbose = 3)
+# # The merged module colors
+# newColors = merge$colors;
+# # Eigengenes of the new merged modules:
+# mergedMEs = merge$newMEs;
+# 
+# sizeGrWindow(12, 9)
+# plotDendroAndColors(net$dendrograms[[1]], colors = cbind(merge$allOK, mergedColors),c("Dynamic Tree Cut", "Merged dynamic"),dendroLabels = FALSE, hang = 0.03,addGuide = TRUE, guideHang = 0.05)
+####
+####
+####
 
 #REMOVE GREY
 MEs = MEs[,-which(colnames(MEs) == "MEgrey")]
@@ -314,8 +337,8 @@ moduleTraitCor = moduleTraitCor[,c(11:61)]
 
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
-save(moduleTraitPvalue, file = "./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
-save(moduleTraitCor, file = "./results/Rdata/networks/moduleTraitCor_full_4.RData")
+save(moduleTraitPvalue, file = "./results/Rdata/networks/moduleTraitPvalue_sexcombined_7_BICOR.RData")
+save(moduleTraitCor, file = "./results/Rdata/networks/moduleTraitCor_sexcombined_7_BICOR.RData")
 
 sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/ncol(MEs)))))),]
 
@@ -398,7 +421,16 @@ geneModuleMembership$gene = colnames(edata_trim)
 combat_annot[5:(ncol(geneModuleMembership)+4)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),]
 
 
-#which(moduleColors=="red")
+
+
+
+
+
+
+
+##
+load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+combat_annot = geneModMemAnnot
 #annot_file_resid[which(moduleColors=="red"),]
 moduleColors = moduleColors[-which(moduleColors=="grey")] #check that this didnt screw up the hub calculation on following line
 hubs = chooseTopHubInEachModule(edata,moduleColors)
@@ -407,8 +439,50 @@ hubs = chooseTopHubInEachModule(edata,moduleColors)
 #allGenes = allGenes$ENSEMBL
 #interesting.genes<-res$ENSEMBL
 #allGenes = colnames(edata)
+
+
+network_GO = list()
+for(color in unique(combat_annot$color)){
+  
+  allGenes = combat_annot$gene
+  interesting.genes = combat_annot[which(combat_annot$color == color),"gene"]
+  #blue is bone module, 2386 genes
+  geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
+  names(geneList)<-allGenes
+  ###MF###
+  GOdata <- new("topGOdata", ontology = "MF", allGenes =geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t1<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t1)
+  ###CC###
+  GOdata <- new("topGOdata", ontology = "CC", allGenes = geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t2<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t2)
+  ###BP###
+  GOdata <- new("topGOdata", ontology = "BP", allGenes = geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t3<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t3)
+  ####
+  t.all = NULL
+  t.all<-rbind(t1,t2,t3)
+  t.all$classic<-as.numeric(as.character(t.all$classic))
+  ######
+  network_GO[[color]] = t.all
+}
+save(network_GO, file="./results/Rdata/networks/GO_male_5.RData")
+#####
+#####
+####
 allGenes = combat_annot$gene
-interesting.genes = combat_annot[which(combat_annot$color == "turquoise"),"gene"]
+interesting.genes = combat_annot[which(combat_annot$color == "salmon"),"gene"]
 #blue is bone module, 2386 genes
 geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
 names(geneList)<-allGenes
@@ -472,8 +546,8 @@ geneModMemAnnot = combat_annot
 
 #write out net, edata connect and annot. 
 #For blacklist, we would use cis-eqtl
-save(edata_trim, file = "./results/Rdata/edata_7.RData")
-save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power7.RData")
+save(edata_trim, file = "./results/Rdata/edata_7_BICOR.RData")
+save(geneModMemAnnot, file = "./results/Rdata/geneModMemAnnot_power7_BICOR.RData")
 
 ########################## CONSTRUCT BAYESIAN NETWORKS FOR EACH MODULE ###########################
 #Done on Rivanna. learn_bn.R. Only need to know number of colors (modules) for SLURM script

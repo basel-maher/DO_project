@@ -56,7 +56,13 @@ coloc$gene = tolower(coloc$gene)
 aa = coloc[order(coloc$gene, coloc$H4,decreasing = T), ] #sort by id and reverse of abs(value)
 aa = aa[ !duplicated(aa$gene), ]  
 ##
-write.csv(aa,file = "./results/flat/coloc/all_coloc_greaterorover75",quote = F,row.names = F)
+#write.csv(aa,file = "./results/flat/coloc/all_coloc_greaterorover75",quote = F,row.names = F)
+
+
+aa = read.csv("./results/flat/coloc/all_coloc_greaterorover75", stringsAsFactors = FALSE)
+
+zhang = zhang_combined_BICOR
+
 
 zhang$coloc_H0 = NA
 zhang$coloc_H1 = NA
@@ -89,4 +95,19 @@ zhang[which(tolower(zhang$gene) %in% tolower(coloc_LSBMD$gene)),"coloc_LSBMD"] =
 zhang[which(tolower(zhang$gene) %in% tolower(coloc_over75$gene)),"coloc_eBMD"] = 1
 
 colnames(zhang)[6] = "degree"
+
+zhang_combined_BICOR = zhang
+
+
+zhang_sexcombined_allModules_MGI_GO_ONLY$impc = 0
+zhang_sexcombined_allModules_MGI_GO_ONLY[which(tolower(zhang_sexcombined_allModules_MGI_GO_ONLY$gene) %in% impc),"impc"] = 1
+
+
+zhang_females_allModules_MGI_GO_ONLY$impc = 0
+zhang_females_allModules_MGI_GO_ONLY[which(tolower(zhang_females_allModules_MGI_GO_ONLY$gene) %in% impc),"impc"] = 1
+
+
+
+zhang_males_allModules_MGI_GO_ONLY$impc = 0
+zhang_males_allModules_MGI_GO_ONLY[which(tolower(zhang_males_allModules_MGI_GO_ONLY$gene) %in% impc),"impc"] = 1
 

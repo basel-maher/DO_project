@@ -142,7 +142,18 @@ mgi = unique(mgi)
 #superduperset = append(superduperset,mgi)
 superduperset = append(mgi, unq_genes)
 
+###print set sans gwas (MGI and GO only)
 
+
+superduperset = na.omit(superduperset)
+
+superduperset = unique(superduperset)
+
+superduperset = superduperset[-grep("\\.", superduperset)]
+
+write.table(superduperset, "./results/flat/superduperset_sansGWAS.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
+
+###
 
 ###########Add IMPC genes that have a nominally significant (0.05), weight corrected genotype effect
 impc = read.delim("./data/IMPC_BMD_Results.csv",stringsAsFactors = FALSE, sep=",")

@@ -9,19 +9,23 @@ options(stringsAsFactors = FALSE)
 #load("./results/Rdata/networks/moduleTraitPvalue_f.RData")
 #moduleTraitPvalue = moduleTraitPvalue_f
 
-#load("./results/Rdata/networks/moduleTraitPvalue_m.RData")
-#moduleTraitPvalue = moduleTraitPvalue_m
+load("./results/Rdata/networks/moduleTraitPvalue_m.RData")
+moduleTraitPvalue = moduleTraitPvalue_m
+load("./results/Rdata/networks/moduleTraitPvalue_sexcombined_7_BICOR.RData")
 
 
-load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
+
+#load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
 
 #load("./results/Rdata/networks/geneModMemAnnot_power7.RData")
 #load("./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
-load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
+load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+#load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
+load("./results/Rdata/networks/geneModMemAnnot_power7_BICOR.RData")
+#use this for sex specific networks, but not full nets
+#geneModMemAnnot = combat_annot_f
 
-#use this for secx specific networks, but not full nets
-#geneModMemAnnot = combat_annot_m
+geneModMemAnnot = combat_annot_m
 
 #required to make plots and such. conver bn to igraph object
 bn2igraph <- function(g.bn){
@@ -29,15 +33,17 @@ bn2igraph <- function(g.bn){
 }
 
 #gene superset
-superset = read.delim("./results/flat/superduperset_GO_MGI_IMPC.txt", stringsAsFactors = FALSE, header = FALSE)
+#superset = read.delim("./results/flat/superduperset_GO_MGI_IMPC.txt", stringsAsFactors = FALSE, header = FALSE)
+superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
+
 superset = superset[,1]
 
 #BNs learned on high performance computing cluster
-bns = list.files("~/Desktop/bn_4/")
+bns = list.files("~/Desktop/bn_m/")
 #bns = "hybrid_brown_nobl_4.Rdata"
 #
-x = bn2igraph(turquoise_bn)
-subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Qsox1"))))
+x = bn2igraph(magenta_bn)
+subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Ptpra"))))
 plot(subgraph,vertex.label.cex=0.9,edge.width=2, vertex.size=25, margin=-0.1, vertex.label.dist=0.2, vertex.label.degree=-pi)
 
 ####
@@ -48,7 +54,7 @@ for(net in bns){
   print(counter)
   color = strsplit(net,"_")[[1]][2]
   #print(color)
-  load(paste0("~/Desktop/bn_4/",net))
+  load(paste0("~/Desktop/bn_m/",net))
   obj_name = paste0(color,"_bn")
   assign(x = obj_name ,bn)
   
@@ -131,6 +137,10 @@ for(i in 1:length(kda_full)){
   kda_full[[i]]$driver = 0
   kda_full[[i]]$driver[which(kda_full[[i]]$num_neib > mean(kda_full[[i]]$num_neib) + sd(kda_full[[i]]$num_neib))] = 1
   
+  #2 sd
+  kda_full[[i]]$driver2 = 0
+  kda_full[[i]]$driver2[which(kda_full[[i]]$num_neib > mean(kda_full[[i]]$num_neib) + 2*(sd(kda_full[[i]]$num_neib)))] = 1
+  
   #hub genes (d-bar + 2sd(d))
   #num out arcs or degree total?
   kda_full[[i]]$hub = 0
@@ -143,14 +153,14 @@ zhang = bind_rows(kda_full)
 kda_full = out
 
 for(i in 1:length(kda_full)){
-  kda_full[[i]] = kda_full[[i]][-which(kda_full[[i]]$num_bone_neib == 0),]##WHAT IS THIS?>??
+  kda_full[[i]] = kda_full[[i]][-which(kda_full[[i]]$num_bone_neib == 0),]
   thresh = mean(kda_full[[i]]$num_neib) - sd(kda_full[[i]]$num_neib)
   kda_full[[i]] = kda_full[[i]][-which(kda_full[[i]]$num_neib < thresh),]
   kda_full[[i]]$hyper = phyper(q=kda_full[[i]]$num_bone_neib, m=kda_full[[i]]$num_bone_genes, n = kda_full[[i]]$num_genes_inMod -  kda_full[[i]]$num_bone_genes_inMod, k=kda_full[[i]]$num_neib, lower.tail = FALSE)
   #kda_full[[i]]$hyperZhang = phyper(q=kda_full[[i]]$num_bone_neib-1, m=1631, n = 16816-1631, k=kda_full[[i]]$num_neib, lower.tail = FALSE)#includes self
   kda_full[[i]]$hyperZhang = phyper(q=kda_full[[i]]$num_bone_neib-1, m=length(superset), n = nrow(zhang)-length(superset), k=kda_full[[i]]$num_neib, lower.tail = FALSE)#includes self
   
-  ####SHOULD n BE 16816 - 1631?
+  ####SHOULD n BE 16816 - 1631
   #subtract 1 for prob P[X>=x] (null hyp)
   #m=kda_full[[i]]$num_bone_genes
   kda_full[[i]]$hyper_fdr = p.adjust(kda_full[[i]]$hyper, method="bonferroni")
@@ -262,6 +272,9 @@ for(i in which(all$gene %in% zhang$gene)){
 # save(out_perm, file="~/Desktop/KDA_1000_perms_minus1.Rdata")
 # load("~/Desktop/KDA_1000_perms.Rdata")
 # 
+zhang_combined_BICOR = zhang
+
+zhang_males_allModules_MGI_GO_ONLY = zhang
 
 
 #sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/36))))),]
@@ -270,7 +283,7 @@ sig_mod = rownames(sig_mod)
 sig_mod = unlist(strsplit(sig_mod, "ME"))[seq(2,length(sig_mod)*2,by = 2)]
 
 zhang = zhang[which(zhang$color %in% sig_mod),]
-zhang_full = zhang
+zhang_m_sigModules = zhang
 
 #######
 #some analysis#

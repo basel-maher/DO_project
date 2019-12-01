@@ -201,44 +201,45 @@ plot(sampleTree_f, main = "Sample clustering to detect outliers", sub="", xlab="
 #pick the soft thresholding power
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
-sft_m = pickSoftThreshold(edata_m, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE)
-sft_f = pickSoftThreshold(edata_f, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE)
-
+sft_m = pickSoftThreshold(edata_m, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
+#4 for bicor males
+sft_f = pickSoftThreshold(edata_f, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
+#14 for bicor females
 # Plot the results:
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
 # Scale-free topology fit index as a function of the soft-thresholding power
-plot(sft_m$fitIndices[,1], -sign(sft_m$fitIndices[,3])*sft_m$fitIndices[,2],
+plot(sft_f$fitIndices[,1], -sign(sft_f$fitIndices[,3])*sft_f$fitIndices[,2],
      xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
      main = paste("Scale independence"));
-text(sft_m$fitIndices[,1], -sign(sft_m$fitIndices[,3])*sft_m$fitIndices[,2],
+text(sft_f$fitIndices[,1], -sign(sft_f$fitIndices[,3])*sft_f$fitIndices[,2],
      labels=powers,cex=cex1,col="red");
 # this line corresponds to using an R^2 cut-off of h
 abline(h=0.90,col="red")
 # Mean connectivity as a function of the soft-thresholding power
-plot(sft_m$fitIndices[,1], sft_m$fitIndices[,5],
+plot(sft_f$fitIndices[,1], sft_f$fitIndices[,5],
      xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
      main = paste("Mean connectivity"))
-text(sft_m$fitIndices[,1], sft_m$fitIndices[,5], labels=powers, cex=cex1,col="red")
+text(sft_f$fitIndices[,1], sft_f$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 #do 5 for males
-net_m = blockwiseModules(edata_m, power = 5,
+net_m = blockwiseModules(edata_m, power = 4,
                        TOMType = "signed", minModuleSize = 30,
-                       reassignThreshold = 0, mergeCutHeight = 0.25,
-                       numericLabels = TRUE, pamRespectsDendro = FALSE,
+                       reassignThreshold = 0, mergeCutHeight = 0.15,
+                       numericLabels = TRUE,
                        saveTOMs = FALSE,
-                       verbose = 3)
+                       verbose = 3,corType = "bicor",maxPOutliers = 0.1)
 
 ##7: 27 mods no 0, 4888 in mod  0
 
 #try 4 for females, 4 is the 0.9 thresh
-net_f = blockwiseModules(edata_f, power = 4,
+net_f = blockwiseModules(edata_f, power = 14,
                          TOMType = "signed", minModuleSize = 30,
-                         reassignThreshold = 0, mergeCutHeight = 0.25,
-                         numericLabels = TRUE, pamRespectsDendro = FALSE,
+                         reassignThreshold = 0, mergeCutHeight = 0.15,
+                         numericLabels = TRUE,
                          saveTOMs = FALSE,
-                         verbose = 3)
+                         verbose = 3,corType = "bicor",maxPOutliers = 0.1)
 
 ##7: 17 mods no 0, 8357 in in mod 0
 #
@@ -432,14 +433,14 @@ geneModuleMembership_f$gene = colnames(edata_trim_f)
 combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[match(geneModuleMembership_f$gene,combat_annot_f$`colnames(edata_f)`),]
 
 
-save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
-save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
+save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power4_BICOR.RData")
+save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power14_BICOR.RData")
 
-save(moduleTraitPvalue_f, file = "./results/Rdata/networks/moduleTraitPvalue_f.RData")
-save(moduleTraitPvalue_m, file = "./results/Rdata/networks/moduleTraitPvalue_m.RData")
+save(moduleTraitPvalue_f, file = "./results/Rdata/networks/moduleTraitPvalue_f_BICOR.RData")
+save(moduleTraitPvalue_m, file = "./results/Rdata/networks/moduleTraitPvalue_m_BICOR.RData")
 
-save(moduleTraitCor_f, file = "./results/Rdata/networks/moduleTraitCor_f.RData")
-save(moduleTraitCor_m, file = "./results/Rdata/networks/moduleTraitCor_m.RData")
+save(moduleTraitCor_f, file = "./results/Rdata/networks/moduleTraitCor_f_BICOR.RData")
+save(moduleTraitCor_m, file = "./results/Rdata/networks/moduleTraitCor_m_BICOR.RData")
 
 
 
