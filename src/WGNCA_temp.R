@@ -22,18 +22,20 @@ counts = read.csv("./results/flat/RNA-seq/genes_over_6reads_in_morethan_38samps_
 
 #read in an annotation file. This is output from the RNA-seq pipeline
 #annot_file = read.delim("./data/314-FarberDO2_S6.gene_abund.tab",header = TRUE) #this looks crappy
-annot_file = readGFF("./results/flat/RNA-seq/mus_stringtie_merged.gtf")
-annot_file = annot_file[which(annot_file$type=="transcript"),]
+#annot_file = readGFF("./results/flat/RNA-seq/mus_stringtie_merged.gtf")
+#annot_file = annot_file[which(annot_file$type=="transcript"),]
 #remove transcripts not on somatic and X chroms
-chr = c(seq(1:19),"X")
-annot_file = annot_file[which(annot_file$seqid %in% chr),]
+#chr = c(seq(1:19),"X")
+#annot_file = annot_file[which(annot_file$seqid %in% chr),]
 
 
-annot_file = annot_file[,c(9,11)]
-annot_file = unique(annot_file)
+#annot_file = annot_file[,c(9,11)]
+#annot_file = unique(annot_file)
 #
+annot_file = read.csv("~/Documents/projects/DO_project/results/flat/annot_file.csv")
+annot_file = annot_file[,c(1,2)]
 
-counts = counts[which(rownames(counts) %in% annot_file$gene_id),]
+counts = counts[which(rownames(counts) %in% annot_file$Gene.ID),]
 #
 
 #find and remove features that have fewer than 10 reads in more than 90% (173) of samples 
@@ -50,24 +52,24 @@ counts = counts[-x,]
 
 
 #some genes are duplicated
-counts = t(counts)
+#counts = t(counts)
 
-colnames(counts) = annot_file[match(colnames(counts),annot_file$gene_id),"gene_name"]
+#colnames(counts) = annot_file[match(colnames(counts),annot_file$Gene.ID),"Gene.Name"]
 
 
 #for now, give them a unique ID
-colnames(counts)[which(duplicated(colnames(counts)))] = paste0(colnames(counts)[which(duplicated(colnames(counts)))], "_isoform")
+#colnames(counts)[which(duplicated(colnames(counts)))] = paste0(colnames(counts)[which(duplicated(colnames(counts)))], "_isoform")
 
-which(duplicated(colnames(counts)))
-colnames(counts)[3570] = paste0(colnames(counts)[3570],".2")
-colnames(counts)[5342] = paste0(colnames(counts)[5342],".2")
-colnames(counts)[6661] = paste0(colnames(counts)[6661],".3")
+#which(duplicated(colnames(counts)))
+#colnames(counts)[3570] = paste0(colnames(counts)[3570],".2")
+#colnames(counts)[5342] = paste0(colnames(counts)[5342],".2")
+#colnames(counts)[6661] = paste0(colnames(counts)[6661],".3")
 
 #colnames(counts)[4133] = paste0(colnames(counts)[4133],".2")
 #colnames(counts)[4134] = paste0(colnames(counts)[4134],".3")
 #colnames(counts)[18694] = paste0(colnames(counts)[18694],".2")
 
-counts = t(counts)
+#counts = t(counts)
 
 
 ######

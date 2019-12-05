@@ -197,11 +197,18 @@ for(i in 1:length(perm_files)){
   }
 }
 
+qtl = qtl_peaks_both[which(qtl_peaks_both$lod >= qtl_peaks_both$perm_thresh),]
+
+
+
+
 ##same for norm
 qtl_peaks_both_norm$perm_thresh = NA
 perm = list.files("./results/Rdata/qtl_perms/")
 
 perm_files = perm[grep("norm_perms_",perm)]
+#remove INT
+perm_files = perm_files[-grep("_INT_",perm_files)]
 
 for(i in 1:length(perm_files)){
   
@@ -222,9 +229,49 @@ for(i in 1:length(perm_files)){
     } else {qtl_peaks_both_norm$perm_thresh[[pheno_rows[i]]] = perm_a}
   }
 }
-qtl = qtl_peaks_both[which(qtl_peaks_both$lod >= qtl_peaks_both$perm_thresh),]
 qtl_norm = qtl_peaks_both_norm[which(qtl_peaks_both_norm$lod >= qtl_peaks_both_norm$perm_thresh),]
+write.csv(qtl_norm, file = "./results/flat/qtl_norm_pass_thresh", row.names = FALSE, quote = FALSE)
 ###
+
+#same for NORM INT
+qtl_peaks_both_int$perm_thresh = NA
+perm = list.files("./results/Rdata/qtl_perms/")
+
+perm_files = perm[grep("norm_perms_INT_",perm)]
+
+for(i in 1:length(perm_files)){
+  
+  load(paste0("./results/Rdata/qtl_perms/",perm_files[i]))
+  
+  perm_a = summary(norm_perm)$A[1]
+  perm_x = summary(norm_perm)$X[1]
+  
+  pheno_name = perm_files[i]
+  pheno_name = gsub(x = perm_files[i],pattern = "norm_perms_INT_",replacement = "")
+  pheno_name = gsub(x = pheno_name,pattern = ".Rdata",replacement = "")
+  
+  pheno_rows = which(qtl_peaks_both_int$lodcolumn == pheno_name)
+  
+  for(i in 1:length(pheno_rows)){
+    if(qtl_peaks_both_int$chr[pheno_rows[i]] == "X"){
+      qtl_peaks_both_int$perm_thresh[[pheno_rows[i]]] = perm_x
+    } else {qtl_peaks_both_int$perm_thresh[[pheno_rows[i]]] = perm_a}
+  }
+}
+
+qtl_norm_INT = qtl_peaks_both_int[which(qtl_peaks_both_int$lod >= qtl_peaks_both_int$perm_thresh),]
+write.csv(qtl_norm_INT, file = "./results/flat/qtl_norm_INT_pass_thresh", row.names = FALSE, quote = FALSE)
+
+###
+
+
+
+
+
+
+
+
+
 
 TMD_blup = scan1blup(apr,pheno = pheno_combined[,"uCT_Ct.TMD"], kinship = k_loco[["1"]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 save(TMD_blup, file = "./results/Rdata/TMD_blup.Rdata")

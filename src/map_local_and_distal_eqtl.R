@@ -22,8 +22,8 @@ load("./results/Rdata/k_loco_basic_cleaned.Rdata")
 getLocalEqtl = function(peaks,geneAnnot,lodThreshAuto, lodThreshX, localDistFromStart,geneCol1,geneCol2){
   out = merge(peaks,geneAnnot,by.x = geneCol1, by.y = geneCol2)
   
-  out$dist_start = abs((out$pos*1000000) - out$start) #multiply by a mil to get bp, calculate distance from start
-  out = out[which(out$chr == out$seqid),] #must be on same chrom
+  out$dist_start = abs((out$pos*1000000) - out$Start) #multiply by a mil to get bp, calculate distance from start
+  out = out[which(out$chr == out$Reference),] #must be on same chrom
   out = out[which(out$dist_start <=localDistFromStart),] #must be within a certain distance from start
   idx = which((out$chr != "X") & (out$lod >= lodThreshAuto)) #find autosomal peaks that meet threshold
   idx = c(idx, which((out$chr == "X") & (out$lod >= lodThreshX))) #find X peaks that meet threshold
@@ -39,7 +39,7 @@ getLocalEqtl = function(peaks,geneAnnot,lodThreshAuto, lodThreshX, localDistFrom
 getDistalEqtl = function(peaks,geneAnnot,lodThreshAuto,lodThreshX, distalMinDistFromStart,geneCol1,geneCol2){
   out = merge(peaks,geneAnnot,by.x = geneCol1, by.y = geneCol2)
   
-  out$dist_start = abs((out$pos*1000000) - out$start) #multiply by a mil to get bp, calculate distance from start
+  out$dist_start = abs((out$pos*1000000) - out$Start) #multiply by a mil to get bp, calculate distance from start
   
   idx = which((out$chr != "X") & (out$lod >= lodThreshAuto)) #find autosomal peaks that meet threshold
   idx = c(idx, which((out$chr == "X") & (out$lod >= lodThreshX))) #find X peaks that meet threshold
@@ -48,7 +48,7 @@ getDistalEqtl = function(peaks,geneAnnot,lodThreshAuto,lodThreshX, distalMinDist
   out$distal = 0 #set col of zeros
   out$distal[which(as.numeric(out$dist_start) >=distalMinDistFromStart)] = 1 #if meets distance criterion for distal eqtl, make = 1
   
-  out$dist_start[which(out$chr != out$chromosome_name)] = "diff_chrom" #if not on same chromosome, make = "diff_chrom"
+  out$dist_start[which(out$chr != out$Reference)] = "diff_chrom" #if not on same chromosome, make = "diff_chrom"
   out$distal[which(out$dist_start=="diff_chrom")] = 1 #make = 1 if on a different chrom
   #
   out = out[which(out$distal == 1),] #subset to only "distal" eqtl
@@ -84,28 +84,7 @@ rownames(covar) = rownames(cross_eqtl$covar)
 out_eqtl_local <- scan1(apr, cross_eqtl$pheno, k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,17:51)],cores = 20)
 
 local_eqtl_peaks = find_peaks(out_eqtl_local, cross_eqtl$pmap, threshold=4, drop=1.5)
-local_eqtl_peaks = local_eqtl_peaks[,-2]
 
-#convert gene names to symbol using transcript quant output
-annot = read.delim("./data/314-FarberDO2_S6.gene_abund.tab", stringsAsFactors = FALSE)#read annotation file
-
-local_eqtl_peaks$lodcolumn = annot[match(local_eqtl_peaks$lodcolumn,annot$Gene.ID),"Gene.Name"] #match ID to get gene name
-write.csv(local_eqtl_peaks, file = "./results/flat/local_eqtl_peaks.csv", quote=FALSE)
-
-#using 48 PEER factors as covariates (distal eQTL)
-out_eqtl_distal <- scan1(apr, cross_eqtl$pheno, k_loco, Xcovar=Xcovar, addcovar = covar[,c(17:ncol(covar))],cores = 20)
-
-distal_eqtl_peaks = find_peaks(out_eqtl_distal, cross_eqtl$pmap, threshold=4, drop=1.5)
-distal_eqtl_peaks = distal_eqtl_peaks[,-2]
-
-#convert gene names to symbol using transcript quant output
-annot = read.delim("./data/314-FarberDO2_S6.gene_abund.tab", stringsAsFactors = FALSE)#read annotation file
-
-distal_eqtl_peaks$lodcolumn = annot[match(distal_eqtl_peaks$lodcolumn,annot$Gene.ID),"Gene.Name"] #match ID to get gene name
-
-write.csv(distal_eqtl_peaks, file = "./results/flat/distal_eqtl_peaks.csv", quote=FALSE)
-
-###
 #generate gene annotation file. This contains ensembl gene IDs, chromosomes, and TSS start and end sites for all genes in our peak data
 #uses biomaRt
 #listMarts() indicates ENSEMBL version 97 is used = GRCm38 (mm10)
@@ -134,43 +113,44 @@ write.csv(distal_eqtl_peaks, file = "./results/flat/distal_eqtl_peaks.csv", quot
 # gene_annot_file = gene_annot_file[-which(duplicated(gene_annot_file$mgi_symbol)),]
 
 #USE ONLY ANNOTATION FILE FROM RNASEQ QUANTIFICATION
+annot_file = read.csv("./results/flat/annot_file.csv", stringsAsFactors = FALSE)
 
-annot_file = readGFF("./results/flat/RNA-seq/mus_stringtie_merged.gtf")
-annot_file = annot_file[which(annot_file$type=="transcript"),]
+#annot_file = readGFF("./results/flat/RNA-seq/mus_stringtie_merged.gtf")
+#annot_file = annot_file[which(annot_file$type=="transcript"),]
 #remove transcripts not on somatic and X chroms
 chr = c(seq(1:19),"X")
-annot_file = annot_file[which(annot_file$seqid %in% chr),]
+annot_file = annot_file[which(annot_file$Reference %in% chr),]
 
 
 #annot_file = annot_file[,c(9,11)]
-annot_file = unique(annot_file)
+#annot_file = unique(annot_file)
 
 #CHANGE TO HAVE 1 ENTRY PER MSTRG/ID
 #temp
-annot_file = annot_file[-which(duplicated(annot_file$gene_id)),]
+#annot_file = annot_file[-which(duplicated(annot_file$gene_id)),]
 # 
 
-p1 = read.csv("~/Desktop/REDO/local_eqtl_peaks_1.csv",stringsAsFactors = FALSE)
-p2 = read.csv("~/Desktop/REDO/local_eqtl_peaks_2.csv",stringsAsFactors = FALSE)
-p3 = read.csv("~/Desktop/REDO/local_eqtl_peaks_3.csv",stringsAsFactors = FALSE)
-p4 = read.csv("~/Desktop/REDO/local_eqtl_peaks_4.csv",stringsAsFactors = FALSE)
-p5 = read.csv("~/Desktop/REDO/local_eqtl_peaks_5.csv",stringsAsFactors = FALSE)
+p1 = read.csv("./results/flat/RNA-seq/eqtl_peaks_REDO/local_eqtl_peaks_1.csv",stringsAsFactors = FALSE)
+p2 = read.csv("./results/flat/RNA-seq/eqtl_peaks_REDO/local_eqtl_peaks_2.csv",stringsAsFactors = FALSE)
+p3 = read.csv("./results/flat/RNA-seq/eqtl_peaks_REDO/local_eqtl_peaks_3.csv",stringsAsFactors = FALSE)
+p4 = read.csv("./results/flat/RNA-seq/eqtl_peaks_REDO/local_eqtl_peaks_4.csv",stringsAsFactors = FALSE)
+p5 = read.csv("./results/flat/RNA-seq/eqtl_peaks_REDO/local_eqtl_peaks_5.csv",stringsAsFactors = FALSE)
 peaks = rbind(p1,p2,p3,p4,p5)
 peaks = peaks[,-1]
 
 #prune output to only include only those that pass LOD threshold from "./src/calc_eqtl_perms.R"
 
-local_eqtl = getLocalEqtl(peaks,annot_file,lodThreshAuto = 10.89, lodThreshX = 11.55, localDistFromStart = 1000000, geneCol1 = "lodcolumn", geneCol2 = "gene_id")
+local_eqtl = getLocalEqtl(peaks,annot_file,lodThreshAuto = 10.89, lodThreshX = 11.55, localDistFromStart = 1000000, geneCol1 = "lodcolumn", geneCol2 = "Gene.ID")
 save(local_eqtl, file = "./results/Rdata/local_eqtl.Rdata")
 #
 
-distal_eqtl = getDistalEqtl(peaks,annot_file,lodThreshAuto = 10.89, lodThreshX = 11.55, distalMinDistFromStart = 1000000, geneCol1 = "lodcolumn", geneCol2 = "gene_id")
+distal_eqtl = getDistalEqtl(peaks,annot_file,lodThreshAuto = 10.89, lodThreshX = 11.55, distalMinDistFromStart = 1000000, geneCol1 = "lodcolumn", geneCol2 = "Gene.ID")
 
 ###remove -ps pseudogenes, -rs and GM genes from trans eqtl list
 ##(what about -rs? related sequence)
-distal_eqtl = distal_eqtl[-grep("-ps",distal_eqtl$gene_name),]
-distal_eqtl = distal_eqtl[-grep("-rs",distal_eqtl$gene_name),]
-distal_eqtl = distal_eqtl[-grep("Gm[0-9]",distal_eqtl$gene_name),]
+distal_eqtl = distal_eqtl[-grep("-ps",distal_eqtl$Gene.Name),]
+distal_eqtl = distal_eqtl[-grep("-rs",distal_eqtl$Gene.Name),]
+distal_eqtl = distal_eqtl[-grep("Gm[0-9]",distal_eqtl$Gene.Name),]
 
 save(distal_eqtl, file = "./results/Rdata/distal_eqtl.Rdata")
 ##CHANGE TO CALCULATE USING MSTRG INSTEAD OF SYMBOL

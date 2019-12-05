@@ -12,27 +12,14 @@ library(rtracklayer)
 options(stringsAsFactors = FALSE)
 #
 set.seed(8675309)
-#read in VST transformed, quantile-normalized data (produced in ./src/normalize_RNAseq.R)
-#load("./results/Rdata/counts_vst_qnorm.Rdata")
-#For now try non-quantile normalized data, compare with q-normed
 
 # read in the RNA-seq processed counts file
 counts = read.csv("./results/flat/RNA-seq/genes_over_6reads_in_morethan_38samps_tpm_over0.1_38samps_COUNTS.csv", stringsAsFactors = FALSE,row.names = 1,check.names = FALSE)
 
-#read in an annotation file. This is output from the RNA-seq pipeline
-#annot_file = read.delim("./data/314-FarberDO2_S6.gene_abund.tab",header = TRUE) #this looks crappy
-annot_file = readGFF("./results/flat/RNA-seq/mus_stringtie_merged.gtf")
-annot_file = annot_file[which(annot_file$type=="transcript"),]
-#remove transcripts not on somatic and X chroms
-chr = c(seq(1:19),"X")
-annot_file = annot_file[which(annot_file$seqid %in% chr),]
+annot_file = read.csv("~/Documents/projects/DO_project/results/flat/annot_file.csv")
+annot_file = annot_file[,c(1,2)]
 
-
-annot_file = annot_file[,c(9,11)]
-annot_file = unique(annot_file)
-#
-
-counts = counts[which(rownames(counts) %in% annot_file$gene_id),]
+counts = counts[which(rownames(counts) %in% annot_file$Gene.ID),]
 #
 
 #find and remove features that have fewer than 10 reads in more than 90% (173) of samples 
@@ -46,28 +33,6 @@ for(i in 1:nrow(counts)){
 
 #311 genes removed
 counts = counts[-x,]
-
-
-#some genes are duplicated
-counts = t(counts)
-
-colnames(counts) = annot_file[match(colnames(counts),annot_file$gene_id),"gene_name"]
-
-
-#for now, give them a unique ID
-colnames(counts)[which(duplicated(colnames(counts)))] = paste0(colnames(counts)[which(duplicated(colnames(counts)))], "_isoform")
-
-which(duplicated(colnames(counts)))
-colnames(counts)[3570] = paste0(colnames(counts)[3570],".2")
-colnames(counts)[5342] = paste0(colnames(counts)[5342],".2")
-colnames(counts)[6661] = paste0(colnames(counts)[6661],".3")
-
-#colnames(counts)[4133] = paste0(colnames(counts)[4133],".2")
-#colnames(counts)[4134] = paste0(colnames(counts)[4134],".3")
-#colnames(counts)[18694] = paste0(colnames(counts)[18694],".2")
-
-counts = t(counts)
-
 
 ######
 
@@ -144,15 +109,8 @@ covs$batch4[match(b4,rownames(covs))] = 1
 covs[which(rownames(covs)%in% b4==FALSE),"batch4"] = 0
 
 
-#cc = as.matrix(covs[,c(3,5:8)])
-#rownames(cc) = rownames(covs)
 
-#convert to integers
-#covs[,1] = as.factor(covs[,1])
-
-#cc[,c(1:5)] = as.integer(cc[,])
-
-covs = as.data.frame(covs[,2:10])
+covs = as.data.frame(covs[,2:8])
 
 covs$batch = NA
 
@@ -193,7 +151,7 @@ sampleTree_f = hclust(dist(edata_f), method = "average")
 
 par(cex = 0.6);
 par(mar = c(0,4,2,0))
-plot(sampleTree_f, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2)
+plot(sampleTree_m, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2)
 #####
 
 
@@ -201,9 +159,10 @@ plot(sampleTree_f, main = "Sample clustering to detect outliers", sub="", xlab="
 #pick the soft thresholding power
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
-sft_m = pickSoftThreshold(edata_m, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
+sft_f = pickSoftThreshold(edata_m, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
+
 #4 for bicor males
-sft_f = pickSoftThreshold(edata_f, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
+sft_m = pickSoftThreshold(edata_f, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
 #14 for bicor females
 # Plot the results:
 sizeGrWindow(9, 5)
@@ -223,25 +182,28 @@ plot(sft_f$fitIndices[,1], sft_f$fitIndices[,5],
      main = paste("Mean connectivity"))
 text(sft_f$fitIndices[,1], sft_f$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
-#do 5 for males
-net_m = blockwiseModules(edata_m, power = 4,
+
+
+
+
+#TRY 8 FOR BOTH
+net_m = blockwiseModules(edata_m, power = 8,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.15,
                        numericLabels = TRUE,
                        saveTOMs = FALSE,
                        verbose = 3,corType = "bicor",maxPOutliers = 0.1)
 
-##7: 27 mods no 0, 4888 in mod  0
+##8: 30 mods no 0, 11976 in mod  0
 
-#try 4 for females, 4 is the 0.9 thresh
-net_f = blockwiseModules(edata_f, power = 14,
+net_f = blockwiseModules(edata_f, power = 8,
                          TOMType = "signed", minModuleSize = 30,
                          reassignThreshold = 0, mergeCutHeight = 0.15,
                          numericLabels = TRUE,
                          saveTOMs = FALSE,
                          verbose = 3,corType = "bicor",maxPOutliers = 0.1)
 
-##7: 17 mods no 0, 8357 in in mod 0
+##8: 24 mods no 0, 12709 in in mod 0
 #
 #
 #
@@ -276,7 +238,7 @@ mergedColors_m = labels2colors(net_m$colors)
 
 
 # Plot the dendrogram and the module colors underneath
-plotDendroAndColors(net_m$dendrograms[[1]], mergedColors[net_m$blockGenes[[1]]],
+plotDendroAndColors(net_f$dendrograms[[1]], mergedColors_f[net_f$blockGenes[[1]]],
                     "Module colors",
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05)
@@ -344,14 +306,6 @@ nSamples_f=nrow(edata_f)
 colnames(moduleTraitPvalue_f) = colnames(moduleTraitCor_f)
 rownames(moduleTraitPvalue_f) = rownames(moduleTraitCor_f)
 
-##remove everything but uCT
-#moduleTraitPvalue = moduleTraitPvalue[,c(44:61)]
-#moduleTraitCor = moduleTraitCor[,c(44:61)]
-
-#moduleTraitPvalue = moduleTraitPvalue[,c(11:61)]
-#moduleTraitCor = moduleTraitCor[,c(11:61)]
-
-#moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
 #keep all but  weight, length, glucose , fat pads, muscle masses and MAT
 moduleTraitPvalue_m = moduleTraitPvalue_m[,c(11:61)]
@@ -433,8 +387,8 @@ geneModuleMembership_f$gene = colnames(edata_trim_f)
 combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[match(geneModuleMembership_f$gene,combat_annot_f$`colnames(edata_f)`),]
 
 
-save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power4_BICOR.RData")
-save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power14_BICOR.RData")
+save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power8_BICOR.RData")
+save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power8_BICOR.RData")
 
 save(moduleTraitPvalue_f, file = "./results/Rdata/networks/moduleTraitPvalue_f_BICOR.RData")
 save(moduleTraitPvalue_m, file = "./results/Rdata/networks/moduleTraitPvalue_m_BICOR.RData")
