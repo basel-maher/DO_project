@@ -9,23 +9,23 @@ options(stringsAsFactors = FALSE)
 #load("./results/Rdata/networks/moduleTraitPvalue_f.RData")
 #moduleTraitPvalue = moduleTraitPvalue_f
 
-load("./results/Rdata/networks/moduleTraitPvalue_m.RData")
-moduleTraitPvalue = moduleTraitPvalue_m
-load("./results/Rdata/networks/moduleTraitPvalue_sexcombined_7_BICOR.RData")
+#load("./results/Rdata/networks/moduleTraitPvalue_f.RData")
+#moduleTraitPvalue = moduleTraitPvalue_f
+#load("./results/Rdata/networks/moduleTraitPvalue_f.RData")
 
 
 
-#load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
+load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
 
 #load("./results/Rdata/networks/geneModMemAnnot_power7.RData")
 #load("./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
-load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
-load("./results/Rdata/networks/geneModMemAnnot_power7_BICOR.RData")
+#load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
+#load("./results/Rdata/networks/geneModMemAnnot_power7_BICOR.RData")
 #use this for sex specific networks, but not full nets
 #geneModMemAnnot = combat_annot_f
 
-geneModMemAnnot = combat_annot_m
+geneModMemAnnot = combat_annot_f
 
 #required to make plots and such. conver bn to igraph object
 bn2igraph <- function(g.bn){
@@ -39,12 +39,14 @@ superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFact
 superset = superset[,1]
 
 #BNs learned on high performance computing cluster
-bns = list.files("~/Desktop/bn_m/")
+bns = list.files("~/Desktop/bn_4/")
 #bns = "hybrid_brown_nobl_4.Rdata"
 #
-x = bn2igraph(magenta_bn)
-subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Ptpra"))))
-plot(subgraph,vertex.label.cex=0.9,edge.width=2, vertex.size=25, margin=-0.1, vertex.label.dist=0.2, vertex.label.degree=-pi)
+
+
+x = bn2igraph(brown_bn)
+subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,3,nodes = "Nab2"))))
+plot(subgraph,vertex.label.cex=0.65,edge.width=2, vertex.size=20, margin=-0.4, vertex.label.dist=0.2, vertex.label.degree=-pi)
 
 ####
 
@@ -54,7 +56,7 @@ for(net in bns){
   print(counter)
   color = strsplit(net,"_")[[1]][2]
   #print(color)
-  load(paste0("~/Desktop/bn_m/",net))
+  load(paste0("~/Desktop/bn_4/",net))
   obj_name = paste0(color,"_bn")
   assign(x = obj_name ,bn)
   

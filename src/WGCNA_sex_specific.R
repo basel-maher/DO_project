@@ -341,8 +341,10 @@ edata_trim_m = edata_m[,-(which(colnames(edata_m) %in% rmv))]
 #have to run this sometimes?
 combat_annot_m = combat_annot_m[,-2]
 #the gsub allows for matching of genes that had _isoform* added to them
-combat_annot_m[,c(3:4)] = annot_file[match(gsub(combat_annot_m$`colnames(edata_m)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
+#combat_annot_m[,c(3:4)] = annot_file[match(gsub(combat_annot_m$`colnames(edata_m)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
 
+#change to work for gene id
+combat_annot_m[,c(3:4)] = annot_file[match(combat_annot_m$`colnames(edata_m)`,annot_file$Gene.ID),c(1,2)]
 
 #modNames = substring(names(MEs), 3)
 geneModuleMembership_m = as.data.frame(cor(edata_trim_m, MEs_m, use = "p")) # spearman or kendall? using pearson here
@@ -372,8 +374,10 @@ edata_trim_f = edata_f[,-(which(colnames(edata_f) %in% rmv))]
 #have to run this sometimes?
 combat_annot_f = combat_annot_f[,-2]
 #the gsub allows for matching of genes that had _isoform* added to them
-combat_annot_f[,c(3:4)] = annot_file[match(gsub(combat_annot_f$`colnames(edata_f)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
+#combat_annot_f[,c(3:4)] = annot_file[match(gsub(combat_annot_f$`colnames(edata_f)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
 
+#change to work for gene id
+combat_annot_f[,c(3:4)] = annot_file[match(combat_annot_f$`colnames(edata_f)`,annot_file$Gene.ID),c(1,2)]
 
 #modNames = substring(names(MEs), 3)
 geneModuleMembership_f = as.data.frame(cor(edata_trim_f, MEs_f, use = "p")) # spearman or kendall? using pearson here
@@ -385,7 +389,10 @@ geneModuleMembership_f$gene = colnames(edata_trim_f)
 
 
 combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[match(geneModuleMembership_f$gene,combat_annot_f$`colnames(edata_f)`),]
-
+#
+#
+#
+#
 
 save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power8_BICOR.RData")
 save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power8_BICOR.RData")

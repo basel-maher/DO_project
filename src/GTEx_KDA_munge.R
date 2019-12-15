@@ -1,3 +1,5 @@
+#MAKE SURE TO MUS HUMAN GENES (COLOC)
+
 ##munge GTEx v7 morris output files
 
 #files = list.files("~/Desktop/coloc_results_1mbp/")
@@ -60,8 +62,19 @@ aa = aa[ !duplicated(aa$gene), ]
 
 
 aa = read.csv("./results/flat/coloc/all_coloc_greaterorover75", stringsAsFactors = FALSE)
+####
+####
+####
+####
+####
+####
+####
+####
+####
+####
+####
 
-zhang = zhang_combined_BICOR
+zhang = all
 
 
 zhang$coloc_H0 = NA
@@ -96,18 +109,13 @@ zhang[which(tolower(zhang$gene) %in% tolower(coloc_over75$gene)),"coloc_eBMD"] =
 
 colnames(zhang)[6] = "degree"
 
-zhang_combined_BICOR = zhang
+all_sexcombined_power4 = zhang
 
 
-zhang_sexcombined_allModules_MGI_GO_ONLY$impc = 0
-zhang_sexcombined_allModules_MGI_GO_ONLY[which(tolower(zhang_sexcombined_allModules_MGI_GO_ONLY$gene) %in% impc),"impc"] = 1
-
-
-zhang_females_allModules_MGI_GO_ONLY$impc = 0
-zhang_females_allModules_MGI_GO_ONLY[which(tolower(zhang_females_allModules_MGI_GO_ONLY$gene) %in% impc),"impc"] = 1
+all_sexcombined_power4$impc = 0
+all_sexcombined_power4[which(tolower(all_sexcombined_power4$gene) %in% impc),"impc"] = 1
 
 
 
-zhang_males_allModules_MGI_GO_ONLY$impc = 0
-zhang_males_allModules_MGI_GO_ONLY[which(tolower(zhang_males_allModules_MGI_GO_ONLY$gene) %in% impc),"impc"] = 1
+
 

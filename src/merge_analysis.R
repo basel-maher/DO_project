@@ -15,11 +15,20 @@ load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
 #load the cross file 
 load(file = "./results/Rdata/cross_basic_cleaned.Rdata")
 
+#load the cross file 
+load(file = "./results/Rdata/cross_eqtl_REDO.Rdata")
+
+#apr
+load(file = "./results/Rdata/apr_basic_cleaned.Rdata")
+
 #load kinship file. In this case, using LOCO but can use overall file too
 load(file = "./results/Rdata/k_loco_basic_cleaned.Rdata") #LOCO
 load(file = "./results/Rdata/k_basic_cleaned.Rdata")
 #get Xcovar
 Xcovar <- get_x_covar(cross_basic)
+
+#load qtl mapping object
+load("./results/Rdata/DO_qtl_scan_norm.Rdata")
 
 
 
@@ -187,4 +196,75 @@ x$row  = c(1:nrow(x))
 p<-ggplot(data=x, aes(y=uCT_BV.TV, x=row, fill=row)) +geom_bar(stat="identity",width=0.5)+theme_minimal() +xlab("index (n=619)")+ylab("bone volume fraction (BV/TV, %)") + scale_fill_continuous() + theme(legend.position="none")
 
 #bone volume fraction
+merge = list()
+query_variants <- create_variant_query_func("./data/CCdb/cc_variants.sqlite")
+query_genes <- create_gene_query_func("./data/CCdb/mouse_genes_mgi.sqlite")
+
+
+
+###plot 
+for(i in 1:nrow(qtl_out)){
+  print(i)
+  chr = qtl_out$chr[i]
+  start = qtl_out$ci_lo[i]-2.5
+  end = qtl_out$ci_hi[i]+2.5
+  
+  genes_locus <- query_genes(chr, start, end)
+  
+  genes_locus = genes_locus[-grep("Gm",genes_locus$Name),]
+  
+  if("pseudogene" %in% genes_locus$mgi_type){
+    genes_locus = genes_locus[-which(genes_locus$mgi_type == "pseudogene"),]
+  }
+  
+  if("miRNA gene" %in% genes_locus$mgi_type){
+    genes_locus = genes_locus[-which(genes_locus$mgi_type == "miRNA gene"),]
+  }
+  
+  if("rRNA gene" %in% genes_locus$mgi_type){
+    genes_locus = genes_locus[-which(genes_locus$mgi_type == "rRNA gene"),]
+  }
+  
+  
+
+  
+ for(gene in unique(genes_locus$Name)){
+    id = annot_file[which(annot_file$Gene.Name == gene),"Gene.ID"]
+    if(isFALSE(length(id)==0)){
+      
+    
+    
+  
+      if(id %in% colnames(cross_eqtl$pheno)){
+        print(gene)
+       
+      
+        minMarker = find_marker(cross_eqtl$pmap, chr = chr, pos =qtl_out$pos[i]-15 )
+        maxMarker = find_marker(cross_eqtl$pmap, chr = chr, pos =qtl_out$pos[i]+15 )
+      
+
+      
+        out_blup = scan1blup(apr[,chr],pheno = cross_eqtl$pheno[,id], kinship = k_loco[[chr]], addcovar =new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
+      
+      
+        out_name = paste0("./results/plots/gene_blups/","chr_",chr,"_pheno_",qtl_out$lodcolumn[i],"_",gene,".pdf")
+      
+        pdf(out_name) 
+      
+        i1 = which(rownames(out_blup) == minMarker)
+        i2 = which(rownames(out_blup) == maxMarker)
+      
+        plot_coefCC(out_blup[c(i1:i2),], cross_eqtl$pmap,legend = "topleft",main = gene,scan1_output = subset(DO_qtl_scan_normal, lodcolumn=qtl_out$lodindex))
+      
+        dev.off() 
+      
+      
+        rm(out_blup)
+        gc()
+    }
+      
+  }
+}
+
+}
 

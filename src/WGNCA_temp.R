@@ -230,17 +230,23 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 #did 4, but try 9
-#7 bicor
-net = blockwiseModules(edata, power = 7,
+net = blockwiseModules(edata, power = 4,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.15,
                        numericLabels = TRUE,
                        saveTOMs = FALSE,
-                       verbose = 3, corType = "bicor", maxPOutliers = 0.1)
+                       verbose = 3, maxPOutliers = 0.1)
+#7 bicor
+# net = blockwiseModules(edata, power = 7,
+#                        TOMType = "signed", minModuleSize = 30,
+#                        reassignThreshold = 0, mergeCutHeight = 0.15,
+#                        numericLabels = TRUE,
+#                        saveTOMs = FALSE,
+#                        verbose = 3, corType = "bicor", maxPOutliers = 0.1)
 
 ## 4: 39 modules not including 0, 6004 genes in module 0
 ##7: 21 mods no 0, 8814 in mod 0
-saveRDS(net, file="./results/Rdata/networks/wgcna_7_BICOR.RDS")
+#saveRDS(net, file="./results/Rdata/networks/wgcna_7_BICOR.RDS")
 
 #get traits we want to look at
 pheno = read.csv("./results/flat/full_pheno_table.csv", stringsAsFactors = FALSE)
@@ -408,7 +414,8 @@ edata_trim = edata[,-(which(colnames(edata) %in% rmv))]
 #have to run this sometimes?
 combat_annot = combat_annot[,-2]
 #the gsub allows for matching of genes that had _isoform* added to them
-combat_annot[,c(3:4)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
+#combat_annot[,c(3:4)] = annot_file[match(gsub(combat_annot$`colnames(edata)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
+combat_annot[,c(3:4)] = annot_file[match(combat_annot$`colnames(edata)`,annot_file$Gene.ID),c(1,2)]
 
 
 #modNames = substring(names(MEs), 3)
@@ -423,6 +430,11 @@ geneModuleMembership$gene = colnames(edata_trim)
 combat_annot[5:(ncol(geneModuleMembership)+4)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),]
 
 
+save(combat_annot, file = "./results/Rdata/networks/geneModMemAnnot_sexcombined_power7_BICOR.RData")
+
+save(moduleTraitPvalue, file = "./results/Rdata/networks/moduleTraitPvalue_sexcombined_power7_BICOR.RData")
+
+save(moduleTraitCor, file = "./results/Rdata/networks/moduleTraitCor_sex_combined_power7_BICOR.RData")
 
 
 
