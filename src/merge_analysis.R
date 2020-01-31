@@ -1,3 +1,4 @@
+library(dplyr)
 ##merge analysis
 ##Do merge analysis for each of the significant QTL, in the widest confidence interval for each locus
 
@@ -30,6 +31,8 @@ Xcovar <- get_x_covar(cross_basic)
 #load qtl mapping object
 load("./results/Rdata/DO_qtl_scan_norm.Rdata")
 
+annot_file = read.csv("./results/flat/annot_file.csv", stringsAsFactors = FALSE)
+
 
 
 #create covar object. This is different fron the covar in cross_basic in that sex is a factor (1 for males, 0 for females)
@@ -46,7 +49,8 @@ rownames(covar) = rownames(cross_basic$covar)#make sure rownames match original 
 
 ##FIX QTL mapping for MAT nonzero vs full
 #get qtl list, passed threshold
-qtl_norm
+qtl_norm = read.csv("./results/flat/qtl_norm_pass_thresh", stringsAsFactors = FALSE)
+
 #define locus, 1Mbp
 chroms = as.vector(unique(qtl_norm$chr)) #chroms
 y <- c(1:19, "X","Y","MT")
@@ -111,7 +115,7 @@ qtl_out = qtl_out[-rmv,]
 
 #remove duplicated loci with different locus id
 
-
+#which(duplicated(qtl_out[,1:8]))
 
 
 
@@ -268,3 +272,72 @@ for(i in 1:nrow(qtl_out)){
 
 }
 
+
+###########DO MERGE ANALYSIS LIKE EQTL, BASED ON CI ONLY.##########
+
+merge = list()
+query_variants <- create_variant_query_func("./data/CCdb/cc_variants.sqlite")
+query_genes <- create_gene_query_func("./data/CCdb/mouse_genes_mgi.sqlite")
+
+for(i in 1:nrow(qtl_norm)){
+  print(i)
+  merge[[i]] = list()
+  pheno = qtl_norm$lodcolumn[i]
+  chr = qtl_norm$chr[i]
+  start = qtl_norm$ci_lo[i]
+  end = qtl_norm$ci_hi[i]
+  #use same covars as qtl mapping.sex,age,BW and gen
+  out_snps <- scan1snps(pr, cross_basic$pmap, cross_basic$pheno[,pheno], k_loco[[chr]],  addcovar =  covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
+                        query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
+  merge[[i]] = out_snps
+  names(merge)[i] = paste0(pheno,"_",chr)
+  rm(out_snps)
+  
+}
+
+
+
+
+#for each merge analysis, take the snps that are within 15% LODs of the max LOD
+merge_top = list()
+for(i in 1:length(merge)){
+  print(i)
+  merge_top[[i]] = list()
+  merge_top[[i]] = top_snps(merge[[i]]$lod, merge[[i]]$snpinfo, drop=1.5)
+  
+}
+names(merge_top) = names(merge)
+
+
+summary(unlist(lapply(merge_top, function(x) nrow(x))))
+
+which(unlist(lapply(merge_top, function(x) nrow(x))) == 1)
+merge_top[[29]]
+
+merge_top_df = bind_rows(merge_top, .id = "column_label")
+
+##
+mmarg = maxmarg(apr, map=cross_basic$pmap, chr=16, pos=22.89766, minprob=0.71, return_char = T)
+
+plot_pxg(mmarg, log10(cross_basic$pheno[,"bending_max_load"]),sort = T)
+
+out_snps <- scan1snps(pr, cross_basic$pmap, cross_basic$pheno[,"bending_max_load"], k_loco[[16]],  addcovar =  covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
+                      query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
+
+genes_locus <- query_genes(chr, start, end)
+
+plot_snpasso(out_snps$lod, out_snps$snpinfo,genes = genes_locus)
+
+
+##eqtl
+out_snps <- scan1snps(pr, cross_eqtl$pmap, cross_eqtl$pheno[,"MSTRG.9880"], k_loco[[chr]],  addcovar = covar[,c(1,10:57)],Xcovar=Xcovar,
+                      query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
+
+top_snps(out_snps$lod, out_snps$snpinfo, drop=1.5)
+
+plot_snpasso(out_snps$lod, out_snps$snpinfo,genes = genes_locus,)
+
+plot_pxg(mmarg, cross_eqtl$pheno[,"MSTRG.9880"],sort = T)
+
+x= scan1(pr, cross_eqtl$pheno[,"MSTRG.9880"],kinship = k_loco[[chr]])
+plot_scan1(x,cross_eqtl$pmap,chr="2")

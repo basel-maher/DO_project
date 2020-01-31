@@ -80,8 +80,8 @@ rownames(covar) = rownames(cross_eqtl$covar)
 #This was done on our high performance computing cluster. 
 #We split our transcripts into 5 pools and ran each independently, in order to speed up calculations.
 
-#using first 35 PEER factors and sex as covars (local eQTL)
-out_eqtl_local <- scan1(apr, cross_eqtl$pheno, k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,17:51)],cores = 20)
+#using first sex and all 48 PEER factors and as covars (local eQTL)
+out_eqtl_local <- scan1(apr, cross_eqtl$pheno, k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,11:58)],cores = 20)
 
 local_eqtl_peaks = find_peaks(out_eqtl_local, cross_eqtl$pmap, threshold=4, drop=1.5)
 

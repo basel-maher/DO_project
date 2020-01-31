@@ -74,7 +74,7 @@ aa = read.csv("./results/flat/coloc/all_coloc_greaterorover75", stringsAsFactors
 ####
 ####
 
-zhang = all
+zhang = all_females_power8_BICOR
 
 
 zhang$coloc_H0 = NA
@@ -109,11 +109,11 @@ zhang[which(tolower(zhang$gene) %in% tolower(coloc_over75$gene)),"coloc_eBMD"] =
 
 colnames(zhang)[6] = "degree"
 
-all_sexcombined_power4 = zhang
+all_females_power8_BICOR = zhang
 
 
-all_sexcombined_power4$impc = 0
-all_sexcombined_power4[which(tolower(all_sexcombined_power4$gene) %in% impc),"impc"] = 1
+all_females_power8_BICOR$impc = 0
+all_females_power8_BICOR[which(tolower(all_females_power8_BICOR$gene) %in% impc),"impc"] = 1
 
 
 

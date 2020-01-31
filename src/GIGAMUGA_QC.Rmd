@@ -21,7 +21,7 @@ load(url("ftp://ftp.jax.org/MUGA/GM_snps.Rdata")) #GigaMUGA SNPs
 dir <- "https://raw.githubusercontent.com/kbroman/MUGAarrays/master/UWisc/" #used to remove snps that dont make uniquely to the genome (https://kbroman.org/MUGAarrays/new_annotations.html)
 
 gm <- read.csv(paste0(dir, "gm_uwisc_v1.csv"))
-set.seed(49573024) #random number seed
+set.seed(8675309) #random number seed
 ```
 We initially start out with `r nrow(GM_snps)` SNPs
 
@@ -53,7 +53,7 @@ Let's round up and run sample QC:
 ```{r, eval=FALSE}
 geno <- run.sample.qc(geno.recode, max.N = 6e3, max.H = 60e3)
 ```
-A summary shows that 9 samples are flagged due to excessive no-calls
+A summary shows that 11 samples are flagged due to excessive no-calls
 
 ```{r}
 summarize.filters(geno)
@@ -92,7 +92,7 @@ hist(with(calls, A+B), col = "lavender", border = NA,xlab = "count of homozygous
 Define max no calls and min homozygous calls based on plots
 ```{r, eval=FALSE}
 
-geno <-run.marker.qc(geno, max.N = 50, min.hom = 125)
+geno <-run.marker.qc(geno, max.N = 75, min.hom = 300)
 ```
 
 Apply the sample and marker level filters
