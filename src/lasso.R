@@ -70,8 +70,8 @@ corMat = cor(pheno_combined, use = "p")
 #remove Tb.Sp, multi with BV/TV and BMD
 pheno_combined = pheno_combined[,-c(15)]
 corMat = cor(pheno_combined, use = "p")
-#remove BVTV
-pheno_combined = pheno_combined[,-c(11)]
+#remove BMD
+pheno_combined = pheno_combined[,-c(12)]
 corMat = cor(pheno_combined, use = "p")
 
 #remove BSBV and rest of histo
@@ -140,7 +140,7 @@ actual <- y_test
 preds <- pred
 rss <- sum((preds - actual) ^ 2)
 tss <- sum((actual - mean(actual)) ^ 2)
-rsq <- 1 - rss/tss2
+rsq <- 1 - rss/tss
 rsq
 
 

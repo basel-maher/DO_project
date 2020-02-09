@@ -44,7 +44,14 @@ covar = covar[,-1]#remove sac date as covar for now
 covar = apply(covar,2,as.numeric) #make sure all cols are numeric
 rownames(covar) = rownames(cross_basic$covar)#make sure rownames match original cross file
 
+##
+covar_eqtl = as.matrix(cross_eqtl$covar)
+covar_eqtl[,"sex"] = (covar_eqtl[,"sex"] == "M")*1
 
+covar_eqtl = covar_eqtl[,-1]#remove sac date as covar for now
+
+covar_eqtl = apply(covar_eqtl,2,as.numeric) #make sure all cols are numeric
+rownames(covar_eqtl) = rownames(cross_eqtl$covar)#make sure rownames match original cross file
 
 
 ##FIX QTL mapping for MAT nonzero vs full
@@ -303,26 +310,142 @@ merge_top = list()
 for(i in 1:length(merge)){
   print(i)
   merge_top[[i]] = list()
-  merge_top[[i]] = top_snps(merge[[i]]$lod, merge[[i]]$snpinfo, drop=1.5)
+  merge_top[[i]] = top_snps(merge[[i]]$lod, merge[[i]]$snpinfo, drop=max(merge[[i]]$lod)*0.15)
   
 }
 names(merge_top) = names(merge)
 
 
+
+#merge_top_df = bind_rows(merge_top, .id = "column_label")
+
+
+
+load("~/Desktop/merge_analysis/merge_top_local_eqtl.Rdata")
+merge_top_eqtl = merge_top
+
+summary(unlist(lapply(merge_top, function(x) nrow(x))))
+
+length(which(unlist(lapply(merge_top, function(x) nrow(x))) == 1))
+
+load("~/Desktop/merge_analysis/merge_top_QTL.Rdata")
+
 summary(unlist(lapply(merge_top, function(x) nrow(x))))
 
 which(unlist(lapply(merge_top, function(x) nrow(x))) == 1)
-merge_top[[29]]
-
-merge_top_df = bind_rows(merge_top, .id = "column_label")
+merge_top[[22]]
 
 ##
-mmarg = maxmarg(apr, map=cross_basic$pmap, chr=16, pos=22.89766, minprob=0.71, return_char = T)
+mmarg = maxmarg(pr, map=cross_basic$pmap, chr=16, pos=22.89766, minprob=0.51, return_char = T)
+#m_full = maxmarg(pr, minprob=0.5)
 
-plot_pxg(mmarg, log10(cross_basic$pheno[,"bending_max_load"]),sort = T)
+covar = cbind(covar, as.data.frame(mmarg))
 
-out_snps <- scan1snps(pr, cross_basic$pmap, cross_basic$pheno[,"bending_max_load"], k_loco[[16]],  addcovar =  covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
+mmarg_model_matrix = model.matrix(~factor(covar$mmarg))[,-1]
+
+covar_mmarg = merge(covar, mmarg_model_matrix, by="row.names", all = TRUE)
+rownames(covar_mmarg) = covar_mmarg$Row.names
+
+plot_pxg(mmarg, log10(cross_basic$pheno[,"bending_frax_load"]),sort = T, SEmult = 1)
+
+chr=16
+start = 22.31704
+end = 23.42906
+
+out_snps <- scan1snps(pr, cross_basic$pmap, cross_basic$pheno[,"uCT_pMOI"], k_loco[["X"]],  addcovar =  covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
                       query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
+
+#UNCHS048601
+plot_scan1(DO_qtl_scan_normal, map = cross_basic$pmap["X"][800:1700], lodcolumn = "uCT_pMOI",chr = "X")
+
+out_snps <- scan1snps(pr, cross_basic$pmap, cross_basic$pheno[,"bending_max_load"], k_loco[[16]],  addcovar =  covar_snp[,c(2,3,4,7:16,18:20)],Xcovar=Xcovar,
+                      query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
+
+
+out_blup = scan1blup(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar_mmarg[,c(2,3,4,7:16,18:52)],cores = 2)
+
+plot_coefCC(out_blup, cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="bending_max_load"))
+
+
+top = top_snps(out_snps$lod, out_snps$snpinfo, drop=1.5)
+top[order(top$lod,decreasing = T),]
+
+#cast private 23.22667
+mmarg = maxmarg(pr, map=cross_basic$pmap, chr=16, pos=23.22667, minprob=0.51, return_char = T)
+mmarg_model_matrix = model.matrix(~factor(covar$mmarg))[,-1]
+
+covar_mmarg = merge(covar, mmarg_model_matrix, by="row.names", all = TRUE)
+rownames(covar_mmarg) = covar_mmarg$Row.names
+
+
+out_blup_bland = scan1blup(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar[,c(1,2,3,6:15)],cores = 2)
+max_scan1(out_blup_bland, map = cross_basic$pmap, lodcolumn = NULL)
+
+
+#cast private
+snpinfo <- data.frame(chr=c("16"),
+                      pos=c(23.22667),
+                      sdp=32,
+                      snp=c("rs241887612"), stringsAsFactors=FALSE)
+
+#cast private right over qtl peak
+snpinfo <- data.frame(chr=c("16"),
+                      pos=c(23.26738),
+                      sdp=32,
+                      snp=c("rs217130452"), stringsAsFactors=FALSE)
+#rs4165304
+
+snpinfo <- data.frame(chr=c("16"),
+                      pos=c(22.89766),
+                      sdp=36,
+                      snp=c("rs4165304"), stringsAsFactors=FALSE)
+
+#no snp near peak 
+
+
+snpinfo <- index_snps(cross_basic$pmap, snpinfo)
+snp_genoprobs = genoprob_to_snpprob(apr,snpinfo)
+snp_genoprobs =as.data.frame(snp_genoprobs$`16`)
+
+covar_snp = merge(covar, snp_genoprobs, by="row.names", all = TRUE)
+rownames(covar_snp) = covar_snp$Row.names
+
+##
+covar_snp$alleleA = 0.5
+for(i in 1:nrow(covar_snp)){
+if(covar_snp$A.rs217130452[i] >0.6){
+  covar_snp$alleleA[i] = 1
+} else{if(covar_snp$B.rs217130452[i] >0.6){
+  covar_snp$alleleA[i] = 0
+}}
+}
+
+out_blup_rs4165304_factor = scan1coef(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar_snp[,c(2,3,4,7:16,19)],cores = 2)
+out_blup_rs217130452_factor = scan1blup(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar_snp[,c(2,3,4,7:16,19)],cores = 2)
+out_blup_rs241887612_factor = scan1blup(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar_snp[,c(2,3,4,7:16,19)],cores = 2)
+
+
+##
+out_blup_rs4165304 = scan1blup(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar_snp[,c(2,3,4,7:19)],cores = 2)
+
+out_blup_rs217130452 = scan1blup(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar_snp[,c(2,3,4,7:19)],cores = 2)
+
+out_blup_rs241887612 = scan1blup(apr[,16],pheno = cross_basic$pheno[,"bending_max_load"], kinship = k_loco[[16]], addcovar =  covar_snp[,c(2,3,4,7:19)],cores = 2)
+
+minMarker = find_marker(cross_basic$pmap, chr = 16, pos =23.26738-10 )
+maxMarker = find_marker(cross_basic$pmap, chr = 16, pos =23.26738+10 )
+
+i1 = which(rownames(out_blup) == minMarker)
+i2 = which(rownames(out_blup) == maxMarker)
+
+plot_coefCC(out_blup_rs241887612_factor[c(i1:i2),], cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="bending_max_load"))
+
+
+out_snps <- scan1snps(pr, cross_basic$pmap, cross_basic$pheno[,"bending_max_load"], k_loco[[16]],  addcovar =  covar_snp[,c(2,3,4,7:19)],Xcovar=Xcovar,
+                      query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
+
+
+##
 
 genes_locus <- query_genes(chr, start, end)
 
@@ -330,14 +453,41 @@ plot_snpasso(out_snps$lod, out_snps$snpinfo,genes = genes_locus)
 
 
 ##eqtl
-out_snps <- scan1snps(pr, cross_eqtl$pmap, cross_eqtl$pheno[,"MSTRG.9880"], k_loco[[chr]],  addcovar = covar[,c(1,10:57)],Xcovar=Xcovar,
+out_snps_eqtl <- scan1snps(pr, cross_eqtl$pmap, cross_eqtl$pheno[,"MSTRG.9880"], k_loco[[chr]],  addcovar = covar_eqtl[,c(1,10:57)],Xcovar=Xcovar,
                       query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
 
-top_snps(out_snps$lod, out_snps$snpinfo, drop=1.5)
+top_snps(out_snps_eqtl$lod, out_snps_eqtl$snpinfo, drop=1.5)
 
-plot_snpasso(out_snps$lod, out_snps$snpinfo,genes = genes_locus,)
+plot_snpasso(out_snps_eqtl$lod, out_snps_eqtl$snpinfo,genes = genes_locus)
 
 plot_pxg(mmarg, cross_eqtl$pheno[,"MSTRG.9880"],sort = T)
 
 x= scan1(pr, cross_eqtl$pheno[,"MSTRG.9880"],kinship = k_loco[[chr]])
 plot_scan1(x,cross_eqtl$pmap,chr="2")
+
+
+
+
+for(i in 1:length(merge_top)){
+  if("rs4165304" %in% merge_top[[i]]$snp_id){
+    print(names(merge_top)[i])
+  }
+}
+
+"rs4165304" %in% merge_top[["ENSMUSG00000000247_2"]]$snp_id
+
+m = find_marker(cross_eqtl$pmap, chr = chr, pos = 22.89766)
+
+
+
+
+"rs4165304" %in% merge_top[["ENSMUSG00000000247_2"]]$snp_id
+x=load("~/Desktop/merge_top_local_eqtl_0.3drop.Rdata")
+
+
+#is this snp the only one with this SDP in the region
+#condition on snp, cast private snp near peak, and 129 private snp near peak
+# is peak 
+
+
+

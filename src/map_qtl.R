@@ -264,9 +264,10 @@ write.csv(qtl_norm_INT, file = "./results/flat/qtl_norm_INT_pass_thresh", row.na
 
 ###
 
+#Do LODi = LODf-LODa. F is full model (additive + int), a is additive only
 
-
-
+full_qtl = merge(qtl_norm, qtl_norm_INT, by=c("lodcolumn","chr"))
+full_qtl$LODi = full_qtl$lod.y - full_qtl$lod.x
 
 
 
