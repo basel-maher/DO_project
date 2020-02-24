@@ -1,10 +1,11 @@
 #install.packages("mctest")
 #install.packages("ppcor")
-install.packages("psych")
+#install.packages("psych")
 library(mctest)
+library(glmnet)
+
 library(ppcor)
 library(psych)
-library(glmnet)
 #lasso regression to find best predictors of max load
 load(file = "./results/Rdata/cross_basic_cleaned.Rdata")
 
@@ -24,84 +25,183 @@ for(i in ncol(pheno_combined)){
 #remove glucose
 pheno_combined = pheno_combined[,-2]
 
+#cor p vals. adjusted for multiple comparisons (Holm)
+x = psych::corr.test(pheno_combined)
+#use only phenotypes that are significantly correlated with max load
+correlated_phenos = names(which(x$p[,60] < 0.05))
+
+pheno_combined = pheno_combined[,correlated_phenos]
 
 #find multicollinear terms
 #Farrar-Glauber test
-explanatory = pheno_combined[,-60]#remove all but max load
-response = pheno_combined[,60] #max load
+#explanatory = pheno_combined[,-60]#remove all but max load
+#response = pheno_combined[,60] #max load
 
 #overall diagnostics
-od<-omcdiag(x=explanatory,y=response)
+#od<-omcdiag(x=explanatory,y=response)
 
 #test for multi
-id<-imcdiag(x=explanatory,y=response)
+#id<-imcdiag(x=explanatory,y=response)
 
 #correlation matrix
 corMat = cor(pheno_combined, use = "p")
 
-#remove all fat pads except BFP
-pheno_combined = pheno_combined[,-c(2,3,5)]
+#remove body length, weight and gastroc
+pheno_combined = pheno_combined[,-c(1,2,25)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove ML and AP, highly correlated (~0.8 with uCT params)
-pheno_combined = pheno_combined[,-c(6,7)]
+#remove Imax and Imin (correlated with ML and AP)
+pheno_combined = pheno_combined[,-c(21,22)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove both disp at frax
-pheno_combined = pheno_combined[,-c(9)]
+#remove pMOI and ttAR (correlated with ML and AP)
+pheno_combined = pheno_combined[,-c(19,20)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove bending yield load
+#remove work to yield (correlated with yield load)
 pheno_combined = pheno_combined[,-c(6)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove total work, multi with work post yield
-pheno_combined = pheno_combined[,-c(9)]
+#remove work_post_yield (corr with total work)
+pheno_combined = pheno_combined[,-c(6)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove all histo
-pheno_combined = pheno_combined[,-c(11:26)]
+#remove histo bvtv
+pheno_combined = pheno_combined[,-c(6)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove SMI
-pheno_combined = pheno_combined[,-c(41)]
+
+#remove histo bsbv (correlated negatiely strongly with tbth)
+pheno_combined = pheno_combined[,-c(6)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove Tb.Sp, multi with BV/TV and BMD
-pheno_combined = pheno_combined[,-c(15)]
-corMat = cor(pheno_combined, use = "p")
-#remove BMD
-pheno_combined = pheno_combined[,-c(12)]
+#remove histo tbsp
+pheno_combined = pheno_combined[,-c(7)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove BSBV and rest of histo
-pheno_combined = pheno_combined[,-c(36:38)]
+#remove uCT BMD, conn density, SMI, tbn, and tbsp (cor uct bvtv)
+pheno_combined = pheno_combined[,-c(9,10,12,20,21)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove ttAr and rest of histo
+#remove uCT bsbv (cor tbth)
 pheno_combined = pheno_combined[,-c(16)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove pMOI
-pheno_combined = pheno_combined[,-c(18)]
+
+#remove bending_yield_stiffness
+pheno_combined = pheno_combined[,-c(13)]
 corMat = cor(pheno_combined, use = "p")
 
-#remove frax load and yield stiffness
-pheno_combined = pheno_combined[,-c(31,33)]
+#remove frax load
+pheno_combined = pheno_combined[,-c(14)]
+corMat = cor(pheno_combined, use = "p")
+
+#remove ctar/ttar
+pheno_combined = pheno_combined[,-c(14)]
 corMat = cor(pheno_combined, use = "p")
 
 
-#remove nonzero MATs
-pheno_combined = pheno_combined[,-c(24:27)]
-corMat = cor(pheno_combined, use = "p")
 
-#remove ctat/ttar
-pheno_combined = pheno_combined[,-c(29)]
-corMat = cor(pheno_combined, use = "p")
 
-#still some uCT multis but left for now
-explanatory = pheno_combined[,-27]#remove all but max load
-response = pheno_combined[,27] #max load
+
+# #remove all non-bone traits
+# pheno_combined = pheno_combined[,-c(1:8, 56)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# 
+# #remove ML and AP, highly correlated (~0.8 with uCT params)
+# pheno_combined = pheno_combined[,-c(1,2)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove BMD (bvtv is better)
+# pheno_combined = pheno_combined[,-c(26)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove both disp at frax and frax load
+# pheno_combined = pheno_combined[,-c(4,49)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove bending yield load
+# pheno_combined = pheno_combined[,-c(1)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove total work, multi with work post yield
+# pheno_combined = pheno_combined[,-c(4)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove histo.bvtv
+# pheno_combined = pheno_combined[,-c(6)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove histo.ovtv, ovbv
+# pheno_combined = pheno_combined[,-c(6,7)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove bsbv
+# pheno_combined = pheno_combined[,-c(6)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove histo tbth
+# pheno_combined = pheno_combined[,-c(9)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# 
+# #remove histo osbs
+# pheno_combined = pheno_combined[,-c(6)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove nobs and nocs, except nob tar and noctar
+# pheno_combined = pheno_combined[,-c(10,11,13,41)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# 
+# 
+# #remove obsos and histo tbn
+# pheno_combined = pheno_combined[,-c(37,12)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# 
+# #remove SMI, tbsp, tbn, and conn_density (all uCT, multi with bvtv)
+# pheno_combined = pheno_combined[,-c(37,15,38,13)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove yield stiffness, ctar/ttar
+# pheno_combined = pheno_combined[,-c(35,32)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# 
+# #bsbv
+# pheno_combined = pheno_combined[,-c(33)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #imin, imax, ttar, pmoi
+# pheno_combined = pheno_combined[,-c(19:21, 16)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove nonzero MAT
+# pheno_combined = pheno_combined[,-c(22:25)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove MAT vol 3
+# pheno_combined = pheno_combined[,-c(20)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove bending disp
+# pheno_combined = pheno_combined[,-c(2,3)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove obsbs and ocsbs
+# pheno_combined = pheno_combined[,-c(4,5)]
+# corMat = cor(pheno_combined, use = "p")
+# 
+# #remove ct.th as it is correlated with ct.ar, but less correlated with max load than ct.ar
+# pheno_combined = pheno_combined[,-c(20)]
+# corMat = cor(pheno_combined, use = "p")
+
+
+
+explanatory = pheno_combined[,-19]#remove all but max load
+response = pheno_combined[,19] #max load
 
 #overall diagnostics
 od<-omcdiag(x=explanatory,y=response)
@@ -134,7 +234,6 @@ lasso_best <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = best_lam,
 pred <- predict(lasso_best, s = best_lam, newx = x_test)
 
 final <- cbind(y_test, pred)
-#take out non bone traits, switch bv/tv for bmd, add some histo parameters (Nob.TAR/Noc.TAR)
 #####
 actual <- y_test
 preds <- pred
