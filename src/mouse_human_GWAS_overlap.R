@@ -1,9 +1,10 @@
 #BMD overlap
 #get all genes around associations, look at overlap with human BMD associated genes.
 
-
-library(biomaRt)
 library(tidyverse)
+library(biomaRt)
+library(liftOver)
+library(GenomicRanges)
 ###
 #from https://www.r-bloggers.com/converting-mouse-to-human-gene-names-with-biomart-package/
 
@@ -100,4 +101,57 @@ qtl_genes_bmd[which(qtl_genes_bmd %in% mussed_human_genes)]
 
 
 
-# 
+##################
+#Identify syntenic regions with liftOver, between Morris BMD GWAS and our associations
+
+#read in the morris eBMD GWAS data / lead snps from supplementary table 2
+#PMCID: PMC6358485
+#hg19
+morris = read.csv("./data/Morris_eBMD_conditionally_ind_snps.csv", header=T)
+
+#take lead snp positions and convert to GRanges object
+
+#take snps
+chroms_human = paste0("chr",morris$CHR)
+#convert chr23 to chrX
+chroms_human[which(chroms_human == "chr23")] = "chrX"
+bp_human = morris$BP
+
+#GRanges format
+pos_human = paste0(chroms_human,":",bp_human)
+
+#GRanges
+pos_human_grange = as(pos_human, "GRanges")
+mcols(pos_human_grange) = pos_human
+
+###liftover from hg19 to mouse mm10
+#get chain object
+#downloaded from http://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/ on (Mar 2 2020)
+chain <- import.chain("./data/hg19ToMm10.over.chain")
+
+lifted = liftOver(pos_human_grange, chain)
+#lifted = unlist(lifted)
+
+
+#convert our associations, including CI, to GRanges
+chr = qtl_norm$chr
+chr = paste0("chr",chr)
+
+bp_start = qtl_norm$ci_lo *1000000
+bp_end = qtl_norm$ci_hi*1000000
+bp_range = paste0(bp_start,"-",bp_end)
+
+pos = paste0(chr,":",bp_range)
+
+mouse = as(pos, "GRanges")
+
+overlaps = findOverlaps(query = lifted, subject = mouse)
+
+overlaps_human = overlaps@from
+overlaps_mouse = overlaps@to  
+
+x = qtl_norm[overlaps_mouse,]
+y = pos_human_grange@elementMetadata[overlaps_human,]  
+
+overlaps_merged = cbind(x,morris[overlaps_human,])
+
