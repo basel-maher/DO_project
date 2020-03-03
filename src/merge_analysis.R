@@ -607,5 +607,6 @@ for(i in 1:nrow(phenos_w_genes)){
 }
 
 
-
+#herit
+hsq = est_herit(cross_basic$pheno, kinship = k, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")])
 
