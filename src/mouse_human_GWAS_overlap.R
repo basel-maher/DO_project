@@ -134,11 +134,11 @@ lifted = liftOver(pos_human_grange, chain)
 
 
 #convert our associations, including CI, to GRanges
-chr = qtl_norm$chr
+chr = qtl_loc$chr
 chr = paste0("chr",chr)
 
-bp_start = qtl_norm$ci_lo *1000000
-bp_end = qtl_norm$ci_hi*1000000
+bp_start = qtl_loc$ci_lo *1000000
+bp_end = qtl_loc$ci_hi*1000000
 bp_range = paste0(bp_start,"-",bp_end)
 
 pos = paste0(chr,":",bp_range)
@@ -150,7 +150,7 @@ overlaps = findOverlaps(query = lifted, subject = mouse)
 overlaps_human = overlaps@from
 overlaps_mouse = overlaps@to  
 
-x = qtl_norm[overlaps_mouse,]
+x = qtl_loc[overlaps_mouse,]
 y = pos_human_grange@elementMetadata[overlaps_human,]  
 
 overlaps_merged = cbind(x,morris[overlaps_human,])
