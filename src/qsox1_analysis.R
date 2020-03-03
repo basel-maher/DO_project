@@ -56,12 +56,12 @@ ggplot(dat1.s,aes(x=Genotype, y=Length)) + geom_boxplot(outlier.shape = NA) +
 hist(dat1.s$Length)
 table(dat1.s$Genotype)
 colnames(dat1.s)
-lf.lm.12<-lm(ML_all~Genotype+Weight+Qsox_Mutation,data=dat1.s)
+lf.lm.12<-lm(FL_all~Genotype+Weight+Qsox_Mutation,data=dat1.s)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab='Femur Length (mm)')
-lsmeans(lf.lm.12,pairwise~Genotype, adj='none')
+lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 # power calculations
 rm(p.dist.20)
@@ -133,7 +133,7 @@ p
 #######################
 qsox1_uct = read.csv('./data/pheno_data/Qsox1_data/qsox_uCT.csv',header=T,na.strings='NA')
 
-lf.lm.12<-lm(Ct.Porosity....~Genotype+Weight..g.+Qsox.Mutation,data=qsox1_uct)
+lf.lm.12<-lm(Tt.Ar.mm2.~Genotype+Weight..g.+Qsox.Mutation,data=qsox1_uct)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
@@ -143,5 +143,39 @@ lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 
 #ct.ar, ct.ar/tt.ar, ct.th, pMOI, Imax, 
+#linear model adjusting pheno after adjusting for weight and sex, 
+#compare residuals between mice at peak marker that are WSB homozygotes vs non-wsb
+#identify fold change between WSB and non. Is this close to fold change from qsox1 knockouts?
+
+
+
+
+#find peak marker for ct.por
+m = find_marker(map = cross_basic$pmap, chr = 1, pos = 155.35757)
+#UNCHS002846
+find_markerpos(cross = cross_basic, markers = m)
+#bin mice into wsb hom/ hets/ no wsb genotype
+m = maxmarg(pr,chr = 1, pos=155.35757, map=cross_basic$pmap,return_char = T,minprob = 0.51)
+plot_pxg(m,pheno = cross_basic$pheno[,"uCT_Ct.porosity"],)
+
+por = as.data.frame(cross_basic$pheno[,"uCT_Ct.porosity"])
+por = merge(x = por, y = covar, by = "row.names")
+rownames(por) = por$Row.names
+
+model<-lm(por$`cross_basic$pheno[, "uCT_Ct.porosity"]`~sex+age_at_sac_days+body_weight+generationG24+generationG25+generationG26+generationG27+generationG28+generationG29+generationG30+generationG31+generationG32+generationG33,data=por)
+anova(model)
+hist(model$residuals)
+#populate with corrected ct.por
+por_resid = as.data.frame(model$residuals)
+
+m = as.data.frame(m)
+m = na.omit(m)
+por_resid = merge(por_resid, m, by="row.names")
+
+mean(por_resid[which(por_resid$m == "HH"),"model$residuals"])
+
+por_resid_noWSB = por_resid[-grep("H", por_resid$m),]
+mean(por_resid_noWSB$`model$residuals`)
+
 
 
