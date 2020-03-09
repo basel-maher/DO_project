@@ -517,6 +517,7 @@ for (i in c(1,2,3,4,8,10,16,"X")){
 
 qtl_loc = qtl_loc[-which(is.na(qtl_loc)),]
 
+write.csv(qtl_loc, file = "./results/flat/qtl_loc", quote = FALSE,row.names = FALSE)
 
 
 

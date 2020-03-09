@@ -24,7 +24,7 @@ pr <- calc_genoprob(cross_basic, map, cores = 20,error_prob = 0.002,map_function
 #setting all values to 0. This is intended to help with the problem of unstable estimates of genotype effects 
 #in scan1coef() and fit1() when there's a genotype that is largely absent.
 pr = clean_genoprob(pr)
-
+?
 #PICK THE RELEVANT FILE NAME BASED ON THE CROSS FILE THAT WAS LOADED
 #save(pr,file ="./results/Rdata/pr_basic.Rdata")
 save(pr,file ="./results/Rdata/pr_basic_cleaned.Rdata")

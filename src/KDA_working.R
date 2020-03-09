@@ -2,9 +2,11 @@ library("igraph")
 library("bnlearn")
 library("parallel")
 library("dplyr")
-library(ggplot2)
-library(ggpubr)
+#library(ggplot2)
+#library(ggpubr)
 options(stringsAsFactors = FALSE)
+
+#from https://gist.github.com/robertness/11126715
 
 bn2igraph <- function(g.bn){
   g <- igraph.from.graphNEL(as.graphNEL(g.bn))
@@ -14,55 +16,36 @@ bn2igraph <- function(g.bn){
 annot_file = read.csv("~/Documents/projects/DO_project/results/flat/annot_file.csv")
 annot_file = annot_file[,c(1,2)]
 
-#load("./results/Rdata/networks/moduleTraitPvalue_f.RData")
-#moduleTraitPvalue = moduleTraitPvalue_f
 
-#load("./results/Rdata/networks/moduleTraitPvalue_m.RData")
-#moduleTraitPvalue = moduleTraitPvalue_m
-
-#load("./results/Rdata/networks/moduleTraitPvalue_f_BICOR.RData")
-#moduleTraitPvalue = moduleTraitPvalue_f
-
-
-#load("./results/Rdata/networks/moduleTraitPvalue_f_BICOR.RData")
-#load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
 
 load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_f_power8_BICOR.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_m_power8_BICOR.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_power7.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+
 load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
-#load("./results/Rdata/networks/geneModMemAnnot_sexcombined_power7_BICOR.RData")
-#use this for sex specific networks, but not full nets
-#geneModMemAnnot = combat_annot_f
 
-geneModMemAnnot = combat_annot_m
 
-#gene superset
-#superset = read.delim("./results/flat/superduperset_GO_MGI_IMPC.txt", stringsAsFactors = FALSE, header = FALSE)
+#bone gene superset
 superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
 
 superset = superset[,1]
 
 #BNs learned on high performance computing cluster
-bns = list.files("~/Documents/projects/DO_project/results/Rdata/networks/bn_4/")
-#bns = "hybrid_brown_nobl_4.Rdata"
-#
-# x = bn2igraph(brown_bn)
-# subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,3,nodes = "Nab2"))))
+bns = list.files("./results/Rdata/networks/bn_4/")
+
+
+#convert and plot a particular BN
+# x = bn2igraph(yellowgreen_bn)
+# subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,3,nodes = "Gm4786"))))
 # plot(subgraph,vertex.label.cex=0.65,edge.width=2, vertex.size=20, margin=-0.4, vertex.label.dist=0.2, vertex.label.degree=-pi)
 
 ####
-
+#create a dataframe with genes and their neighborhoods, degrees, number of bone genes in nerighborhood, etc
 out = list()
 counter = 1
 for(net in bns){
   print(counter)
   color = strsplit(net,"_")[[1]][2]
   #print(color)
-  load(paste0("~/Documents/projects/DO_project/results/Rdata/networks/bn_4/",net))
+  load(paste0("./results/Rdata/networks/bn_4/",net))
   obj_name = paste0(color,"_bn")
   assign(x = obj_name ,bn)
   
@@ -119,8 +102,7 @@ for(net in bns){
   
   colnames(kda) = c("gene","color","num_neib","num_bone_neib","num_in_arcs","degree","ratio_bone_neib","num_genes_inMod", "not_neib_in_bone","in_neib_not_bone","not_neib_not_bone","num_bone_genes_inMod", "num_out")
   
-  #kda$fdr_pval = p.adjust(kda$phyper,method = "BH")
-  
+
   out[[counter]] = kda
   names(out)[counter] = color
   counter = counter+1
@@ -131,13 +113,14 @@ kda_full = out
 
 
 
-####zhang####
+#Key driver analysis: pure connectivity metrics
+#Identification of Key Causal Regulators in Gene Networks, Zhang and Zhu
+
 #network size mu
 #candidate driver: neib > mu-bar + sd(mu)
 for(i in 1:length(kda_full)){#for module in full net
   
   #candidate driver: neib > mu-bar + sd(mu)
-  #num neib is 2 step? look at 2 step or degree?
   kda_full[[i]]$driver = 0
   kda_full[[i]]$driver[which(kda_full[[i]]$num_neib > mean(kda_full[[i]]$num_neib) + sd(kda_full[[i]]$num_neib))] = 1
   
@@ -146,7 +129,7 @@ for(i in 1:length(kda_full)){#for module in full net
   kda_full[[i]]$driver2[which(kda_full[[i]]$num_neib > mean(kda_full[[i]]$num_neib) + 2*(sd(kda_full[[i]]$num_neib)))] = 1
   
   #hub genes (d-bar + 2sd(d))
-  #num out arcs or degree total?
+  #d = out-degree
   kda_full[[i]]$hub = 0
   kda_full[[i]]$hub[which(kda_full[[i]]$num_out > (mean(kda_full[[i]]$num_out) + 2*(sd(kda_full[[i]]$num_out))))] = 1
 }
@@ -156,46 +139,32 @@ zhang = bind_rows(kda_full)
 #############
 kda_full = zhang
 
-all = bind_rows(kda_full)
+all = kda_full
 all = all[-which(all$num_neib<=2),] #remove unconnected genes or those connected to only 1 
 
-thresh = mean(all$num_neib) - sd(all$num_neib)
+thresh = mean(all$num_neib) - sd(all$num_neib) #threshold based on all networks combined mean neighborhoods 
 all = all[-which(all$num_neib < thresh)]
 
-
+#hypergeometric test to define key drivers
+#n is based on all genes, before removal of unconnected genes or thresholding
 for(i in 1:nrow(all)){
-  all$hyperZhang[i] = phyper(q=all$num_bone_neib[i]-1, m=length(superset), n = nrow(zhang) - length(superset), k=all$num_neib[i], lower.tail = FALSE)
-  
-  #mod = subset(all, all$color == all$color[i])
-  #superMod = length(which(tolower(superset) %in% tolower(mod$gene)))
-  #print(superMod)
-  #all$hyper_mod[i] = phyper(q=all$num_bone_neib[i]-1, m=superMod, n = nrow(mod) - superMod, k=all$num_neib[i], lower.tail = FALSE)
+  all$hyper[i] = phyper(q=all$num_bone_neib[i]-1, m=length(superset), n = nrow(zhang) - length(superset), k=all$num_neib[i], lower.tail = FALSE)
 
 }
 
+# FDR correction
 all$hyper_bonf = NA
-#all$hyper_mod_bonf = NA
-# for(i in which(all$gene %in% zhang$gene)){
-#   gene = all$gene[i]
-#   zhang[which(zhang$gene == gene),"hyper"] = all$hyperZhang[i]
-#   zhang[which(zhang$gene == gene),"hyper_bonf"] = all$hyperZhang_fdr[i]
-# }
-all$hyper_bonf = p.adjust(all$hyperZhang, method="fdr")
-#all$hyper_mod_bonf = p.adjust(all$hyper_mod, method="fdr")
-all_sexcombined_power7_BICOR = all
+
+all$hyper_bonf = p.adjust(all$hyper, method="fdr")
 
 
+#look at only significant modules?
+#not used 
 
-zhang_combined_BICOR = zhang
+#sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/length(unique(zhang$color))))))),]
+#sig_mod = rownames(sig_mod)
+#sig_mod = unlist(strsplit(sig_mod, "ME"))[seq(2,length(sig_mod)*2,by = 2)]
 
-zhang_males_allModules_MGI_GO_ONLY = zhang
+#sig = zhang[which(zhang$color %in% sig_mod),]
 
-
-#sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/36))))),]
-sig_mod = moduleTraitPvalue[which(rownames(moduleTraitPvalue) %in% names(which(apply(moduleTraitPvalue, 1, function(r) any(r < 0.05/length(unique(zhang$color))))))),]
-sig_mod = rownames(sig_mod)
-sig_mod = unlist(strsplit(sig_mod, "ME"))[seq(2,length(sig_mod)*2,by = 2)]
-
-zhang = zhang[which(zhang$color %in% sig_mod),]
-zhang_m_sigModules = zhang
-
+write.csv(all, file="./results/flat/key_driver_analysis.csv",quote = F,row.names = F)

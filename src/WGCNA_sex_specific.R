@@ -142,7 +142,7 @@ save(edata_m, file = "./results/Rdata/networks/edata_m.Rdata")
 edata_f = edata[which(rownames(edata) %in% males == FALSE),]
 save(edata_f, file = "./results/Rdata/networks/edata_f.Rdata")
 
-m##
+
 
 
 #cluster samples
@@ -152,6 +152,8 @@ sampleTree_f = hclust(dist(edata_f), method = "average")
 par(cex = 0.6);
 par(mar = c(0,4,2,0))
 plot(sampleTree_m, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2)
+plot(sampleTree_f, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2)
+
 #####
 
 
@@ -159,55 +161,56 @@ plot(sampleTree_m, main = "Sample clustering to detect outliers", sub="", xlab="
 #pick the soft thresholding power
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
-sft_f = pickSoftThreshold(edata_m, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
+sft_m = pickSoftThreshold(edata_m, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE)
 
-#4 for bicor males
-sft_m = pickSoftThreshold(edata_f, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE,corFnc = "bicor",corOptions = list(maxPOutliers =0.1))
-#14 for bicor females
-# Plot the results:
+
+sft_f = pickSoftThreshold(edata_f, powerVector = powers, verbose = 5,networkType = "signed", dataIsExpr = TRUE)
+
+
+# Plot the results (do for M and F):
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
 # Scale-free topology fit index as a function of the soft-thresholding power
-plot(sft_f$fitIndices[,1], -sign(sft_f$fitIndices[,3])*sft_f$fitIndices[,2],
+plot(sft_m$fitIndices[,1], -sign(sft_m$fitIndices[,3])*sft_m$fitIndices[,2],
      xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
      main = paste("Scale independence"));
-text(sft_f$fitIndices[,1], -sign(sft_f$fitIndices[,3])*sft_f$fitIndices[,2],
+text(sft_m$fitIndices[,1], -sign(sft_m$fitIndices[,3])*sft_m$fitIndices[,2],
      labels=powers,cex=cex1,col="red");
 # this line corresponds to using an R^2 cut-off of h
 abline(h=0.90,col="red")
 # Mean connectivity as a function of the soft-thresholding power
-plot(sft_f$fitIndices[,1], sft_f$fitIndices[,5],
+plot(sft_m$fitIndices[,1], sft_m$fitIndices[,5],
      xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
      main = paste("Mean connectivity"))
-text(sft_f$fitIndices[,1], sft_f$fitIndices[,5], labels=powers, cex=cex1,col="red")
+text(sft_m$fitIndices[,1], sft_m$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ###
 
+#SFT = 4 for females
+#SFT = 5 for males
 
 
-
-#TRY 8 FOR BOTH
-net_m = blockwiseModules(edata_m, power = 8,
+net_m = blockwiseModules(edata_m, power = 5,
                        TOMType = "signed", minModuleSize = 30,
                        reassignThreshold = 0, mergeCutHeight = 0.15,
                        numericLabels = TRUE,
                        saveTOMs = FALSE,
-                       verbose = 3,corType = "bicor",maxPOutliers = 0.1)
+                       verbose = 3)
 
-##8: 30 mods no 0, 11976 in mod  0
 
-net_f = blockwiseModules(edata_f, power = 8,
+saveRDS(net_m, file="./results/Rdata/networks/wgcna_m_5.RDS ")
+
+net_f = blockwiseModules(edata_f, power = 4,
                          TOMType = "signed", minModuleSize = 30,
                          reassignThreshold = 0, mergeCutHeight = 0.15,
                          numericLabels = TRUE,
                          saveTOMs = FALSE,
-                         verbose = 3,corType = "bicor",maxPOutliers = 0.1)
+                         verbose = 3)
 
-##8: 24 mods no 0, 12709 in in mod 0
-#
-#
-#
-#
+saveRDS(net_f, file="./results/Rdata/networks/wgcna_f_4.RDS ")
+
+
+
 #get traits we want to look at
 pheno = read.csv("./results/flat/full_pheno_table.csv", stringsAsFactors = FALSE)
 
@@ -322,11 +325,9 @@ moduleTraitPvalue_f = as.matrix(moduleTraitPvalue_f)
 sig_mod_m = moduleTraitPvalue_m[which(rownames(moduleTraitPvalue_m) %in% names(which(apply(moduleTraitPvalue_m, 1, function(r) any(r < 0.05/ncol(MEs_m)))))),]
 sig_mod_f = moduleTraitPvalue_f[which(rownames(moduleTraitPvalue_f) %in% names(which(apply(moduleTraitPvalue_f, 1, function(r) any(r < 0.05/ncol(MEs_f)))))),]
 
-######
-#####
-#####
-#####
-######
+
+#create trimmed expression object to remove grey module and get gene names from annot file
+
 combat_annot_m = as.data.frame(colnames(edata_m))
 
 combat_annot_m$module = net_m$colors
@@ -338,12 +339,8 @@ rmv = combat_annot_m[which(combat_annot_m$color == "grey"),"colnames(edata_m)"]
 combat_annot_m = combat_annot_m[-which(combat_annot_m$`colnames(edata_m)` %in% rmv),]
 edata_trim_m = edata_m[,-(which(colnames(edata_m) %in% rmv))]
 
-#have to run this sometimes?
 combat_annot_m = combat_annot_m[,-2]
-#the gsub allows for matching of genes that had _isoform* added to them
-#combat_annot_m[,c(3:4)] = annot_file[match(gsub(combat_annot_m$`colnames(edata_m)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
-
-#change to work for gene id
+#match by gene id
 combat_annot_m[,c(3:4)] = annot_file[match(combat_annot_m$`colnames(edata_m)`,annot_file$Gene.ID),c(1,2)]
 
 #modNames = substring(names(MEs), 3)
@@ -359,7 +356,7 @@ combat_annot_m[5:(ncol(geneModuleMembership_m)+4)] = geneModuleMembership_m[matc
 #
 #
 #
-#
+#Do the same for females
 combat_annot_f = as.data.frame(colnames(edata_f))
 
 combat_annot_f$module = net_f$colors
@@ -371,10 +368,7 @@ rmv = combat_annot_f[which(combat_annot_f$color == "grey"),"colnames(edata_f)"]
 combat_annot_f = combat_annot_f[-which(combat_annot_f$`colnames(edata_f)` %in% rmv),]
 edata_trim_f = edata_f[,-(which(colnames(edata_f) %in% rmv))]
 
-#have to run this sometimes?
 combat_annot_f = combat_annot_f[,-2]
-#the gsub allows for matching of genes that had _isoform* added to them
-#combat_annot_f[,c(3:4)] = annot_file[match(gsub(combat_annot_f$`colnames(edata_f)`,pattern = "_isoform.*",replacement = ""),annot_file$gene_name),c(1,2)]
 
 #change to work for gene id
 combat_annot_f[,c(3:4)] = annot_file[match(combat_annot_f$`colnames(edata_f)`,annot_file$Gene.ID),c(1,2)]
@@ -384,8 +378,6 @@ geneModuleMembership_f = as.data.frame(cor(edata_trim_f, MEs_f, use = "p")) # sp
 
 MMPvalue_f = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership_f), nSamples_f))#nsamples - Here it is RNA samples. Is This Correct? or use number of modules? or number of genes?
 geneModuleMembership_f$gene = colnames(edata_trim_f)
-#names(geneModuleMembership) = paste("MM", modNames, sep="");
-#names(MMPvalue) = paste("p.MM", modNames, sep="");
 
 
 combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[match(geneModuleMembership_f$gene,combat_annot_f$`colnames(edata_f)`),]
@@ -394,213 +386,114 @@ combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[matc
 #
 #
 
-save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power8_BICOR.RData")
-save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power8_BICOR.RData")
+save(combat_annot_m, file = "./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
+save(combat_annot_f, file = "./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
 
-save(moduleTraitPvalue_f, file = "./results/Rdata/networks/moduleTraitPvalue_f_BICOR.RData")
-save(moduleTraitPvalue_m, file = "./results/Rdata/networks/moduleTraitPvalue_m_BICOR.RData")
+save(moduleTraitPvalue_f, file = "./results/Rdata/networks/moduleTraitPvalue_f.RData")
+save(moduleTraitPvalue_m, file = "./results/Rdata/networks/moduleTraitPvalue_m.RData")
 
-save(moduleTraitCor_f, file = "./results/Rdata/networks/moduleTraitCor_f_BICOR.RData")
-save(moduleTraitCor_m, file = "./results/Rdata/networks/moduleTraitCor_m_BICOR.RData")
+save(moduleTraitCor_f, file = "./results/Rdata/networks/moduleTraitCor_f.RData")
+save(moduleTraitCor_m, file = "./results/Rdata/networks/moduleTraitCor_m.RData")
 
 
 
 
 #########
 #########
-allGenes = combat_annot_f$gene
-interesting.genes = combat_annot_f[which(combat_annot_f$color == "turquoise"),"gene"]
-#blue is bone module, 2386 genes
-geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
-names(geneList)<-allGenes
-###MF###
-GOdata <- new("topGOdata", ontology = "MF", allGenes =geneList,
-              annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
-test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
-result<-getSigGroups(GOdata,test.stat)
-t1<-GenTable(GOdata, classic=result, topNodes=length(result@score))
-head(t1)
-###CC###
-GOdata <- new("topGOdata", ontology = "CC", allGenes = geneList,
-              annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
-test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
-result<-getSigGroups(GOdata,test.stat)
-t2<-GenTable(GOdata, classic=result, topNodes=length(result@score))
-head(t2)
-###BP###
-GOdata <- new("topGOdata", ontology = "BP", allGenes = geneList,
-              annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
-test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
-result<-getSigGroups(GOdata,test.stat)
-t3<-GenTable(GOdata, classic=result, topNodes=length(result@score))
-head(t3)
-####
-t.all = NULL
-t.all<-rbind(t1,t2,t3)
-t.all$classic<-as.numeric(as.character(t.all$classic))
-t.all<-subset(t.all,t.all$classic<=0.01)
-t.all<-t.all[order(t.all$classic,decreasing=FALSE),]
-dim(t.all[t.all$classic<=1e-5,])
-######
+#Do GO analysis
+##
+#Females
+load("./results/Rdata/networks/geneModMemAnnot_f_power4.RData")#combat_annot_f
 
-##############CONSENSUS###############
-#put both expression datasets in one list
-nSets = 2
-setLabels = c("females", "males")
-multiExpr = vector(mode = "list", length = nSets)
-#rows = samples, cols = genes
-multiExpr[[1]] = list(data = as.data.frame(edata_f))
-multiExpr[[2]] = list(data = as.data.frame(edata_m))
-#check
-exprSize = checkSets(multiExpr)
-gsg = goodSamplesGenesMS(multiExpr, verbose = 3)
-gsg$allOK
+moduleColors = moduleColors_f[-which(moduleColors_f=="grey")]
 
-#cluster samples separately in each set
-sampleTrees = list()
-for (set in 1:nSets){
-  sampleTrees[[set]] = hclust(dist(multiExpr[[set]]$data), method = "average")
+
+network_GO = list()
+for(color in unique(combat_annot_f$color)){
+  
+  allGenes = combat_annot_f$Gene.Name
+  interesting.genes = combat_annot_f[which(combat_annot_f$color == color),"Gene.Name"]
+  
+  geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
+  names(geneList)<-allGenes
+  ###MF###
+  GOdata <- new("topGOdata", ontology = "MF", allGenes =geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t1<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t1)
+  ###CC###
+  GOdata <- new("topGOdata", ontology = "CC", allGenes = geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t2<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t2)
+  ###BP###
+  GOdata <- new("topGOdata", ontology = "BP", allGenes = geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t3<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t3)
+  ####
+  t.all = NULL
+  t.all<-rbind(t1,t2,t3)
+  t.all$classic<-as.numeric(as.character(t.all$classic))
+  ######
+  network_GO[[color]] = t.all
 }
-par(mfrow=c(2,1))
-par(mar = c(0, 4, 2, 0))
-for (set in 1:nSets){
-  plot(sampleTrees[[set]], main = paste("Sample clustering on all genes in", setLabels[set]),xlab="", sub="", cex = 0.7)
-}
-####
-
-
-#no outliers (follow outlier removal based on but height if u see anything. Horvath tutorial page)
-#PHENO DATA
-pheno = read.csv("./results/flat/full_pheno_table.csv", stringsAsFactors = FALSE)
-
-datTraits = pheno[,-c(2:7,16,22)]
-
-Traits = vector(mode="list", length = nSets);
-
-for (set in 1:nSets){
-  setSamples = rownames(multiExpr[[set]]$data);
-  traitRows = match(setSamples, datTraits$Mouse.ID);
-  Traits[[set]] = list(data = datTraits[traitRows, -1]);
-  rownames(Traits[[set]]$data) = datTraits[traitRows, 1];
-  }
-collectGarbage()
-
-
-# Define data set dimensions
-nGenes = exprSize$nGenes;
-nSamples = exprSize$nSamples
-
-
-#######
-# Choose a set of soft-thresholding powers
-powers = c(seq(4,10,by=1), seq(12,20, by=2));
-# Initialize a list to hold the results of scale-free analysis
-powerTables = vector(mode = "list", length = nSets);
-# Call the network topology analysis function for each set in turn
-for (set in 1:nSets)
-  powerTables[[set]] = list(data = pickSoftThreshold(multiExpr[[set]]$data, powerVector=powers,
-                                                     verbose = 2)[[2]]);
-collectGarbage();
-# Plot the results:
-colors = c("black", "red")
-# Will plot these columns of the returned scale free analysis tables
-plotCols = c(2,5,6,7)
-colNames = c("Scale Free Topology Model Fit", "Mean connectivity", "Median connectivity",
-             "Max connectivity");
-# Get the minima and maxima of the plotted points
-ylim = matrix(NA, nrow = 2, ncol = 4);
-for (set in 1:nSets)
-{
-  for (col in 1:length(plotCols))
-  {
-    ylim[1, col] = min(ylim[1, col], powerTables[[set]]$data[, plotCols[col]], na.rm = TRUE);
-    ylim[2, col] = max(ylim[2, col], powerTables[[set]]$data[, plotCols[col]], na.rm = TRUE);
-  }
-}
-# Plot the quantities in the chosen columns vs. the soft thresholding power
-sizeGrWindow(8, 6)
-par(mfcol = c(2,2));
-par(mar = c(4.2, 4.2 , 2.2, 0.5))
-cex1 = 0.7;
-for (col in 1:length(plotCols)) for (set in 1:nSets)
-{
-  if (set==1)
-  {
-    plot(powerTables[[set]]$data[,1], -sign(powerTables[[set]]$data[,3])*powerTables[[set]]$data[,2],
-         xlab="Soft Threshold (power)",ylab=colNames[col],type="n", ylim = ylim[, col],
-         main = colNames[col]);
-    addGrid();
-  }
-  if (col==1)
-  {
-    text(powerTables[[set]]$data[,1], -sign(powerTables[[set]]$data[,3])*powerTables[[set]]$data[,2],
-         labels=powers,cex=cex1,col=colors[set]);
-  } else
-    text(powerTables[[set]]$data[,1], powerTables[[set]]$data[,plotCols[col]],
-         labels=powers,cex=cex1,col=colors[set]);
-  if (col==1)
-  {
-    legend("bottomright", legend = setLabels, col = colors, pch = 20) ;
-  } else
-    legend("topright", legend = setLabels, col = colors, pch = 20) ;
-}
-
-#try 8
-
-softPower = 8;
-# Initialize an appropriate array to hold the adjacencies
-adjacencies = array(0, dim = c(nSets, nGenes, nGenes));
-# Calculate adjacencies in each individual data set
-for (set in 1:nSets)adjacencies[set, , ] = abs(cor(multiExpr[[set]]$data, use = "p"))^softPower
-
-# Initialize an appropriate array to hold the TOMs
-TOM = array(0, dim = c(nSets, nGenes, nGenes));
-# Calculate TOMs in each individual data set
-for (set in 1:nSets)TOM[set, , ] = TOMsimilarity(adjacencies[set, , ])
-
-##DONE ON RIVANNA HPC
-###scale TOMs
-#scale so that 95th percentiles of each sex match
-scaleP=0.95
-set.seed(8675309)
-#sample TOM entries
-nSamples = as.integer(1/(1-scaleP) * 1000);
-# Choose the sampled TOM entries
-scaleSample = sample(nGenes*(nGenes-1)/2, size = nSamples)
-TOMScalingSamples = list()
-# These are TOM values at reference percentile
-scaleQuant = rep(1, nSets)
-# Scaling powers to equalize reference TOM values
-scalePowers = rep(1, nSets)
-
-# Loop over sets
-for (set in 1:nSets)
-{
-  # Select the sampled TOM entries
-  TOMScalingSamples[[set]] = as.dist(TOM[set, , ])[scaleSample]
-  # Calculate the 95th percentile
-  scaleQuant[set] = quantile(TOMScalingSamples[[set]],
-                             probs = scaleP, type = 8);
-  # Scale the male TOM
-  if (set>1)
-  {
-    scalePowers[set] = log(scaleQuant[1])/log(scaleQuant[set]);
-    TOM[set, ,] = TOM[set, ,]^scalePowers[set];
-  }
-}
+save(network_GO, file="./results/Rdata/networks/GO_Females_sft4.RData")
 #####
-load("~/Desktop/TOM.Rdata")
 
 
-#calculate consensus TOM
-consensusTOM = pmin(TOM[1, , ], TOM[2, , ])
+##
+#Males
+load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")#combat_annot_f
 
-# Clustering
-consTree = hclust(as.dist(1-consensusTOM), method = "average");
-# We like large modules, so we set the minimum module size relatively high:
-minModuleSize = 30;
-# Module identification using dynamic tree cut:
-unmergedLabels = cutreeDynamic(dendro = consTree, distM = 1-consensusTOM,deepSplit = 2, cutHeight = 0.995,minClusterSize = minModuleSize,pamRespectsDendro = FALSE );
-unmergedColors = labels2colors(unmergedLabels)
+moduleColors = moduleColors_m[-which(moduleColors_m=="grey")]
 
-save(TOM, file="./TOM.Rdata")
+
+network_GO = list()
+for(color in unique(combat_annot_m$color)){
+  
+  allGenes = combat_annot_m$Gene.Name
+  interesting.genes = combat_annot_m[which(combat_annot_m$color == color),"Gene.Name"]
+  
+  geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
+  names(geneList)<-allGenes
+  ###MF###
+  GOdata <- new("topGOdata", ontology = "MF", allGenes =geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t1<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t1)
+  ###CC###
+  GOdata <- new("topGOdata", ontology = "CC", allGenes = geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t2<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t2)
+  ###BP###
+  GOdata <- new("topGOdata", ontology = "BP", allGenes = geneList,
+                annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+  test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+  result<-getSigGroups(GOdata,test.stat)
+  t3<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+  head(t3)
+  ####
+  t.all = NULL
+  t.all<-rbind(t1,t2,t3)
+  t.all$classic<-as.numeric(as.character(t.all$classic))
+  ######
+  network_GO[[color]] = t.all
+}
+save(network_GO, file="./results/Rdata/networks/GO_Males_sft5.RData")
+#####
+
+
+
+

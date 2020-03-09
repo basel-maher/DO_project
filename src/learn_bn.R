@@ -1,8 +1,8 @@
 library(igraph)
 library(bnlearn)
 ########
-load("./edata.RData")
-
+load("./edata_4.RData")
+edata=edata_trim
 load("./geneModMemAnnot_power4.RData")
 
 #BASH STUFF#

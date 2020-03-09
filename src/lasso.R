@@ -28,7 +28,7 @@ pheno_combined = pheno_combined[,-2]
 #cor p vals. adjusted for multiple comparisons (Holm)
 x = psych::corr.test(pheno_combined)
 #use only phenotypes that are significantly correlated with max load
-correlated_phenos = names(which(x$p[,60] < 0.05))
+correlated_phenos = names(which(x$p[,60] <= 0.05))
 
 pheno_combined = pheno_combined[,correlated_phenos]
 

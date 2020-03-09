@@ -40,7 +40,6 @@ colnames(all_coloc_results)= c("BMD","tissue","n","H0","H1","H2","H3","H4","gene
 
 coloc_over75 = all_coloc_results[which(as.numeric(all_coloc_results$H4) >= 0.75),]
 
-#coloc_gefos = read.delim("~/Desktop/GWAS_project/project_extension/coloc_v7/coloc_v7_all_results_int.txt")
 coloc_gefos = read.delim("./results/flat/coloc/coloc_v7_all_results_int.txt")
 genes = tolower(coloc_gefos$gene)
 genes = append(genes, tolower(coloc_over75$gene))

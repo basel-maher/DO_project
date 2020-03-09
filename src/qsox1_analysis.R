@@ -56,7 +56,7 @@ ggplot(dat1.s,aes(x=Genotype, y=Length)) + geom_boxplot(outlier.shape = NA) +
 hist(dat1.s$Length)
 table(dat1.s$Genotype)
 colnames(dat1.s)
-lf.lm.12<-lm(FL_all~Genotype+Weight+Qsox_Mutation,data=dat1.s)
+lf.lm.12<-lm(ell~Genotype+Weight+Qsox_Mutation,data=dat1.s)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))

@@ -2,7 +2,6 @@
 #get all genes around associations, look at overlap with human BMD associated genes.
 
 library(tidyverse)
-library(biomaRt)
 library(liftOver)
 library(GenomicRanges)
 ###
@@ -154,4 +153,68 @@ x = qtl_loc[overlaps_mouse,]
 y = pos_human_grange@elementMetadata[overlaps_human,]  
 
 overlaps_merged = cbind(x,morris[overlaps_human,])
+
+
+
+####redo but reverse. identify convert mouse association loci to syntenic human regions, then find overlaps with all 
+#Morris GWAS variants that exceen genome-wide significance threshold (P.NI)
+
+#get ALL Morris GWAS variants
+#downloaded from GEFOS (March 3 2020)
+#http://www.gefos.org/?q=content/data-release-2018
+
+morris = read.table("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt", header=T)
+#get vars that are genome wide significant
+morris = morris[which(morris$P.NI <= 5e-8),]
+
+#create GRanges object
+chroms_human = paste0("chr",morris$CHR)
+#convert chr23 to chrX
+chroms_human[which(chroms_human == "chr23")] = "chrX"
+bp_human = morris$BP
+
+#GRanges format
+pos_human = paste0(chroms_human,":",bp_human)
+
+#GRanges
+pos_human_grange = as(pos_human, "GRanges")
+
+###
+#get qtl
+qtl_loc = read.csv("./results/flat/qtl_loc", stringsAsFactors = FALSE)
+
+#make into GRange
+chr = qtl_loc$chr
+chr = paste0("chr",chr)
+
+bp_start = qtl_loc$ci_lo *1000000
+bp_end = qtl_loc$ci_hi*1000000
+bp_range = paste0(bp_start,"-",bp_end)
+
+pos = paste0(chr,":",bp_range)
+
+mouse = as(pos, "GRanges")
+mcols(mouse) = mouse
+#get chain object
+chain <- import.chain("./data/mm10ToHg19.over.chain")
+
+lifted = liftOver(mouse, chain)
+humanized = as.data.frame(lifted)
+humanized = humanized[,c(3:6,8:11)]
+colnames(humanized) = c("hg19_chr","hg19_start","hg19_end","hg19_width","mm10_chr","mm10_start","mm10_end","mm10_width")
+
+overlaps = findOverlaps(query = pos_human_grange, subject = lifted)
+
+overlaps_human = overlaps@from
+overlaps_mouse = overlaps@to  
+
+x = qtl_loc[overlaps_mouse,]
+
+overlaps_merged = cbind(x,morris[overlaps_human,])
+write.csv(overlaps_merged, file="~/Desktop/overlaps.csv",quote = F,row.names = F)
+
+
+
+
+
 
