@@ -1,10 +1,11 @@
 # DO_project pipeline
 
 1. Munge phenotypic files into one nice file.
-  -use ./src/munge_raw_pheno_data.R
+    - use ./src/munge_raw_pheno_data.R
     - This takes pheno files from ./data/pheno_data 
     - outputs:
-      -./results/flat/full_pheno_table.csv and results/Rdata/full_pheno_table.Rdata
+        -./results/flat/full_pheno_table.csv
+        -./results/Rdata/full_pheno_table.Rdata
 
 2. Fix GeneSeek files
 
