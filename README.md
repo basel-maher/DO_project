@@ -2,7 +2,7 @@
 Do project code and analyses
 
 
-Go to /doc/analysis_pipeline.md for the analysis pipeline.
+Go to [doc/analysis_pipeline.md](/doc/analysis_pipeline.md) for the analysis pipeline.
 
 
 
@@ -28,5 +28,8 @@ Folders are as follows:
 
 
 
-Go to /doc/analysis_pipeline.md for the analysis pipeline.
+Go to [doc/analysis_pipeline.md](/doc/analysis_pipeline.md) for the analysis pipeline.
+
+
+
 
