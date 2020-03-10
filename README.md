@@ -1,5 +1,6 @@
-# DO_project
-Do project code and analyses
+# Bone Strength in the Diversity Outbred
+
+Project code and analyses
 
 
 Go to [doc/analysis_pipeline.md](/doc/analysis_pipeline.md) for the analysis pipeline.
