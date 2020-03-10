@@ -198,7 +198,7 @@ net_m = blockwiseModules(edata_m, power = 5,
                        verbose = 3)
 
 
-saveRDS(net_m, file="./results/Rdata/networks/wgcna_m_5.RDS ")
+saveRDS(net_m, file="./results/Rdata/networks/wgcna_m_5.RDS")
 
 net_f = blockwiseModules(edata_f, power = 4,
                          TOMType = "signed", minModuleSize = 30,
@@ -207,7 +207,7 @@ net_f = blockwiseModules(edata_f, power = 4,
                          saveTOMs = FALSE,
                          verbose = 3)
 
-saveRDS(net_f, file="./results/Rdata/networks/wgcna_f_4.RDS ")
+saveRDS(net_f, file="./results/Rdata/networks/wgcna_f_4.RDS")
 
 
 

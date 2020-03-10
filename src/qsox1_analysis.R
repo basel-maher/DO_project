@@ -1,3 +1,4 @@
+library(lsmeans)
 
 # read in data and order genotype classifications (this will make sure
 # genotypes are listed in order)
@@ -37,7 +38,7 @@ boxplot(dat1$ML_all~dat1$Genotype,ylab='Femur Length (mm)',
 # generate LSMEANS by sex adjusting for weight and mutation type
 # can add mutation type to the filter statement to look at effects
 # of individual mutation
-library(lsmeans)
+
 library(ggplot2)
 rm(dat1.s)
 table(dat1$Qsox_Mutation)
@@ -133,7 +134,14 @@ p
 #######################
 qsox1_uct = read.csv('./data/pheno_data/Qsox1_data/qsox_uCT.csv',header=T,na.strings='NA')
 
-lf.lm.12<-lm(Tt.Ar.mm2.~Genotype+Weight..g.+Qsox.Mutation,data=qsox1_uct)
+a = qsox1_uct$Imax.mm4.
+b = qsox1_uct$Imin.mm4.
+
+e = sqrt((a^2 - b^2)/a^2)
+
+qsox1_uct$e = e
+
+lf.lm.12<-lm(Ct.Porosity....~Genotype+Weight..g.+Qsox.Mutation,data=qsox1_uct)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))

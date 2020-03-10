@@ -56,6 +56,7 @@ z$Gene.Name[48778] = paste0(z$Gene.Name[48778],".2")
 
 which(duplicated(z$Gene.Name))
 
+z = z[,c(1,2)]
 write.csv(z,file="~/Documents/projects/DO_project/results/flat/annot_file.csv", row.names = F, quote = F)
 
 
