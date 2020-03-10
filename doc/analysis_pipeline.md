@@ -127,7 +127,7 @@
         * ./results/Rdata/networks/moduleTraitCor_f.RData
         * ./results/Rdata/networks/moduleTraitCor_m.RData
         * ./results/Rdata/networks/GO_Females_sft4.RData
-			* ./results/Rdata/networks/GO_Males_sft5.RData
+		* ./results/Rdata/networks/GO_Males_sft5.RData
 
 
 	* Bayesian networks learned with [src/learn_bn.R](../src/learn_bn.R)
