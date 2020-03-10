@@ -50,15 +50,17 @@
     * [src/calc_probs.R](../src/calc_probs.R)
 
 
-9. make_annot.R
+9. 
 
 
-10. Calc QTL
+10. Map QTL
 
     * [src/map_qtl.R](../src/map_qtl.R)
     * will also perform permutation analysis
         * output: 
 		* ./results/Rdata/qtl_perms/
+		
+		* Ellipticity calculation and mapping in [src/ellipticity.R](../src/ellipticity.R)
         
 
 11. eQTL mapping
@@ -67,6 +69,14 @@
         -used VST + qnormed counts
         - 48 PEER factors, no covars and no intercept
 
+
+    * Make the annotation file that links between Stringtie gene IDs and gene names:
+      * [src/make_annot.R](../src/make_annot.R)
+        * requires gene abundance files (Stringtie output)
+        * In: ./results/flat/RNA-seq/abund/
+        * Output:
+          * [results/flat/annot_file.csv](../results/flat/annot_file.csv)
+    
     * after RNA-seq preprocessing, normalize the counts
     	* [src/normalize_RNAseq.R](../src/normalize_RNAseq.R)
 
