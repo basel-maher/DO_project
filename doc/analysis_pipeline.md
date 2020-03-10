@@ -2,10 +2,10 @@
 
 1. Munge phenotypic files into one nice file.
 	* use [src/munge_raw_pheno_data.R](../src/munge_raw_pheno_data.R)
-    * This takes pheno files from ./data/pheno_data
+    * This takes pheno files from data/pheno_data
 	* outputs:
-		 * ./results/flat/full_pheno_table.csv
-         	 * ./results/Rdata/full_pheno_table.Rdata
+		 * results/flat/full_pheno_table.csv
+         	 * results/Rdata/full_pheno_table.Rdata
 
 2. Fix GeneSeek files
 	* There was a sample confusion. Re-genotyped samples have a .1 appended to their name, except 371.
@@ -21,13 +21,13 @@
 
     * From https://kbroman.org/qtl2/pages/prep_do_data.html
     * use [src/geneseek2qtl2_mod.R](../src/geneseek2qtl2_mod.R)
-    * output is in ./results/GIGAMUGA/qtl_batches1-4
+    * output is in results/GIGAMUGA/qtl_batches1-4
 
 4. Remove bad samples and markers using Argyle.
 
     * use [src/GIGAMUGA_QC.Rmd](../src/GIGAMUGA_QC.Rmd)
     * output:
-		* ./results/GIGAMUGA/geno.final_merged.RDS
+		  * results/GIGAMUGA/geno.final_merged.RDS
 
 
 5. Create cross file for QTL mapping. 
@@ -42,7 +42,7 @@
 
     * script adapted from https://github.com/kbroman/Paper_MPPdiag/blob/master/R/diagnostics.Rmd
     * This is largely buggy, but everything looked fine. Led to the removal of several hundred markers (479)that had greater than 5% genotyping errors.
-    * output is ./results/Rdata/cross_basic_cleaned.Rdata
+    * output is results/Rdata/cross_basic_cleaned.Rdata
     	* 109,427 markers remaining
 
 8. recalculate genotype and allele probs using the new cross_basic_cleaned
@@ -50,10 +50,9 @@
     * [src/calc_probs.R](../src/calc_probs.R)
 
 
-9. 
 
 
-10. Map QTL
+9. Map QTL
 
     * [src/map_qtl.R](../src/map_qtl.R)
     * will also perform permutation analysis
@@ -63,7 +62,7 @@
 		* Ellipticity calculation and mapping in [src/ellipticity.R](../src/ellipticity.R)
         
 
-11. eQTL mapping
+10. eQTL mapping
     * [put pipeline here](rna_seq_pipeline.md)
     * PEER stuff
         -used VST + qnormed counts
@@ -73,9 +72,9 @@
     * Make the annotation file that links between Stringtie gene IDs and gene names:
       * [src/make_annot.R](../src/make_annot.R)
         * requires gene abundance files (Stringtie output)
-        * In: ./results/flat/RNA-seq/abund/
+        * In: results/flat/RNA-seq/abund/
         * Output:
-          * [results/flat/annot_file.csv](../results/flat/annot_file.csv)
+          * results/flat/annot_file.csv
     
     * after RNA-seq preprocessing, normalize the counts
     	* [src/normalize_RNAseq.R](../src/normalize_RNAseq.R)
@@ -101,7 +100,7 @@
         
         
 
-12. Networks
+11. Networks
     
     * Make bone "superset" [src/make_bone_geneset.R](../src/make_bone_geneset.R)
 		* used code from https://www.r-bloggers.com/converting-mouse-to-human-gene-names-with-biomart-package/
@@ -115,29 +114,29 @@
     	* Gene ontology for WGCNA network modules also performed here
     
     * outputs:
-        * ./results/Rdata/networks/edata_full.Rdata
-        * ./results/Rdata/networks/wgcna_4.RDS
-        * ./results/Rdata/networks/moduleTraitPvalue_full_4.RData
-        * ./results/Rdata/networks/moduleTraitCor_full_4.RData
-        * ./results/Rdata/networks/geneModMemAnnot_power4.RData
-        * ./results/Rdata/networks/GO_sft4.RData
+        * results/Rdata/networks/edata_full.Rdata
+        * results/Rdata/networks/wgcna_4.RDS
+        * results/Rdata/networks/moduleTraitPvalue_full_4.RData
+        * results/Rdata/networks/moduleTraitCor_full_4.RData
+        * results/Rdata/networks/geneModMemAnnot_power4.RData
+        * results/Rdata/networks/GO_sft4.RData
         
     * Sex-specific WGCNA networks constructed in [src/WGCNA_sex_specific.R](../src/WGCNA_sex_specific.R)
     * Gene ontology for sex-specific WGCNA network modules also performed here
     
      * outputs:
-        * ./results/Rdata/networks/edata_m.Rdata
-        * ./results/Rdata/networks/edata_f.Rdata
-        * ./results/Rdata/networks/wgcna_m_5.RDS
-        * ./results/Rdata/networks/wgcna_f_4.RDS
-        * ./results/Rdata/networks/geneModMemAnnot_m_power5.RData
-        * ./results/Rdata/networks/geneModMemAnnot_f_power4.RData
-        * ./results/Rdata/networks/moduleTraitPvalue_f.RData
-        * ./results/Rdata/networks/moduleTraitPvalue_m.RData
-        * ./results/Rdata/networks/moduleTraitCor_f.RData
-        * ./results/Rdata/networks/moduleTraitCor_m.RData
-        * ./results/Rdata/networks/GO_Females_sft4.RData
-		* ./results/Rdata/networks/GO_Males_sft5.RData
+        * results/Rdata/networks/edata_m.Rdata
+        * results/Rdata/networks/edata_f.Rdata
+        * results/Rdata/networks/wgcna_m_5.RDS
+        * results/Rdata/networks/wgcna_f_4.RDS
+        * results/Rdata/networks/geneModMemAnnot_m_power5.RData
+        * results/Rdata/networks/geneModMemAnnot_f_power4.RData
+        * results/Rdata/networks/moduleTraitPvalue_f.RData
+        * results/Rdata/networks/moduleTraitPvalue_m.RData
+        * results/Rdata/networks/moduleTraitCor_f.RData
+        * results/Rdata/networks/moduleTraitCor_m.RData
+        * results/Rdata/networks/GO_Females_sft4.RData
+		* results/Rdata/networks/GO_Males_sft5.RData
 
 
 	* Bayesian networks learned with [src/learn_bn.R](../src/learn_bn.R)
@@ -147,7 +146,7 @@
 
     * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R)
       * output:
-      	* ./results/flat/key_driver_analysis.csv
+      	* results/flat/key_driver_analysis.csv
     
     - munge to add coloc data
     
