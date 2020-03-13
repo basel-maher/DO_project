@@ -353,6 +353,11 @@ geneModuleMembership_m$gene = colnames(edata_trim_m)
 
 
 combat_annot_m[5:(ncol(geneModuleMembership_m)+4)] = geneModuleMembership_m[match(geneModuleMembership_m$gene,combat_annot_m$`colnames(edata_m)`),]
+
+x = match(colnames(edata_trim_m),annot_file$Gene.ID)
+
+colnames(edata_trim_m) = annot_file$Gene.Name[x]
+
 #
 #
 #
@@ -381,6 +386,11 @@ geneModuleMembership_f$gene = colnames(edata_trim_f)
 
 
 combat_annot_f[5:(ncol(geneModuleMembership_f)+4)] = geneModuleMembership_f[match(geneModuleMembership_f$gene,combat_annot_f$`colnames(edata_f)`),]
+
+x = match(colnames(edata_trim_f),annot_file$Gene.ID)
+
+colnames(edata_trim_f) = annot_file$Gene.Name[x]
+
 #
 #
 #
@@ -395,6 +405,8 @@ save(moduleTraitPvalue_m, file = "./results/Rdata/networks/moduleTraitPvalue_m.R
 save(moduleTraitCor_f, file = "./results/Rdata/networks/moduleTraitCor_f.RData")
 save(moduleTraitCor_m, file = "./results/Rdata/networks/moduleTraitCor_m.RData")
 
+save(edata_trim_m, file = "./results/Rdata/networks/edata_trim_m_5.RData")
+save(edata_trim_f, file = "./results/Rdata/networks/edata_trim_f_4.RData")
 
 
 
