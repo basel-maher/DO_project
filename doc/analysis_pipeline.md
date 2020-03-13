@@ -52,7 +52,7 @@
 
 
 
-9. Map QTL
+9. QTL mapping / analysis
 
     * [src/map_qtl.R](../src/map_qtl.R)
     * will also perform permutation analysis
@@ -61,9 +61,15 @@
 		
 		* Ellipticity calculation and mapping in [src/ellipticity.R](../src/ellipticity.R)
         
+    GWAS-QTL overlap
+    
+    LASSO
+    
+    get pheno_combined as output
 
 10. eQTL mapping
     * [put pipeline here](rna_seq_pipeline.md)
+    * ALIGNMENT STATS
     * PEER stuff
         -used VST + qnormed counts
         - 48 PEER factors, no covars and no intercept
@@ -97,10 +103,14 @@
         	* ./results/flat/local_eqtl_peaks.csv 
         	* ./results/Rdata/local_eqtl.Rdata
 			* CHECK OUTS, SOME FROM RIVANNA (1-4)
+			*
         
-        
+ 
+11. Merge Analysis 
 
-11. Networks
+13. QSOX1 analysis
+
+12. Networks
     
     * Make bone "superset" [src/make_bone_geneset.R](../src/make_bone_geneset.R)
 		* used code from https://www.r-bloggers.com/converting-mouse-to-human-gene-names-with-biomart-package/
@@ -150,6 +160,7 @@
     
     - munge to add coloc data
     
+
 
         
 
