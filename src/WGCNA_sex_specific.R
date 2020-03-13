@@ -327,6 +327,10 @@ sig_mod_f = moduleTraitPvalue_f[which(rownames(moduleTraitPvalue_f) %in% names(w
 
 
 #create trimmed expression object to remove grey module and get gene names from annot file
+#
+#
+#
+#
 
 combat_annot_m = as.data.frame(colnames(edata_m))
 
@@ -462,7 +466,7 @@ save(network_GO, file="./results/Rdata/networks/GO_Females_sft4.RData")
 
 ##
 #Males
-load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")#combat_annot_f
+load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")#combat_annot_m
 
 moduleColors = moduleColors_m[-which(moduleColors_m=="grey")]
 
