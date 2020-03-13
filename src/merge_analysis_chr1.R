@@ -832,5 +832,83 @@ runx2 = cross_eqtl$pheno[,"MSTRG.11266"]
 
 
 
+##chr1 porosity index snp
+#scan all chrom 1 phenos
+locus1_scan = scan1(apr, pheno_combined[,c("uCT_Ct.TMD","uCT_pMOI","uCT_Imax","uCT_Ct.Ar.Tt.Ar", "uCT_Tt.Ar","ML", "uCT_Ma.Ar","uCT_Ct.porosity")], k_loco, Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
 
+peaks = find_peaks(locus1_scan,map = cross_basic$pmap, peakdrop = 1.5, threshold = 4)
+
+
+
+start = 155.049996
+end = 156.424700
+chr = 1
+
+variants_locus = query_variants(chr, start, end)
+genes_locus <- query_genes(chr, start, end)
+
+genes_locus = genes_locus[-grep("Gm",genes_locus$Name),]
+
+if("pseudogene" %in% genes_locus$mgi_type){
+  genes_locus = genes_locus[-which(genes_locus$mgi_type == "pseudogene"),]
+}
+
+if("miRNA gene" %in% genes_locus$mgi_type){
+  genes_locus = genes_locus[-which(genes_locus$mgi_type == "miRNA gene"),]
+}
+
+if("rRNA gene" %in% genes_locus$mgi_type){
+  genes_locus = genes_locus[-which(genes_locus$mgi_type == "rRNA gene"),]
+}
+
+
+out_snps_ctpor_1 <- scan1snps(pr, cross_basic$pmap, pheno_combined[,"uCT_Ct.porosity"], k_loco[["1"]],  addcovar =  covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
+                            query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=TRUE)
+
+
+top_por <- top_snps(out_snps_ctpor_1$lod, out_snps_ctpor_1$snpinfo,drop=0.15*max(out_snps_ctpor_1$lod))
+top_por[order(top_por$lod,decreasing = T),]
+plot_snpasso(out_snps_ctpor_1$lod, out_snps_ctpor_1$snpinfo, genes = genes_locus)
+
+
+#condition on top snp rs33687430
+snpinfo <- data.frame(chr=c("1"),
+                      pos=c(155.369808),
+                      sdp=128,
+                      snp=c("rs33687430"), stringsAsFactors=FALSE)
+
+
+snpinfo <- index_snps(cross_basic$pmap, snpinfo)
+snp_genoprobs = genoprob_to_snpprob(apr,snpinfo)
+snp_genoprobs =as.data.frame(snp_genoprobs$`1`)
+
+covar_snp = merge(covar, snp_genoprobs, by="row.names", all = TRUE)
+rownames(covar_snp) = covar_snp$Row.names
+
+##
+covar_snp$alleleA = 0.5
+for(i in 1:nrow(covar_snp)){
+  if(covar_snp$A.rs33687430[i] >0.6){
+    covar_snp$alleleA[i] = 1
+  } else{if(covar_snp$B.rs33687430[i] >0.6){
+    covar_snp$alleleA[i] = 0
+  }}
+}
+
+
+
+#redo qtl scan while conditioning on snp
+locus1_scan_cond_por = scan1(apr, pheno_combined[,c("uCT_Ct.TMD","uCT_pMOI","uCT_Imax","uCT_Ct.Ar.Tt.Ar", "uCT_Tt.Ar","ML", "uCT_Ma.Ar","uCT_Ct.porosity")], k_loco, Xcovar=Xcovar, addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "ML",add=T)
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.TMD",ylim=c(0,15))
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_pMOI",add=T)
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Imax",add=T)
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.Ar.Tt.Ar",add=T)
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Tt.Ar",add=T)
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ma.Ar",add=T)
+plot(locus1_scan_cond_por, map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.porosity",add=T)
+
+peaks = find_peaks(locus1_scan_cond_por, cross_basic$pmap, threshold=4, drop=1.5)
+abline(h=thresh, col="red")
 
