@@ -348,6 +348,10 @@ geneModuleMembership$gene = colnames(edata_trim)
 
 combat_annot[5:(ncol(geneModuleMembership)+4)] = geneModuleMembership[match(geneModuleMembership$gene,combat_annot$`colnames(edata)`),]
 
+x = match(colnames(edata_trim),annot_file$Gene.ID)
+
+colnames(edata_trim) = annot_file$Gene.Name[x]
+
 
 save(combat_annot, file = "./results/Rdata/networks/geneModMemAnnot_power4.RData")
 
@@ -355,12 +359,11 @@ save(moduleTraitPvalue, file = "./results/Rdata/networks/moduleTraitPvalue_full_
 
 save(moduleTraitCor, file = "./results/Rdata/networks/moduleTraitCor_full_4.RData")
 
-
+save(edata_trim, file = "./results/Rdata/networks/edata_4.RData")
 
 #Do GO analysis
 ##
 load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
-combat_annot = geneModMemAnnot
 moduleColors = moduleColors[-which(moduleColors=="grey")]
 hubs = chooseTopHubInEachModule(edata,moduleColors)
 
@@ -368,8 +371,8 @@ hubs = chooseTopHubInEachModule(edata,moduleColors)
 network_GO = list()
 for(color in unique(combat_annot$color)){
   
-  allGenes = combat_annot$gene
-  interesting.genes = combat_annot[which(combat_annot$color == color),"gene"]
+  allGenes = combat_annot$Gene.Name
+  interesting.genes = combat_annot[which(combat_annot$color == color),"Gene.Name"]
 
   geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
   names(geneList)<-allGenes

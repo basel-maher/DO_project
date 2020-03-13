@@ -20,7 +20,7 @@ annot_file = annot_file[,c(1,2)]
 
 load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
 
-load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
+x=load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
 
 
 #bone gene superset
@@ -29,7 +29,8 @@ superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFact
 superset = superset[,1]
 
 #BNs learned on high performance computing cluster
-bns = list.files("./results/Rdata/networks/bn_4/")
+#bns = list.files("./results/Rdata/networks/bn_4/")
+bns = list.files("~/Desktop/bn_4/")
 
 
 #convert and plot a particular BN
@@ -45,13 +46,14 @@ for(net in bns){
   print(counter)
   color = strsplit(net,"_")[[1]][2]
   #print(color)
-  load(paste0("./results/Rdata/networks/bn_4/",net))
+  #load(paste0("./results/Rdata/networks/bn_4/",net))
+  load(paste0("~/Desktop/bn_4/",net))
   obj_name = paste0(color,"_bn")
   assign(x = obj_name ,bn)
   
   z = bn2igraph(get(obj_name)) #get "gets" an object from env based on name. otherwise its just a string here
   
-  mod_genes = geneModMemAnnot[which(geneModMemAnnot$color == color),"gene"]
+  mod_genes = combat_annot[which(combat_annot$color == color),"Gene.Name"]
   
   if(length(which(is.na(mod_genes))) > 0){
     mod_genes = mod_genes[-which(is.na(mod_genes))]
@@ -167,4 +169,4 @@ all$hyper_bonf = p.adjust(all$hyper, method="fdr")
 
 #sig = zhang[which(zhang$color %in% sig_mod),]
 
-write.csv(all, file="./results/flat/key_driver_analysis.csv",quote = F,row.names = F)
+write.csv(all, file="./results/flat/key_driver_analysis_sexcombined_sft4.csv",quote = F,row.names = F)
