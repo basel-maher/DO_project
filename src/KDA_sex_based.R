@@ -211,7 +211,7 @@ for(net in bns){
   
   z = bn2igraph(get(obj_name)) #get "gets" an object from env based on name. otherwise its just a string here
   
-  mod_genes = combat_annot_m[which(combat_annot_m$color == color),"Gene.Name"]
+  mod_genes = combat_annot_f[which(combat_annot_f$color == color),"Gene.Name"]
   
   if(length(which(is.na(mod_genes))) > 0){
     mod_genes = mod_genes[-which(is.na(mod_genes))]
