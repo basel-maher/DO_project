@@ -98,9 +98,8 @@
 
     * Map eQTL
 
-    	* [src/map_local_and_distal_eqtl.R](../src/map_local_and_distal_eqtl.R)
+    	* [src/map_local_and_distal_eqtl.R](../src/map_local_eqtl.R)
     	* outputs: 
-        	* ./results/flat/local_eqtl_peaks.csv 
         	* ./results/Rdata/local_eqtl.Rdata
 			* CHECK OUTS, SOME FROM RIVANNA (1-4)
 			*
@@ -146,19 +145,22 @@
         * results/Rdata/networks/moduleTraitCor_f.RData
         * results/Rdata/networks/moduleTraitCor_m.RData
         * results/Rdata/networks/GO_Females_sft4.RData
-		* results/Rdata/networks/GO_Males_sft5.RData
+		    * results/Rdata/networks/GO_Males_sft5.RData
+		    * results/Rdata/networks/edata_trim_m_5.RData
+		    * results/Rdata/networks/edata_trim_f_4.RData
 
 
 	* Bayesian networks learned with [src/learn_bn.R](../src/learn_bn.R)
-    
+      *ADD SEX BASED AS WELL
       * This was run on Rivanna supercomputing cluster
       * output in ./results/Rdata/networks/bn_4/
 
-    * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R)
+    * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R)
       * output:
       	* results/flat/key_driver_analysis.csv
     
-    - munge to add coloc data
+   * Annotate with coloc results from GTEx.
+      * ./src/annotate_KDA_GTEx.R
     
 
 
