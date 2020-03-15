@@ -1,23 +1,25 @@
 library(biomaRt)
 library(tidyverse)
 ###
-#from https://www.r-bloggers.com/converting-mouse-to-human-gene-names-with-biomart-package/
 
-# Basic function to convert human to mouse gene names
-convertHumanGeneList <- function(x){
+#convert human to mouse
+#use mgi homolog list
+#http://www.informatics.jax.org/downloads/reports/HOM_MouseHumanSequence.rpt (Mar-14-2020)
+
+homology = read.table("./data/mgi_homologs.txt",sep = "\t", header = T)
+
+convertHumantoMouse = function(x){
+  mouse=c()
+  for(i in 1:length(x)){
+    id = homology[which((homology$Common.Organism.Name == "human") & tolower(homology$Symbol) == tolower(x[i])),"HomoloGene.ID"]
+    mus = homology[which((homology$Common.Organism.Name == "mouse, laboratory") & homology$HomoloGene.ID == id),"Symbol"]
+    mouse=append(mouse,mus)
+  }
+  mouse=unique(mouse)
+  return(mouse)
   
-  require("biomaRt")
-  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
-  
-  genesV2 = getLDS(attributes = c("hgnc_symbol"), filters = "hgnc_symbol", values = x , mart = human, attributesL = c("mgi_symbol"), martL = mouse, uniqueRows=T)
-  
-  humanx <- unique(genesV2[, 2])
-  
-  # Print the first 6 genes found to the screen
-  print(head(humanx))
-  return(humanx)
 }
+
 
 ###
 
@@ -83,7 +85,7 @@ for(i in terms){
 }
 genes_hum = genes_hum[-1,1]
 genes_hum = unique(genes_hum)
-mussed_human_genes = convertHumanGeneList(genes_hum)
+mussed_human_genes = convertHumantoMouse(genes_hum)
 
 genes_mus= genes_mus[-1,1]
 genes_mus = unique(genes_mus)
@@ -132,7 +134,7 @@ mgi_mouse = mgi_mouse[-which(mgi_mouse == "917M")]
 
 mgi_hum = mgi[which(mgi$Organism=="human"),]
 mgi_hum = mgi_hum$Gene.Symbol
-mussed_human_genes = convertHumanGeneList(mgi_hum)
+mussed_human_genes = convertHumantoMouse(mgi_hum)
 
 mgi = c(mgi_mouse, mussed_human_genes)
 
