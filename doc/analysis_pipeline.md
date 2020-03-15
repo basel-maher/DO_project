@@ -123,6 +123,7 @@
     	* Gene ontology for WGCNA network modules also performed here
     
     * outputs:
+    EDIT TO REFLECT NEW TRIM
         * results/Rdata/networks/edata_full.Rdata
         * results/Rdata/networks/wgcna_4.RDS
         * results/Rdata/networks/moduleTraitPvalue_full_4.RData
@@ -134,6 +135,7 @@
     * Gene ontology for sex-specific WGCNA network modules also performed here
     
      * outputs:
+     EDIT TO REFLECT NEW TRIM
         * results/Rdata/networks/edata_m.Rdata
         * results/Rdata/networks/edata_f.Rdata
         * results/Rdata/networks/wgcna_m_5.RDS
