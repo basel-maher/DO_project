@@ -106,6 +106,9 @@
         
  
 11. Merge Analysis 
+  * [src/merge_analysis_QTL.R](../src/merge_analysis_QTL.R)
+  * [src/merge_analysis_eQTL.R](../src/merge_analysis_eQTL.R)
+  * [src/merge_analysis_chr1.R](../src/merge_analysis_chr1.R)
 
 13. QSOX1 analysis
 
