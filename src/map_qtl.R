@@ -327,5 +327,41 @@ full_qtl$LODi = full_qtl$lod.y - full_qtl$lod.x
 # cor(pMOI_coef, TMD_coef, method = "k")
 
 ###
+#make qtl_loci
+#qtl file
+qtl_norm = read.csv("./results/flat/qtl_norm_pass_thresh", stringsAsFactors = FALSE)
+
+#remove FFP and soleus
+qtl_norm = qtl_norm[-c(1:3),]
+#remove MAT_vol1_nonzero
+qtl_norm = qtl_norm[-(which(qtl_norm$lodcolumn == "MAT_VOL1_nonzero")),]
+
+#define loci
+qtl_norm$locus = 0
+
+loc_idx = 1
+qtl_loc = as.data.frame(matrix(nrow=nrow(qtl_norm), ncol=ncol(qtl_norm)))
+colnames(qtl_loc) = colnames(qtl_norm)
+for (i in c(1,2,3,4,8,10,16,"X")){
+  sub = subset(qtl_norm, qtl_norm$chr == i)
+  
+  while(any(sub$locus == 0)){
+    min_sub = min(sub$pos)
+    idx = which((sub$pos >= min_sub) & (sub$pos <= min_sub + 1.5))
+    sub[idx,"locus"] = loc_idx
+    qtl_loc = rbind(qtl_loc, sub[idx,])
+    sub = sub[-idx,]
+    loc_idx = loc_idx + 1
+  }
+}
+
+qtl_loc = qtl_loc[-which(is.na(qtl_loc)),]
+
+write.csv(qtl_loc, file = "./results/flat/qtl_loc", quote = FALSE,row.names = FALSE)
+
+
+
+
+
 
 
