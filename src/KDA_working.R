@@ -33,9 +33,9 @@ bns = list.files("./results/Rdata/networks/bn_4/")
 
 
 #convert and plot a particular BN
-# x = bn2igraph(yellowgreen_bn)
-# subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,3,nodes = "Gm4786"))))
-# plot(subgraph,vertex.label.cex=0.65,edge.width=2, vertex.size=20, margin=-0.4, vertex.label.dist=0.2, vertex.label.degree=-pi)
+ x = bn2igraph(tan_bn)
+ subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,3,nodes = "Rasd1"))))
+ plot(subgraph,vertex.label.cex=0.65,edge.width=1, vertex.size=5, margin=-0.2, vertex.label.dist=0.2, vertex.label.degree=-pi)
 
 ####
 #create a dataframe with genes and their neighborhoods, degrees, number of bone genes in nerighborhood, etc
