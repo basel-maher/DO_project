@@ -96,7 +96,7 @@ FeaturePlot(ob, features = c("Sost", "Dmp1", "Phex", "Mepe"))
 
 FeaturePlot(ob, features = c("Ctsk", "Ocstamp", "Dcstamp"))
 FeaturePlot(ob, features = c("Adcy9"))
-FeaturePlot(ob, features = c("A930004D18Rik"))
+FeaturePlot(ob, features = c("Rasd1"))
 
 
 
