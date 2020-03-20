@@ -9,6 +9,7 @@ library(patchwork)
 library(gtable)
 library(ggrepel)
 library(ggplotify)
+library(tidyr)
 #
 #load the geno probs
 load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
@@ -47,23 +48,40 @@ rownames(covar) = rownames(cross_basic$covar)#make sure rownames match original 
 ##########
 
 #1B)
-#freq of founder genotype per individual
-af_ind <- calc_geno_freq(apr, "individual")#marker
+## allele freq per geno
+#calculate allele freq of each marker, get chromosome from find_markerpos, plot contribution of allele per chrom
+chr = c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","X")
+af_mar <- calc_geno_freq(apr, "marker", omit_x=FALSE)
+af_mar = as.data.frame(af_mar)
+af_mar$chrom = NA
+af_mar$markerName = rownames(af_mar)
 
-mean_allele_freq = as.data.frame(matrix(nrow=8, ncol=1))
 
-for(i in 1:8){
-  mean_allele_freq[i,] = mean(af_ind[,i])
-}
-mean_allele_freq$allele = c("AJ","B6","129","NOD","NZO","CAST","PWK","WSB")
-mean_allele_freq$x="A"
+af_mar$chrom = as.character(apply(af_mar,1,function(x) find_markerpos(cross_basic$pmap,(x[10]))[1][[1]]))
 
-p=ggplot(mean_allele_freq, aes(fill=allele, y=V1, x=allele)) + 
-  geom_bar(position="stack", stat="identity")#position=fill for percentage in stack
 
-#x=x to stack, x=allele for normal bar plot
+mean_per_chrom = aggregate(af_mar[,c(1:8)],by = list(af_mar$chrom), FUN = mean)
 
-p+ scale_fill_manual(values=as.vector(CCcolors))
+mean_per_chrom = mean_per_chrom[match(chr,mean_per_chrom$Group.1),]
+rownames(mean_per_chrom) =mean_per_chrom$Group.1
+mean_per_chrom = mean_per_chrom[,-1]
+
+barplot(as.matrix(t(mean_per_chrom)),col = CCcolors, ylab = "Allele Frequency", xlab="Chr", main = "Global Allele Freq. Per Chromosome")
+
+
+
+legend("topleft", fill=CCcolors, legend=c("A","B","C","D","E","F","G","H"))
+
+
+
+# dat = mean_per_chrom %>% gather()
+# dat$chrom = rep(rownames(mean_per_chrom), nrow(dat)/nrow(mean_per_chrom))
+# 
+# dat$chrom = as.factor(dat$chrom)
+# levels(dat$chrom) = c(1:20,"X")
+# ggplot(dat, aes(x=chrom, y= value, fill=key)) + geom_bar(position=position_fill(reverse=T ),stat = "identity")
+# 
+# p+ scale_fill_manual(values=as.vector(CCcolors))
 
 # 
 # par(mar=c(4.1, 4.1, 0.6, 0.6))
@@ -77,51 +95,31 @@ p+ scale_fill_manual(values=as.vector(CCcolors))
 
 #1C)
 #boxplot BV/TV
-#make dataframe with bv/tv and sex
+#make dataframe with bv/tv 
 df_bvtv = as.data.frame(cross_basic$pheno[,"uCT_BV.TV"])
 df_bvtv$pheno = "BV/TV"
 df_bvtv$ind = rownames(df_bvtv)
-df_bvtv$M = covar[,"sex"]
 colnames(df_bvtv)[1] = "val"
-df_2 = df_bvtv
-df_bvtv$pheno = paste0(df_bvtv$pheno,"_",df_bvtv$M)
-#M=1
-
-df = rbind(df_bvtv,df_2)
 
 
-p1 <- ggplot(df, aes(x=pheno, y=val)) + 
-  geom_boxplot()
+p3 <- ggplot(df_bvtv, aes(x=reorder(ind,val), y=val,width=1)) + 
+  geom_bar(stat="identity",color=CCcolors[4]) + theme(axis.text.x = element_blank()) + xlab("") + ylab("Bone Volume Fraction (BV/TV) (%)")
 
 
 
 df_str = as.data.frame(cross_basic$pheno[,"bending_max_load"])
 df_str$pheno = "max_load"
 df_str$ind = rownames(df_str)
-df_str$M = covar[,"sex"]
 colnames(df_str)[1] = "val"
 
-df_2 = df_str
-df_str$pheno = paste0(df_str$pheno,"_",df_str$M)
-#M=1
-
-df = rbind(df_bvtv,df_str)
+p4 <- ggplot(df_str, aes(x=reorder(ind,val), y=val,width=1)) + 
+  geom_bar(stat="identity",color=CCcolors[6]) + theme(axis.text.x = element_blank()) + xlab("DO Mouse") + ylab("Max Load (N)")
 
 
-p2 <- ggplot(df, aes(x=pheno, y=val)) + 
-  geom_boxplot()
 
-p1 | p2
+patch = p3 / p4
 
-df = rbind(df_bvtv, df_str)
-#df_2 = df
 
-#df$pheno = paste0(df$pheno,"_",df$M)
-#df = rbind(df,df_2)
-
-p2 <- ggplot(df, aes(x=pheno, y=val)) + 
-  geom_boxplot()
-p2
 # 
 # p
 #1D) heritability
@@ -134,6 +132,13 @@ pheno_combined = as.matrix(pheno_combined)
 for(i in ncol(pheno_combined)){
   names(pheno_combined[,i]) = names(cross_basic$pheno[,6])
 }
+
+
+
+
+
+
+
 
 
 new_covar = covar
@@ -168,13 +173,35 @@ h_df$pheno = rownames(h_df)
 #grid.table(hsq_table)
 hsq_table = h_df[-which(h_df$pheno %in% c("glucose", "soleus_weight","adiposity","RFP","GFP","BFP","FFP","gastroc_weight","MAT_VOL1_nonzero","MAT_VOL2_nonzero","MAT_VOL3_nonzero","MAT_VOL4_nonzero")),]
 
+hsq_table[grep("bending",x = hsq_table$pheno),"group"] = 1
+hsq_table[grep("uCT",x = hsq_table$pheno),"group"] = 2
+hsq_table[grep("histo",x = hsq_table$pheno),"group"] = 3
+hsq_table[grep("MAT",x = hsq_table$pheno),"group"] = 4
+
+hsq_table[grep("ML",x = hsq_table$pheno,fixed = T),"group"] = 5
+hsq_table[grep("AP",x = hsq_table$pheno,fixed=T),"group"] = 5
+hsq_table[grep("FL",x = hsq_table$pheno,fixed=T),"group"] = 5
+hsq_table[grep("body_length",x = hsq_table$pheno,fixed=T),"group"] = 5
+
 hsq_table = hsq_table[order(hsq_table$h),]
+
+pheno = c(hsq_table[which(hsq_table$group == 1),"pheno"])
+pheno = append(pheno,c(hsq_table[which(hsq_table$group == 2),"pheno"]))
+pheno = append(pheno,c(hsq_table[which(hsq_table$group == 3),"pheno"]))
+pheno = append(pheno,c(hsq_table[which(hsq_table$group == 4),"pheno"]))
+pheno = append(pheno,c(hsq_table[which(hsq_table$group == 5),"pheno"]))
+
+
+
+
+
+
 
 hsq_table$pheno <- factor(hsq_table$pheno, levels = hsq_table$pheno)
 
-p3<-ggplot(hsq_table, aes(x=pheno, y=h)) + 
-  geom_point() + coord_flip()
-p3
+
+p5<-ggplot(hsq_table, aes(x=pheno, y=h, fill=as.factor(group))) + 
+  geom_bar(position = "dodge",stat="identity") + coord_flip() + scale_x_discrete(limits = c(pheno)) + xlab("Heritability") + ylab("Phenotype") + scale_color_brewer(palette = "Dark2") + theme(legend.position = "none")
 
 
 
@@ -208,14 +235,17 @@ p3
 p1=grid::textGrob("PLACEHOLDER FOR A")
 p1 = wrap_elements(p1)
 
-patchwork = (p1|p|p2)/p3
+
+p2 = wrap_elements(panel = ~barplot(as.matrix(t(mean_per_chrom)),col = CCcolors, ylab = "Allele Frequency", xlab="Chr", main = "Global Allele Freq. Per Chromosome"), clip=FALSE)
+
+patch = wrap_elements(patch)
 
 layout = "
-AABC
-DDDD
+AABB
+CCDD
 "
 
-p1+p+p2+p3+plot_layout(design = layout)+plot_annotation(tag_levels = "A")
+p1+p1+patch+p5+plot_layout(design = layout)+plot_annotation(tag_levels = "A")
 
 
 
