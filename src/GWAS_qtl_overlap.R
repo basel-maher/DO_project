@@ -55,7 +55,7 @@ lifted_mouse_loci = as(lifted_mouse_loci, "GRanges")
 #get ALL Morris GWAS variants
 #downloaded from GEFOS (March 3 2020)
 #http://www.gefos.org/?q=content/data-release-2018
-
+morris_lead_snps = read.csv("./data/Morrisetal2018.NatGen.SumStats/Morris_eBMD_conditionally_ind_snps.csv", header=T)
 morris = read.table("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt", header=T)
 #get vars that are genome wide significant
 morris = morris[which(morris$P.NI <= 5e-8),]
