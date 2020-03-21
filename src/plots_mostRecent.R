@@ -43,6 +43,19 @@ covar = covar[,-1]#remove sac date as covar for now
 
 covar = apply(covar,2,as.numeric) #make sure all cols are numeric
 rownames(covar) = rownames(cross_basic$covar)#make sure rownames match original cross file
+##
+
+#create a covar object for eqtl from covariates in cross file
+#must be numeric
+covar_eqtl = as.matrix(cross_eqtl$covar)
+covar_eqtl[,"sex"] = (covar_eqtl[,"sex"] == "M")*1 #convert sex to 1's and 0's
+covar_eqtl[,1] = as.factor(covar_eqtl[,1]) #sac date to factors
+covar_eqtl[,6] = as.factor(covar_eqtl[,6]) #generation to factors
+
+covar_eqtl = apply(covar_eqtl,2,as.numeric)
+rownames(covar_eqtl) = rownames(cross_eqtl$covar)
+
+
 
 ##########
 ##########
@@ -70,7 +83,7 @@ barplot(as.matrix(t(mean_per_chrom)),col = CCcolors, ylab = "Allele Frequency", 
 
 
 
-legend("topleft", fill=CCcolors, legend=c("A","B","C","D","E","F","G","H"))
+legend("topleft", fill=CCcolors, legend=c("AJ","B6","129","NOD","NZO","CAST","PWK","WSB"))
 
 
 
@@ -259,7 +272,7 @@ p1+p1+patch+p5+plot_layout(design = layout)+plot_annotation(tag_levels = "A")
 #scatterplot with traits, across all chroms, color traits differently, LOD score, labels
 #load in significant qtl
 qtl = read.csv("./results/flat/qtl_loc",stringsAsFactors = F)
-qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","MAT_VOL1","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Disp. @ frax","Disp. @ max load","Tot.Work","WPY","TMD","Max Load","Frax. Load","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
+qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","MAT_VOL1","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Dfx","DFmax","Wtotal","WPY","TMD","Fmax","Ffrax","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
 qtl[which(qtl$chr=="X"),"chr"]="20"
 qtl$chr = as.numeric(qtl$chr)
 chr_lengths = as.data.frame(matrix(nrow=2,ncol=1))
@@ -295,7 +308,7 @@ qtl$pos2 = as.numeric(qtl$pos2)
 rects <- data.frame(start = c(chr_lengths[1:20,1]), end = c(chr_lengths[2:21,1]), col =c(rep(c(1:2),10)))
 
 
-ggplot() + 
+p2a=ggplot() + 
   geom_rect(data = rects, aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = col),fill=rep(c("grey","white"),10), alpha = 0.4) +
   geom_point(data = qtl, aes(x=pos2,y=lod))+ labs(x = "Chromosome", y = "LOD") + 
   scale_x_continuous(breaks=c(195/2,
@@ -328,12 +341,12 @@ ggplot() +
 ###2B
 #chr3 Ma.Ar QTL Trace
 
-load("./results/Rdata/DO_qtl_scan_norm.Rdata")
+#load("./results/Rdata/DO_qtl_scan_norm.Rdata")
 
-maar3_blup = scan1blup(apr[,3], pheno_combined[,"uCT_Ma.Ar"], k_loco[["3"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+#maar3_blup = scan1blup(apr[,3], pheno_combined[,"uCT_Ma.Ar"], k_loco[["3"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
 #save(maar3_blup,file = "./results/Rdata/maar_chr3_blup.Rdata")
-
-plot_coefCC(maar3_blup[1000:4000,], cross_basic$pmap,legend = "topright",scan1_output = subset(DO_qtl_scan_normal, lodcolumn="uCT_Ma.Ar"), main = "Ma.Ar", legend_ncol=1,top_panel_prop = 0.6)
+load("./results/Rdata/maar_chr3_blup.Rdata")
+plot_coefCC(maar3_blup[1000:3300,], cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="uCT_Ma.Ar"), main = "Ma.Ar - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
 # 
 
 
@@ -356,7 +369,7 @@ out_snps_maar_3 <- scan1snps(pr, cross_basic$pmap, pheno_combined[,"uCT_Ma.Ar"],
 variants_locus = query_variants(chr, start, end)
 genes_locus <- query_genes(chr, start, end)
 
-genes_locus = genes_locus[-grep("Gm",genes_locus$Name),]
+#genes_locus = genes_locus[-grep("Gm",genes_locus$Name),]
 
 if("pseudogene" %in% genes_locus$mgi_type){
   genes_locus = genes_locus[-which(genes_locus$mgi_type == "pseudogene"),]
@@ -383,7 +396,7 @@ load("./results/Rdata/local_eqtl.Rdata")#eqtl
 x = local_eqtl[which(local_eqtl$Gene.Name %in% genes_locus$Name),"lodcolumn"]
 x = paste0(x,"_3")
 
-load("~/Desktop/merge_analysis/merge_top_local_eqtl.Rdata") #merge frame
+load("./results/Rdata/merge_top_local_eqtl.Rdata") #merge frame
 
 merge_top_maar = merge_top[which(names(merge_top) %in% x)]
 
@@ -395,20 +408,21 @@ for(i in 1:length(merge_top_maar)){
   }
 }
 
-
-coloc_snps = unique(coloc_snps) #colocalizing snps
-
-#create_variant_query_func("./data/CCdb/cc_variants.sqlite", filter="snp_id == " ? ")
-
-#l = out_snps_maar_3$lod[which(rownames(out_snps_maar_3$lod) %in% coloc_snps),]
-#s = out_snps_maar_3$snpinfo[which(out_snps_maar_3$snpinfo$snp_id %in% coloc_snps),]
-
-
+#coloc genes: MSTRG.15696, MSTRG.15702, MSTRG.15703, MSTRG.15704
+load("./results/Rdata/chr3_coloc_genes.Rdata") #called "chr3_coloc_genes", got from supercomputing cluster. files too big to keep on laptop
+#plot
+MSTRG.15696 = scan1blup(apr[,3], cross_eqtl$pheno[,"MSTRG.15696"], kinship = k_loco[[3]], addcovar = covar_eqtl[,c(2,11:58)])
+MSTRG.15702 = scan1blup(apr[,3], cross_eqtl$pheno[,"MSTRG.15702"], kinship = k_loco[[3]], addcovar = covar_eqtl[,c(2,11:58)])
+MSTRG.15703 = scan1blup(apr[,3], cross_eqtl$pheno[,"MSTRG.15703"], kinship = k_loco[[3]], addcovar = covar_eqtl[,c(2,11:58)])
+MSTRG.15704 = scan1blup(apr[,3], cross_eqtl$pheno[,"MSTRG.15704"], kinship = k_loco[[3]], addcovar = covar_eqtl[,c(2,11:58)])
 
 
-#plot_genes
-g = genes_locus[which(genes_locus$start >= start & genes_locus$stop <= end),]
-plot_genes(genes = g)
+plot_coefCC(MSTRG.15696[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15696"), main = "Mfsd1 - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(MSTRG.15702[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15702"), main = "Il12a - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(MSTRG.15703[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15703"), main = "Gm17641 - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(MSTRG.15704[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15704"), main = "1110032F04Rik - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+
+# 
 
 ####
 ####
