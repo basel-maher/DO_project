@@ -667,7 +667,7 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 ######
 #4D
 #
-#"uCT_Ct.TMD", "uCT_Tt.Ar","ML", "uCT_Ma.Ar","uCT_Ct.porosity"
+#"uCT_Ct.TMD","uCT_Ct.porosity"
 dat1<-read.csv('./data/pheno_data/Qsox1_data/qsox_uCT.csv',header=T,na.strings='NA')
 
 dat1$Genotype<-factor(dat1$Genotype, levels=c('wt','Het','Mut'))
@@ -728,3 +728,19 @@ lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 lff = as.data.frame(lff)
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
   theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.083"),aes(y=lsmeans.lsmean),y_position = c(2.075)) + ylim(1.8,2.1)
+#
+#
+#
+#
+#4H
+#
+lf.lm.12<-lm(Ma.Ar.mm2.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
+anova(lf.lm.12)
+lf<-lsmeans(lf.lm.12,"Genotype")
+par(mfrow=c(2,2))
+plot(lf,horizontal=F,ylab="Ma.Ar")
+lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
+
+lff = as.data.frame(lff)
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.93"),aes(y=lsmeans.lsmean),y_position = c(1.09)) + ylim(0.98,1.09)
