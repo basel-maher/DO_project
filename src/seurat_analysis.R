@@ -72,20 +72,23 @@ ob <- FindClusters(ob, resolution = 0.5)
 
 ob <- RunUMAP(ob, dims = 1:10)
 
-DimPlot(ob, reduction = "umap")
+DimPlot(ob, reduction = "umap", label=T)
 
 # note that you can set `label = TRUE` or use the LabelClusters function to help label
 # individual clusters
 DimPlot(ob, reduction = "umap", label=TRUE,split.by = "seurat_clusters")
 
-cluster1.markers <- FindMarkers(ob, ident.1 = 8, min.pct = 0.25)
+cluster5.markers <- FindMarkers(ob, ident.1 = 5, min.pct = 0.25)
 
 ob.markers <- FindAllMarkers(ob, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 ob.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
 
 #markers distinguishing cluster
-cluster5.markers <- FindMarkers(ob, ident.1 = c(2,3,4,5), ident.2 = c(0,1,6,7,8,9,10), min.pct = 0.25)
-head(cluster5.markers, n = 10)
+cluster5.markers <- FindMarkers(ob, ident.1 = c(5), ident.2 = c(0,1,2,3,4,6,7,8,9,10), min.pct = 0.25)
+head(cluster5.markers, n = 30)
+
+FeaturePlot(ob, features = c("Qsox1", "Timp2"))
+
 
 FeaturePlot(ob, features = c("Tnfsf11", "Tnfrsf11a", "Tnfrsf11b"))
 
