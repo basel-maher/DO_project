@@ -16,7 +16,7 @@ k_loco_pomp <- calc_kinship(apr_pomp, "loco")
 rownames(pheno_pomp) = pheno_pomp$X
 
 scan1_pomp = scan1(apr_pomp, pheno_pomp[,c(11:17)], k_loco_pomp, Xcovar=Xcovar, addcovar = pheno_pomp[,c("Sex", "Diet","AgeSac","MassSac")])
-
+save(scan1_pomp, file="./results/Rdata/scan1_pomp.Rdata")
 pomp_peaks = find_peaks(scan1_pomp, MM_snps1_pmap, threshold=4, drop=1.5)
 
 plot(scan1_pomp, MM_snps1_pmap$`1`,lodcolumn = 2)
@@ -31,4 +31,5 @@ plot_coefCC(coef_ML_pomp, MM_snps1_pmap["1"], scan1_output=subset(scan1_pomp, lo
 
 coef_ML_pomp_blup = scan1blup(apr_pomp[,"1"], ML_pomp, kinship = k_loco_pomp[["1"]], addcovar = pheno_pomp[,c("Sex", "Diet","AgeSac","MassSac")])
 plot_coefCC(coef_ML_pomp_blup, MM_snps1_pmap["1"], scan1_output=subset(scan1_pomp, lodcolumn=2),legend = "topleft")
+save(coef_ML_pomp_blup, file="./results/Rdata/coef_ML_pomp_blup.Rdata")
 
