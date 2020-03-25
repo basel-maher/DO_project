@@ -10,6 +10,8 @@ library(gtable)
 library(ggrepel)
 library(ggplotify)
 library(tidyr)
+library(reshape2)
+
 #
 #load the geno probs
 load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
@@ -430,34 +432,34 @@ plot_coefCC(MSTRG.15704[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3
 ####
 ####3A
 
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.TMD",ylim=c(0,25),col="red")
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "ML",col="blue",add=T)
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_pMOI",col="green",add=T)
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Imax",col="black",add=T)
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.Ar.Tt.Ar",col="violet",add=T)
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Tt.Ar",col="orange",add=T)
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ma.Ar",col="yellow",add=T)
-plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.porosity",col="purple",add=T)
-
-
-patchwork = wrap_plots(x1,x2,x3,x4,x5,x6,x7,x8)
-patchwork * theme(axis.text.x = element_blank(),axis.ticks = element_blank(), axis.title = element_blank())
-
-qtl = read.csv("./results/flat/qtl_loc",stringsAsFactors = F)
-qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","MAT_VOL1","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Disp. @ frax","Disp. @ max load","Tot.Work","WPY","TMD","Max Load","Frax. Load","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
-qtl = qtl[which(qtl$chr=="1"),]
-qtl$chr = as.numeric(qtl$chr)
-
-
-
-ggplot() + geom_point(data = qtl, aes(x=pos,y=lod))+ labs(x = "Chromosome 1", y = "LOD") +
-  geom_text_repel(data=qtl,aes(x=pos,y=lod,label=pheno_name),size = 3.5)+
-  theme(legend.position = "none",panel.grid = element_blank())
-
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.TMD",ylim=c(0,25),col="red")
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "ML",col="blue",add=T)
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_pMOI",col="green",add=T)
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Imax",col="black",add=T)
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.Ar.Tt.Ar",col="violet",add=T)
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Tt.Ar",col="orange",add=T)
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ma.Ar",col="yellow",add=T)
+# plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.porosity",col="purple",add=T)
+# 
+# 
+# patchwork = wrap_plots(x1,x2,x3,x4,x5,x6,x7,x8)
+# patchwork * theme(axis.text.x = element_blank(),axis.ticks = element_blank(), axis.title = element_blank())
+# 
+# qtl = read.csv("./results/flat/qtl_loc",stringsAsFactors = F)
+# qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","MAT_VOL1","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Disp. @ frax","Disp. @ max load","Tot.Work","WPY","TMD","Max Load","Frax. Load","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
+# qtl = qtl[which(qtl$chr=="1"),]
+# qtl$chr = as.numeric(qtl$chr)
+# 
+# 
+# 
+# ggplot() + geom_point(data = qtl, aes(x=pos,y=lod))+ labs(x = "Chromosome 1", y = "LOD") +
+#   geom_text_repel(data=qtl,aes(x=pos,y=lod,label=pheno_name),size = 3.5)+
+#   theme(legend.position = "none",panel.grid = element_blank())
+# 
 
 
 ###
-#plot as lines only?
+#plot as lines only
 dat = as.data.frame(DO_qtl_scan_normal[,c("uCT_Ct.TMD","ML","uCT_pMOI","uCT_Imax","uCT_Ct.Ar.Tt.Ar","uCT_Tt.Ar","uCT_Ma.Ar","uCT_Ct.porosity")])
 map = as.data.frame(cross_basic$pmap$`1`)
 dat = as.data.frame(dat[which(rownames(dat) %in% rownames(map)),])
@@ -477,6 +479,14 @@ x1/x2/x3/x4/x5/x6/x7/x8
 
 ##3B
 #POMP data
+#from pomp_mapping_ML.R
+load("./results/Rdata/scan1_pomp.Rdata")
+load("./results/Rdata/coef_ML_pomp_blup.Rdata")
+
+plot_coefCC(coef_ML_pomp_blup, MM_snps1_pmap["1"], scan1_output=subset(scan1_pomp, lodcolumn=2),legend = "topleft")
+
+
+
 
 #3C 
 #like 3A but after conditioning on ML index variant
@@ -524,5 +534,88 @@ x7 = ggplot(data=dat[5700:6200,], aes(x=map, y=Ma.Ar))+geom_line()+theme(axis.te
 x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+geom_hline(yintercept = 7.77,col="red")+xlab("Chromosome 1 Position")
 
 x1/x2/x3/x4/x5/x6/x7/x8
+
+#3D
+load("./results/Rdata/qsox1_ier5.Rdata") # got from supercomputing cluster. main files too big to keep on laptop
+
+#plot
+#MSTRG.1301 - Ier5
+#MSTRG.1311 - Qsox1
+
+ier5= scan1blup(apr[,1], cross_eqtl$pheno[,"MSTRG.1301"], kinship = k_loco[[1]], addcovar = covar_eqtl[,c(2,11:58)])
+qsox1 = scan1blup(apr[,1], cross_eqtl$pheno[,"MSTRG.1311"], kinship = k_loco[[1]], addcovar = covar_eqtl[,c(2,11:58)])
+
+
+
+plot_coefCC(ier5, cross_basic$pmap,scan1_output = subset(x, lodcolumn="Ier5"), main = "Ier5 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(qsox1, cross_basic$pmap,scan1_output = subset(x, lodcolumn="Qsox1"), main = "Qsox1 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+
+##
+TMD_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.TMD"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+ML_blup = scan1blup(apr[,1], pheno_combined[,"ML"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+
+plot_coefCC(TMD_blup, cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="uCT_Ct.TMD"), main = "TMD - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(MremiL_blup, cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="ML"), main = "ML - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+
+
+##
+##3E
+#get microarray data from bioGPS (03.24.2020):
+#GSE10246
+biogps = read_csv("./data/GSE10246_bioGPS_032420.csv")
+biogps = biogps[-which(as.numeric(biogps$`1420831_at`)<500),]
+biogps$tis = rownames(biogps)
+biogps = biogps[,-2]
+
+#get mean of samples with more than one reading
+u = unique(unlist(strsplit(biogps$tis, split = "[.]")))
+u = u[-which(u %in% c("1","2"))]
+
+
+biogps_means = as.data.frame(matrix(ncol=2, nrow=length(u)))
+colnames(biogps_means) = c("val","tis")
+
+for(i in 1:length(u)){
+  sub = biogps[grep(x=biogps$tis, pattern = u[i]),]
+  m = mean(as.numeric(sub[,1]))
+  biogps_means[i,] = c(m, u[i])
+}
+
+biogps_means$col = 1
+biogps_means[grep(pattern = "osteoblast", x = biogps_means$tis,ignore.case = T), "col"] = 2
+
+p = biogps_means[order(as.numeric(biogps_means$val)),"tis"]
+
+ggplot(biogps_means, aes(x=tis, y=as.numeric(val), fill=col)) + 
+  geom_bar(position = "dodge",stat="identity") + coord_flip()  + xlab("Tissue") + ylab("Expression") + scale_color_brewer(palette = "Dark2") + theme(legend.position = "none") + scale_x_discrete(limits = p)
+
+#
+#
+#
+##3F
+#seurat_analysis.R
+
+
+####4A
+#Done externally
+
+
+
+##4B
+#Mostly Charles Farber's code
+dat2<-read.csv('./data/pheno_data/Qsox1_data/QsoxAssay_June09.csv',header=T)
+
+dat2$pmol.H202.min.ul<-dat2$pmol.H2O2.synthesized...min/5
+
+dat2$Genotype<-factor(dat2$Genotype, c('wt','Het','Mut'))
+dat2<-filter(dat2,Genotype!='NA')
+dat2.melt<-melt(dat2[,c(1,8,18)])
+colnames(dat2.melt)<-c('Mutation','Genotype','variable','Activity')
+
+ggplot(data = dat2.melt, aes(x=Genotype, y=Activity,Group=Mutation,fill=Mutation)) + 
+  geom_boxplot(outlier.shape=NA) +
+  geom_point(  position="jitter", size=1) +
+  ylab('QSOX1 Activity (pmol H2O2/min/ul')
+
 
 
