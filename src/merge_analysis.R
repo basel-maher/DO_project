@@ -1,5 +1,6 @@
 set.seed(8675309)
 library(qtl2)
+options(stringsAsFactors = F)
 
 
 
@@ -124,8 +125,10 @@ phenos_w_genes$gene_name = NA
 for(i in 1:nrow(phenos_w_genes)){
   phenos_w_genes$gene[i] = unlist(strsplit(phenos_w_genes$gene[i], "_"))[1]
   phenos_w_genes$gene_name[i] = eqtl_loc[which(eqtl_loc$lodcolumn == phenos_w_genes$gene[i]),"Gene.Name"]
-}9
+}
 ## number nonsynonymous variants in top qtl merge for a phenotype
+nonsyn = list()
+counter=1
 for(i in unique(qtl_loc$locus)){
   #print(i)
   sub_qtl = subset(qtl_loc, qtl_loc$locus == i)
@@ -134,8 +137,25 @@ for(i in unique(qtl_loc$locus)){
   
   
   for(j in phenos){
-    l = length(grep("missense",x=merge_top_qtl[[j]]$consequence))
+    counter=counter+1
+    missense = (grep("missense",x=merge_top_qtl[[j]]$consequence))
+    l = length(missense)
+    z = merge_top_qtl[[j]]$snp_id[missense]
     print(paste0(j,":",l))
+    nonsyn[[counter]] = z
+    names(nonsyn)[counter] = j
     }
   }
 
+nonsyn_frame = do.call(rbind, lapply(nonsyn, as.data.frame))
+
+# out_snps_totwork <- scan1snps(pr, cross_basic$pmap, pheno_combined[,"bending_total_work"], k_loco[[10]],  addcovar =  new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
+#                       query_func=query_variants,chr=10, start=23.5, end=24.6, keep_all_snps=TRUE)
+# 
+# 
+# out_snps_wpy <- scan1snps(pr, cross_basic$pmap, pheno_combined[,"bending_work_post_yield"], k_loco[[10]],  addcovar =  new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
+#                            query_func=query_variants,chr=10, start=23.2, end=25.5, keep_all_snps=TRUE)
+# 
+# plot_snpasso(out_snps_totwork$lod, out_snps_totwork$snpinfo, drop_hilit = (max(out_snps_totwork$lod)*0.15))
+# 
+# plot_snpasso(out_snps_wpy$lod, out_snps_wpy$snpinfo, drop_hilit = (max(out_snps_wpy$lod)*0.15))
