@@ -13,8 +13,7 @@ library(tidyr)
 library(reshape2)
 library(emmeans)
 library(ggsignif)
-library(Gviz)
-library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+library(RACER)
 #
 #load the geno probs
 load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
@@ -273,7 +272,111 @@ p1+p1+patch+p5+plot_layout(design = layout)+plot_annotation(tag_levels = "A")
 #
 
 ##Figure 2
-#2A
+#2A - mirrorplot
+ebmd = read.delim("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt",stringsAsFactors = FALSE)
+
+gtex = read.delim("./data/stomach_RASD1_GTEx_v7", stringsAsFactors = F, header = FALSE, sep = " ")
+
+
+ebmd = ebmd[which(ebmd$RSID %in% gtex$V3),]
+
+
+gtex = gtex[which(gtex$V3 %in% ebmd$RSID),]
+
+
+for(i in 1:nrow(gtex)){
+  gtex$pos[i] = strsplit(gtex$V2[i], split = "_")[[1]][2]
+}
+
+ebmd$pos = gtex[match(ebmd$RSID,gtex$V3),"pos"]
+
+
+bmd_racer = RACER::formatRACER(assoc_data = ebmd, chr_col = 3, pos_col = 15, p_col = 13)
+bmd_racer = bmd_racer[,-11]
+#
+
+
+gtex_racer = RACER::formatRACER(assoc_data = gtex, chr_col = 11, pos_col = 13, p_col = 5)
+
+bmd_racer_ld = (RACER::ldRACER(assoc_data = bmd_racer, rs_col = 2, pops = "EUR", lead_snp = "rs1029830"))
+gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR", lead_snp = "rs1029830"))
+
+
+mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 17, plotby = "coord",start_plot = 17000000, end_plot = 17450000 ,build = "hg19", name1 = "eBMD", name2 = "RASD1 - Stomach")
+####
+
+#2B
+net = readRDS("./results/Rdata/networks/wgcna_4.RDS")
+rnames = rownames(net$MEs)
+tan = as.data.frame(net$MEs[,"ME12"])
+tan$DO = rnames
+tan = tan[order(as.numeric(tan$DO)),]
+
+p = pheno_combined[,"uCT_BV.TV"]
+
+n=c()
+for(i in names(p)){
+  x=strsplit(i, split = "[.]")[[1]][1]
+  n=append(n,x)
+}
+names(p) = n
+p = p[which(names(p) %in% tan$DO)]
+
+p = p[order(as.numeric(names(p)))]
+
+cor(tan$`net$MEs[, "ME12"]`, p, method = "s")
+cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
+
+
+d = cbind(p,tan)
+
+ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm)
+
+
+
+##2C
+rasd1_impc = read.csv("./data/RASD1_IMPC_BMD_032620.txt")
+#r_m = rasd1_impc[which(rasd1_impc$Sex == "male"),]
+#r_f = rasd1_impc[which(rasd1_impc$Sex == "female"),]
+r = rasd1_impc
+
+r$con = paste0(r$Genotype, r$Sex)
+r[which(r$con == "+/+female"),"con"] = "Female WT"
+r[which(r$con == "+/+male"),"con"] = "Male WT"
+r[which(r$con == "BL3486female"),"con"] = "KO Female"
+r[which(r$con == "BL3486male"),"con"] = "KO Male"
+
+r$con = factor(r$con, levels = c("Female WT","KO Female","Male WT", "KO Male"))
+
+x = PhenList(rasd1_impc, testGenotype = "BL3486",refGenotype = "+/+")
+
+t = testDataset(x, depVariable = "Value", equation = "withWeight")
+
+ggplot(r, aes(con,Value )) + geom_boxplot()
+
+
+#resid = as.data.frame(t@analysisResults$model.output$residuals)
+
+#resid$genotype = rasd1_impc[,"Genotype"]
+#resid$sex = rasd1_impc[,"Sex"]
+
+##2D
+
+##2E
+#from B6>OBs_RNA_Seq.R
+load("./results/Rdata/rasd1_calvarial.Rdata") #called temp4
+
+ggplot(temp4, aes(x=Day, y=mean,ymin=mean-temp4$sem, ymax=mean+temp4$sem, colour=newGene,Group=newGene)) + 
+  geom_errorbar(aes(ymin=mean-temp4$sem, ymax=mean+temp4$sem), width=0.5, size=1.25) +
+  geom_line(aes(group=newGene), size=0.5) +
+  geom_point() + scale_color_discrete(name="Gene",
+                                      breaks=as.character(unique(temp4$Gene)),
+                                      labels=genes,l=60) +
+  scale_y_continuous() + facet_wrap(~newGene, scales='free_y') 
+
+
+##Figure 3
+#3A
 #scatterplot with traits, across all chroms, color traits differently, LOD score, labels
 #load in significant qtl
 qtl = read.csv("./results/flat/qtl_loc",stringsAsFactors = F)
@@ -343,7 +446,7 @@ p2a=ggplot() +
   #geom_label_repel
 
 
-###2B
+###3B
 #chr3 Ma.Ar QTL Trace
 
 #load("./results/Rdata/DO_qtl_scan_norm.Rdata")
@@ -357,7 +460,7 @@ plot_coefCC(maar3_blup[1000:3300,], cross_basic$pmap,scan1_output = subset(DO_qt
 
 
 
-##2C
+##3C
 
 query_variants <- create_variant_query_func("./data/CCdb/cc_variants.sqlite")
 query_genes <- create_gene_query_func("./data/CCdb/mouse_genes_mgi.sqlite")
@@ -433,7 +536,7 @@ plot_coefCC(MSTRG.15704[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3
 ####
 #Figure3
 ####
-####3A
+####4A
 
 # plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.TMD",ylim=c(0,25),col="red")
 # plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "ML",col="blue",add=T)
@@ -480,7 +583,7 @@ x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text
 
 x1/x2/x3/x4/x5/x6/x7/x8
 
-##3B
+##4B
 #POMP data
 #from pomp_mapping_ML.R
 load("./results/Rdata/scan1_pomp.Rdata")
@@ -491,7 +594,7 @@ plot_coefCC(coef_ML_pomp_blup, MM_snps1_pmap["1"], scan1_output=subset(scan1_pom
 
 
 
-#3C 
+#4C 
 #like 3A but after conditioning on ML index variant
 
 #condition on top snp rs50769082
@@ -538,7 +641,7 @@ x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text
 
 x1/x2/x3/x4/x5/x6/x7/x8
 
-#3D
+#4D
 load("./results/Rdata/qsox1_ier5.Rdata") # got from supercomputing cluster. main files too big to keep on laptop
 
 #plot
@@ -562,7 +665,7 @@ plot_coefCC(MremiL_blup, cross_basic$pmap,scan1_output = subset(DO_qtl_scan_norm
 
 
 ##
-##3E
+##4E
 #get microarray data from bioGPS (03.24.2020):
 #GSE10246
 biogps = read_csv("./data/GSE10246_bioGPS_032420.csv")
@@ -595,11 +698,11 @@ ggplot(biogps_means, aes(x=tis, y=as.numeric(val), fill=col)) +
 #
 #
 #
-##3F
+##4F
 #seurat_analysis.R
 
 
-####4A
+####5A
 #done externally
 library(BSgenome.Mmusculus.UCSC.mm10)
 from = 155778158
@@ -615,7 +718,7 @@ gr=GRanges(seqnames = c("chr1"), ranges = IRanges(start=from, end=to), strand = 
 subsetByOverlaps(transcripts(TxDb.Mmusculus.UCSC.mm10.knownGene),gr)
 plot_theme = theme(legend.position = "none")
 geneViz(TxDb.Mmusculus.UCSC.mm10.knownGene, gr, BSgenome.Mmusculus.UCSC.mm10,isoformSel = "uc007dbp.1", labelTranscript = F, plotLayer = plot_theme)
-##4B
+##5B
 #Mostly Charles Farber's code
 dat2<-read.csv('./data/pheno_data/Qsox1_data/QsoxAssay_June09.csv',header=T)
 
@@ -632,7 +735,7 @@ ggplot(data = dat2.melt, aes(x=Genotype, y=Activity,Group=Mutation,fill=Mutation
   ylab('QSOX1 Activity (pmol H2O2/min/ul')
 
 
-####4C
+####5C
 # generate LSMEANS by sex adjusting for weight, length and mutation type
 # can add mutation type to the filter statement to look at effects
 # of individual mutation
@@ -677,7 +780,7 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 ######
 #ADD SAMPLE COUNTS PER GENOTYPE
 ######
-#4D
+#5D
 #
 #"uCT_Ct.TMD","uCT_Ct.porosity"
 dat1<-read.csv('./data/pheno_data/Qsox1_data/qsox_uCT.csv',header=T,na.strings='NA')
@@ -698,7 +801,7 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 #
 ####
 ####
-#4E
+#5E
 lf.lm.12<-lm(Imax.mm4.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
@@ -713,7 +816,7 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 #
 ###
 ####
-#4F
+#5F
 lf.lm.12<-lm(Ct.Ar.Tt.Ar....~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
@@ -744,7 +847,7 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 #
 #
 #
-#4H
+#5H
 #
 lf.lm.12<-lm(Ma.Ar.mm2.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
 anova(lf.lm.12)
@@ -757,7 +860,7 @@ lff = as.data.frame(lff)
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
   theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.93"),aes(y=lsmeans.lsmean),y_position = c(1.09)) + ylim(0.98,1.09)
 
-###4I
+###5I
 lf.lm.12<-lm(Ct.TMD..mgHA.cm3.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
@@ -773,7 +876,7 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 #
 #
 #
-###4J
+###5J
 lf.lm.12<-lm(Ct.Porosity....~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
 anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
@@ -786,7 +889,7 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
   theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.242"),aes(y=lsmeans.lsmean),y_position = c(1.6)) + ylim(0.85,1.6)
 
 #######
-####4K
+####5K
 qsox_bend_AP = read.csv("./data/pheno_data/Qsox1_data/qsox1_bending_AP.csv")
 qsox_bend_ML = read.csv("./data/pheno_data/Qsox1_data/qsox1_bending_ML.csv")
 
@@ -821,5 +924,14 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 
 
 
-###4L is external
+###5L is external
+
+
+
+
+
+
+
+
+
 

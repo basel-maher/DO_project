@@ -66,11 +66,11 @@ ElbowPlot(ob)
 
 
 ##
-ob <- FindNeighbors(ob, dims = 1:10)
+ob <- FindNeighbors(ob, dims = 1:15)
 ob <- FindClusters(ob, resolution = 0.5)
 ##
 
-ob <- RunUMAP(ob, dims = 1:10)
+ob <- RunUMAP(ob, dims = 1:20)
 
 DimPlot(ob, reduction = "umap", label=T)
 
@@ -78,7 +78,7 @@ DimPlot(ob, reduction = "umap", label=T)
 # individual clusters
 DimPlot(ob, reduction = "umap", label=TRUE,split.by = "seurat_clusters")
 
-cluster5.markers <- FindMarkers(ob, ident.1 = 5, min.pct = 0.25)
+cluster5.markers <- FindMarkers(ob, ident.1 = 0, min.pct = 0.25)
 
 ob.markers <- FindAllMarkers(ob, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 ob.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
@@ -87,7 +87,7 @@ ob.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
 cluster5.markers <- FindMarkers(ob, ident.1 = c(5), ident.2 = c(0,1,2,3,4,6,7,8,9,10), min.pct = 0.25)
 head(cluster5.markers, n = 30)
 
-FeaturePlot(ob, features = c("Qsox1", "Timp2"))
+FeaturePlot(ob, features = c("Rasd1"))
 
 
 FeaturePlot(ob, features = c("Tnfsf11", "Tnfrsf11a", "Tnfrsf11b"))

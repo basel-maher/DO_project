@@ -79,7 +79,10 @@ temp4<-ddply(temp3, c('Gene','Day'), summarise,
       mean = mean(value), sd = sd(value),
       sem = sd(value)/sqrt(length(value)))
 
+
 temp4$newGene<-mapvalues(temp4$Gene, from=unique(temp4$Gene), to=toupper(genes))
+
+save(temp4,file = "./results/Rdata/rasd1_calvarial.Rdata")
 
 ggplot(temp4, aes(x=Day, y=mean,ymin=mean-temp4$sem, ymax=mean+temp4$sem, colour=newGene,Group=newGene)) + 
   geom_errorbar(aes(ymin=mean-temp4$sem, ymax=mean+temp4$sem), width=0.5, size=1.25) +
