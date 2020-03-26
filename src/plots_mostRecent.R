@@ -13,7 +13,8 @@ library(tidyr)
 library(reshape2)
 library(emmeans)
 library(ggsignif)
-
+library(Gviz)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 #
 #load the geno probs
 load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
@@ -599,10 +600,21 @@ ggplot(biogps_means, aes(x=tis, y=as.numeric(val), fill=col)) +
 
 
 ####4A
-#Done externally
+#done externally
+library(BSgenome.Mmusculus.UCSC.mm10)
+from = 155778158
+to = 155812889
+txTr = GeneRegionTrack(TxDb.Mmusculus.UCSC.mm10.knownGene, chromosome = "chr1",start = from, end = to)
+plotTracks(txTr)
+
+biomTrack <- BiomartGeneRegionTrack(genome = "mm10",name = "ENSEMBL", symbol = "Qsox1")
+plotTracks(biomTrack)
 
 
-
+gr=GRanges(seqnames = c("chr1"), ranges = IRanges(start=from, end=to), strand = strand(c("-")))
+subsetByOverlaps(transcripts(TxDb.Mmusculus.UCSC.mm10.knownGene),gr)
+plot_theme = theme(legend.position = "none")
+geneViz(TxDb.Mmusculus.UCSC.mm10.knownGene, gr, BSgenome.Mmusculus.UCSC.mm10,isoformSel = "uc007dbp.1", labelTranscript = F, plotLayer = plot_theme)
 ##4B
 #Mostly Charles Farber's code
 dat2<-read.csv('./data/pheno_data/Qsox1_data/QsoxAssay_June09.csv',header=T)
@@ -744,3 +756,70 @@ lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 lff = as.data.frame(lff)
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
   theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.93"),aes(y=lsmeans.lsmean),y_position = c(1.09)) + ylim(0.98,1.09)
+
+###4I
+lf.lm.12<-lm(Ct.TMD..mgHA.cm3.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
+anova(lf.lm.12)
+lf<-lsmeans(lf.lm.12,"Genotype")
+par(mfrow=c(2,2))
+plot(lf,horizontal=F,ylab="Ma.Ar")
+lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
+
+lff = as.data.frame(lff)
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.4"),aes(y=lsmeans.lsmean),y_position = c(1182)) + ylim(1162,1182)
+
+
+#
+#
+#
+###4J
+lf.lm.12<-lm(Ct.Porosity....~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
+anova(lf.lm.12)
+lf<-lsmeans(lf.lm.12,"Genotype")
+par(mfrow=c(2,2))
+plot(lf,horizontal=F,ylab="Ma.Ar")
+lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
+
+lff = as.data.frame(lff)
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.242"),aes(y=lsmeans.lsmean),y_position = c(1.6)) + ylim(0.85,1.6)
+
+#######
+####4K
+qsox_bend_AP = read.csv("./data/pheno_data/Qsox1_data/qsox1_bending_AP.csv")
+qsox_bend_ML = read.csv("./data/pheno_data/Qsox1_data/qsox1_bending_ML.csv")
+
+qsox_bend_ML$Genotype = qsox_bend_AP[match(qsox_bend_ML$Specimen, qsox_bend_AP$Specimen),"Genotype"]
+qsox_bend_ML$Weight = qsox_bend_AP[match(qsox_bend_ML$Specimen, qsox_bend_AP$Specimen),"Weight"]
+qsox_bend_ML$Qsox.Mutation = qsox_bend_AP[match(qsox_bend_ML$Specimen, qsox_bend_AP$Specimen),"Qsox.Mutation"]
+
+
+lf.lm.12<-lm(Max.Load..N.~Genotype+Weight+Qsox.Mutation,data=qsox_bend_ML)
+anova(lf.lm.12)
+lf<-lsmeans(lf.lm.12,"Genotype")
+par(mfrow=c(2,2))
+plot(lf,horizontal=F,ylab="Ma.Ar")
+lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
+
+lff = as.data.frame(lff)
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.001"),aes(y=lsmeans.lsmean),y_position = c(63)) + ylim(40,63)
+
+###AP
+lf.lm.12<-lm(Max.Load..N.~Genotype+Weight+Qsox.Mutation,data=qsox_bend_AP)
+anova(lf.lm.12)
+lf<-lsmeans(lf.lm.12,"Genotype")
+par(mfrow=c(2,2))
+plot(lf,horizontal=F,ylab="Ma.Ar")
+lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
+
+lff = as.data.frame(lff)
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.198"),aes(y=lsmeans.lsmean),y_position = c(33)) + ylim(26,33)
+###
+
+
+
+###4L is external
+
