@@ -66,16 +66,21 @@ ElbowPlot(ob)
 
 
 ##
-ob <- FindNeighbors(ob, dims = 1:15)
+ob <- FindNeighbors(ob, dims = 1:12)
 ob <- FindClusters(ob, resolution = 0.5)
 ##
 
-ob <- RunUMAP(ob, dims = 1:20)
+ob <- RunUMAP(ob, dims = 1:12)
 
 DimPlot(ob, reduction = "umap", label=T)
 
 # note that you can set `label = TRUE` or use the LabelClusters function to help label
 # individual clusters
+
+FeaturePlot(ob, features = c("Rasd1"))
+
+#save(ob, file = "./results/Rdata/seurat_ob.Rdata")
+
 DimPlot(ob, reduction = "umap", label=TRUE,split.by = "seurat_clusters")
 
 cluster5.markers <- FindMarkers(ob, ident.1 = 0, min.pct = 0.25)
@@ -87,44 +92,16 @@ ob.markers %>% group_by(cluster) %>% top_n(n = 2, wt = avg_logFC)
 cluster5.markers <- FindMarkers(ob, ident.1 = c(5), ident.2 = c(0,1,2,3,4,6,7,8,9,10), min.pct = 0.25)
 head(cluster5.markers, n = 30)
 
-FeaturePlot(ob, features = c("Rasd1"))
-
-
-FeaturePlot(ob, features = c("Tnfsf11", "Tnfrsf11a", "Tnfrsf11b"))
-
-
-FeaturePlot(ob, features = c("Sp7", "Ibsp", "Bglap", "Col1a1"))
-
-FeaturePlot(ob, features = c("Sost", "Dmp1", "Phex", "Mepe"))
-
-FeaturePlot(ob, features = c("Ctsk", "Ocstamp", "Dcstamp"))
-FeaturePlot(ob, features = c("Adcy9"))
-FeaturePlot(ob, features = c("Rasd1"))
-
-
-
-ob.markers[which(ob.markers$cluster==8),]
-
-ob@meta.data$seurat_clusters
-Idents(ob)[5]
-
-#bulk rna counts
-Matrix::rowSums(ob[["RNA"]]@counts)
-
-#rna counts per cluster
-Idents(ob)
-
-c0Counts = ob[["RNA"]]@counts[,names(Idents(ob)[which(Idents(ob) == 0)])]
-c0Sums = Matrix::rowSums(c0Counts)
-
-
-cluster_RNA_sums = matrix(nrow = 17401, ncol=11)
-colnames(cluster_RNA_sums) = paste0("c_",c(0:10))
-
-for(i in c(0:10)){
-  counts = ob[["RNA"]]@counts[,names(Idents(ob)[which(Idents(ob) == i)])]
-  sums = as.matrix(Matrix::rowSums(counts))
-  
-  cluster_RNA_sums[,i+1] = sums
-  rownames(cluster_RNA_sums) = rownames(counts)
-}
+# FeaturePlot(ob, features = c("Qsox1"))
+# 
+# 
+# FeaturePlot(ob, features = c("Tnfsf11", "Tnfrsf11a", "Tnfrsf11b"))
+# 
+# 
+# FeaturePlot(ob, features = c("Sp7", "Ibsp", "Bglap", "Col1a1"))
+# 
+# FeaturePlot(ob, features = c("Sost", "Dmp1", "Phex", "Mepe"))
+# 
+# FeaturePlot(ob, features = c("Ctsk", "Ocstamp", "Dcstamp"))
+# FeaturePlot(ob, features = c("Adcy9"))
+# FeaturePlot(ob, features = c("Rasd1"))

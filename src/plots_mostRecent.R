@@ -361,6 +361,11 @@ ggplot(r, aes(con,Value )) + geom_boxplot()
 #resid$sex = rasd1_impc[,"Sex"]
 
 ##2D
+load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
+
+FeaturePlot(ob, features = c("Rasd1"))
+
+
 
 ##2E
 #from B6>OBs_RNA_Seq.R
@@ -700,7 +705,7 @@ ggplot(biogps_means, aes(x=tis, y=as.numeric(val), fill=col)) +
 #
 ##4F
 #seurat_analysis.R
-
+load("./results/Rdata/seurat_ob.Rdata") #loads as "ob"
 
 ####5A
 #done externally
