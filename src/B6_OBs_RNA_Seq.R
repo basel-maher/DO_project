@@ -39,7 +39,7 @@ genes<-c('Bicc1')
 grep('ENSMUST00000182158',gene.ann[,1])
 grep('A430106G13Rik',gene.ann[,2])
 dat1<-c()
-genes<-c('Rasd1')#A930004D18Rik
+genes<-c('Qsox1')#A930004D18Rik
 genes<-unique(genes)
 rm(dat1)
 dat1<-c()
