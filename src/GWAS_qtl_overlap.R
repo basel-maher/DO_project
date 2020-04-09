@@ -2,6 +2,7 @@
 set.seed(8675309)
 library(GenomicRanges)
 library(Homo.sapiens)
+library(biomaRt)
 
 ###
 #get mouse QTL loci and identify syntenic regions.
@@ -70,7 +71,7 @@ morris = read.table("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-
 #get vars that are genome wide significant
 morris = morris[which(morris$P.NI <= 5e-8),]
 
-#create GRanges object
+#make into GRanges format
 chroms_human = paste0("chr",morris$CHR)
 #convert chr23 to chrX
 chroms_human[which(chroms_human == "chr23")] = "chrX"
@@ -78,6 +79,34 @@ bp_human = morris$BP
 
 #convert to GRanges format
 pos_human = paste0(chroms_human,":",bp_human)
+
+#GRanges
+#pos_human_grange = as(pos_human, "GRanges")
+
+
+
+
+####load in Estrada data
+
+#get rsid pos
+mart = useMart(biomart = "ENSEMBL_MART_SNP", host = "grch37.ensembl.org",path = "/biomart/martservice", dataset = "hsapiens_snp")
+
+snps = getBM(attributes = c("refsnp_id", "chr_name","chrom_start"),
+             filters = "snp_filter",
+             values = gefos_snps,
+             mart = mart)
+
+
+snps$pos = paste0("chr",snps$chr_name, ":", snps$chrom_start)
+
+
+
+
+####merge with morris
+pos_human = append(pos_human, snps$pos)
+pos_human = unique(pos_human)
+####
+
 
 #GRanges
 pos_human_grange = as(pos_human, "GRanges")
