@@ -14,6 +14,8 @@ library(reshape2)
 library(emmeans)
 library(ggsignif)
 library(RACER)
+library(PhenStat)
+library(Seurat)
 #
 #load the geno probs
 load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
@@ -83,11 +85,12 @@ mean_per_chrom = mean_per_chrom[match(chr,mean_per_chrom$Group.1),]
 rownames(mean_per_chrom) =mean_per_chrom$Group.1
 mean_per_chrom = mean_per_chrom[,-1]
 
-barplot(as.matrix(t(mean_per_chrom)),col = CCcolors, ylab = "Allele Frequency", xlab="Chr", main = "Global Allele Freq. Per Chromosome")
+pdf(file="~/Desktop/figs/1B.pdf", width = 10, height = 7)
+barplot(as.matrix(t(mean_per_chrom)),col = CCcolors, ylab = "Allele frequency", xlab="Chr", main = "Global allele frequency per chromosome")
+legend("topleft", fill=CCcolors, legend=c("A/J","C57BL/6J","129S1/SvImJ","NOD/ShiLtJ","NZO/HILtJ","CAST/EiJ","PWK/PhJ","WSB/EiJ"),cex = 2, box.lwd = 1.5)
+dev.off()
 
 
-
-legend("topleft", fill=CCcolors, legend=c("AJ","B6","129","NOD","NZO","CAST","PWK","WSB"))
 
 
 
@@ -120,8 +123,8 @@ colnames(df_bvtv)[1] = "val"
 
 
 p3 <- ggplot(df_bvtv, aes(x=reorder(ind,val), y=val,width=1)) + 
-  geom_bar(stat="identity",color=CCcolors[4]) + theme(axis.text.x = element_blank()) + xlab("") + ylab("Bone Volume Fraction (BV/TV) (%)")
-
+  geom_bar(stat="identity",color=CCcolors[4]) + theme_bw() + theme(axis.text.x = element_blank()) + xlab("") + ylab("Bone volume fraction (BV/TV, %)") + xlab("DO mouse index") + scale_y_continuous(expand=c(0,0)) +
+  theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=20), axis.text.y = element_text(size = 15))
 
 
 df_str = as.data.frame(cross_basic$pheno[,"bending_max_load"])
@@ -130,13 +133,26 @@ df_str$ind = rownames(df_str)
 colnames(df_str)[1] = "val"
 
 p4 <- ggplot(df_str, aes(x=reorder(ind,val), y=val,width=1)) + 
-  geom_bar(stat="identity",color=CCcolors[6]) + theme(axis.text.x = element_blank()) + xlab("DO Mouse") + ylab("Max Load (N)")
+  geom_bar(stat="identity",color=CCcolors[6]) +theme_bw() + theme(axis.text.x = element_blank()) + xlab("DO Mouse") + ylab("Max Load (N)") + xlab("DO mouse index") + scale_y_continuous(expand=c(0,0)) +
+  theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=20), axis.text.y = element_text(size = 15))
+
+
 
 
 
 patch = p3 / p4
 
+pdf(file="~/Desktop/figs/1C.pdf", width = 10, height = 7)
+patch
+dev.off()
 
+pdf(file="~/Desktop/figs/1Ca.pdf", width = 10, height = 7)
+p3
+dev.off()
+
+pdf(file="~/Desktop/figs/1Cb.pdf", width = 10, height = 7)
+p4
+dev.off()
 # 
 # p
 #1D) heritability
@@ -188,7 +204,7 @@ h_df$pheno = rownames(h_df)
 
 
 #grid.table(hsq_table)
-hsq_table = h_df[-which(h_df$pheno %in% c("glucose", "soleus_weight","adiposity","RFP","GFP","BFP","FFP","gastroc_weight","MAT_VOL1_nonzero","MAT_VOL2_nonzero","MAT_VOL3_nonzero","MAT_VOL4_nonzero")),]
+hsq_table = h_df[-which(h_df$pheno %in% c("glucose", "soleus_weight","adiposity","RFP","GFP","BFP","FFP","gastroc_weight","MAT_VOL1_nonzero","MAT_VOL2_nonzero","MAT_VOL3_nonzero","MAT_VOL4_nonzero","body_length")),]
 
 hsq_table[grep("bending",x = hsq_table$pheno),"group"] = 1
 hsq_table[grep("uCT",x = hsq_table$pheno),"group"] = 2
@@ -201,6 +217,7 @@ hsq_table[grep("FL",x = hsq_table$pheno,fixed=T),"group"] = 5
 hsq_table[grep("body_length",x = hsq_table$pheno,fixed=T),"group"] = 5
 
 hsq_table = hsq_table[order(hsq_table$h),]
+
 
 pheno = c(hsq_table[which(hsq_table$group == 1),"pheno"])
 pheno = append(pheno,c(hsq_table[which(hsq_table$group == 2),"pheno"]))
@@ -217,12 +234,30 @@ pheno = append(pheno,c(hsq_table[which(hsq_table$group == 5),"pheno"]))
 hsq_table$pheno <- factor(hsq_table$pheno, levels = hsq_table$pheno)
 
 
+
 p5<-ggplot(hsq_table, aes(x=pheno, y=h, fill=as.factor(group))) + 
-  geom_bar(position = "dodge",stat="identity") + coord_flip() + scale_x_discrete(limits = c(pheno)) + xlab("Heritability") + ylab("Phenotype") + scale_color_brewer(palette = "Dark2") + theme(legend.position = "none")
+  geom_bar(stat="identity",show.legend = F) + coord_flip() + scale_x_discrete(limits = c(pheno), labels=c(
+    expression(D[yield]),"PYD", expression(W[yield]), "k", expression(k[yield]),
+    expression(F[yield]),expression(D[Fmax]), expression(W[py]), "W", expression(D[fx]),
+    expression(F[max]),expression(F[fx]), "Ct.Por","SMI","Tb.Th",
+    "BS/BV","Conn.D.", "BV/TV","BMD","Tb.Sp",
+    "Tb.N", expression(I[max]), "TMD",expression(I[min]),"pMOI",
+    "Tt.Ar","Ct.Th", "Ct.Ar","Ma.Ar","Ct.Ar/Tt.Ar",
+    "histo_OS/BS", "histo_OV/BV", "histo_ObS/OS", "histo_NOb/Obpm", "histo_NOb/Opm",
+    "histo_BS/BV", "histo_Tb.Th", "histo_NOc/Bpm", "histo_OTh", "histo_ObS/BS",
+    "histo_OcS/BS", "histo_Tb.N", "histo_NOb/Bpm", "histo_BV/TV", "histo_Tb.Sp",
+    "histo_NOc/TAR", "histo_NOb/TAR","histo_OV/TV", "MAT_V1", "MAT_V3",
+    "MAT_V2", "MAT_V4","AP","FL","ML"
+    )) + 
+  
+  xlab("Phenotype") + ylab("Heritability") + scale_color_brewer(palette = "Dark2") + theme_bw() +scale_y_continuous(limits = c(0,1),expand=c(0,0)) +
+  theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=20), axis.text = element_text(size = 15))
 
+pdf(file="~/Desktop/figs/1D.pdf", width = 12, height = 14)
+p5
+dev.off()
 
-
-#wrap_plots(p1,p,p2,p3)
+s#wrap_plots(p1,p,p2,p3)
 #patchwork+plot_annotation(tag_levels = "A")
 
 # x = as.data.frame(hsq)
@@ -298,11 +333,13 @@ bmd_racer = bmd_racer[,-11]
 
 gtex_racer = RACER::formatRACER(assoc_data = gtex, chr_col = 11, pos_col = 13, p_col = 5)
 
-bmd_racer_ld = (RACER::ldRACER(assoc_data = bmd_racer, rs_col = 2, pops = "EUR", lead_snp = "rs1029830"))
-gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR", lead_snp = "rs1029830"))
+bmd_racer_ld = (RACER::ldRACER(assoc_data = bmd_racer, rs_col = 2, pops = "EUR", lead_snp = "rs1736213"))
+gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR", lead_snp = "rs1736213"))
 
-
-mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 17, plotby = "coord",start_plot = 17000000, end_plot = 17450000 ,build = "hg19", name1 = "eBMD", name2 = "RASD1 - Stomach")
+cairo_pdf(file="~/Desktop/figs/2A.pdf", width = 9, height = 7)
+par(ps=12)
+mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 17, plotby = "coord",start_plot = 17050000, end_plot = 17410000 ,build = "hg19", name1 = "eBMD", name2 = "RASD1 - Stomach")
+dev.off()
 ####
 
 #2B
@@ -312,7 +349,39 @@ tan = as.data.frame(net$MEs[,"ME12"])
 tan$DO = rnames
 tan = tan[order(as.numeric(tan$DO)),]
 
-p = pheno_combined[,"uCT_BV.TV"]
+bvtv = pheno_combined[,"uCT_BV.TV"]
+
+n=c()
+for(i in names(bvtv)){
+  x=strsplit(i, split = "[.]")[[1]][1]
+  n=append(n,x)
+}
+names(bvtv) = n
+bvtv = bvtv[which(names(bvtv) %in% tan$DO)]
+
+bvtv = bvtv[order(as.numeric(names(bvtv)))]
+
+cor(tan$`net$MEs[, "ME12"]`, bvtv, method = "s")
+cor.test(tan$`net$MEs[, "ME12"]`, bvtv,method = "s")
+
+
+d = cbind(bvtv,tan)
+#rho -.262
+#pval 0.0002418
+#pdf(file="~/Desktop/figs/2B1.pdf", width = 9, height = 7)
+p1 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=bvtv)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab("Bone volume fraction (%)") + 
+  theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
+
+#dev.off()
+
+
+
+
+
+
+
+
+p = pheno_combined[,"uCT_BMD"]
 
 n=c()
 for(i in names(p)){
@@ -324,13 +393,155 @@ p = p[which(names(p) %in% tan$DO)]
 
 p = p[order(as.numeric(names(p)))]
 
-cor(tan$`net$MEs[, "ME12"]`, p, method = "s")
+cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #-0.276
 cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
 
 
 d = cbind(p,tan)
+#rho -.262
 
-ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm)
+#pdf(file="~/Desktop/figs/2B2.pdf", width = 9, height = 7)
+p2 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab(expression(paste("Volumetric BMD (mgHA/", cm^3,")"))) +
+  theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
+
+#dev.off()
+
+
+
+
+
+
+
+p = pheno_combined[,"AP"]
+
+n=c()
+for(i in names(p)){
+  x=strsplit(i, split = "[.]")[[1]][1]
+  n=append(n,x)
+}
+names(p) = n
+p = p[which(names(p) %in% tan$DO)]
+
+p = p[order(as.numeric(names(p)))]
+
+cor(tan$`net$MEs[, "ME12"]`, p, method = "s", use = "p") #
+cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
+
+
+d = cbind(p,tan)
+#rho -.258
+
+#pdf(file="~/Desktop/figs/2B4.pdf", width = 9, height = 7)
+p3 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab("Anterior-posterior femoral width (mm)") +
+theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
+
+#dev.off()
+
+
+
+
+
+
+
+
+
+
+
+p = pheno_combined[,"uCT_Tb.N"]
+
+n=c()
+for(i in names(p)){
+  x=strsplit(i, split = "[.]")[[1]][1]
+  n=append(n,x)
+}
+names(p) = n
+p = p[which(names(p) %in% tan$DO)]
+
+p = p[order(as.numeric(names(p)))]
+
+cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #
+cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
+
+
+d = cbind(p,tan)
+#rho -.347
+
+#pdf(file="~/Desktop/figs/2B3.pdf", width = 9, height = 7)
+p4 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab(expression(paste("Trabecular number (", mm^-1,")"))) +
+theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
+
+
+
+
+
+
+
+
+
+
+p = pheno_combined[,"uCT_Tb.Sp"]
+
+n=c()
+for(i in names(p)){
+  x=strsplit(i, split = "[.]")[[1]][1]
+  n=append(n,x)
+}
+names(p) = n
+p = p[which(names(p) %in% tan$DO)]
+
+p = p[order(as.numeric(names(p)))]
+
+cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #0.34
+cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
+
+
+d = cbind(p,tan)
+#rho -.347
+
+#pdf(file="~/Desktop/figs/2B3.pdf", width = 9, height = 7)
+p5 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab("Trabecular separation (mm)") +
+  theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
+
+
+
+
+
+
+p = pheno_combined[,"uCT_conn_density"]
+
+n=c()
+for(i in names(p)){
+  x=strsplit(i, split = "[.]")[[1]][1]
+  n=append(n,x)
+}
+names(p) = n
+p = p[which(names(p) %in% tan$DO)]
+
+p = p[order(as.numeric(names(p)))]
+
+cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #-0.34
+cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
+
+
+d = cbind(p,tan)
+#rho -.347
+
+#pdf(file="~/Desktop/figs/2B3.pdf", width = 9, height = 7)
+p6 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab(expression(paste("Connectivity density (", mm^-3,")"))) +
+  theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
+
+
+
+layout = "
+ABC
+DEF
+"
+
+par(ps=12)
+cairo_pdf(file="~/Desktop/figs/2B.pdf", width = 15, height = 12)
+p1+p2+p3+p4+p5+p6+plot_layout(design = layout)
+dev.off()
+
 
 
 
@@ -347,13 +558,17 @@ r[which(r$con == "BL3486female"),"con"] = "KO Female"
 r[which(r$con == "BL3486male"),"con"] = "KO Male"
 
 r$con = factor(r$con, levels = c("Female WT","KO Female","Male WT", "KO Male"))
-
+r$col = 1
+r$col[which(r$con == "Female WT" | r$con == "Male WT")] = 0
 x = PhenList(rasd1_impc, testGenotype = "BL3486",refGenotype = "+/+")
 
 t = testDataset(x, depVariable = "Value", equation = "withWeight")
 
-ggplot(r, aes(con,Value )) + geom_boxplot()
-
+par(ps=12)
+cairo_pdf(file="~/Desktop/figs/2C.pdf", width = 10, height = 7)
+ggplot(r, aes(con,Value, fill=as.factor(col) )) + geom_boxplot(width=0.1) + xlab(NULL) + ylab("BMD") + theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15), legend.position = "none")+
+  scale_fill_brewer(palette = "Dark2")
+dev.off()
 
 #resid = as.data.frame(t@analysisResults$model.output$residuals)
 
@@ -363,21 +578,32 @@ ggplot(r, aes(con,Value )) + geom_boxplot()
 ##2D
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
 
-FeaturePlot(ob, features = c("Rasd1"))
-
+cairo_pdf(file="~/Desktop/figs/2D.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = c("Rasd1"),pt.size = 1, sort.cell = T)
+dev.off()
 
 
 ##2E
 #from B6>OBs_RNA_Seq.R
-load("./results/Rdata/rasd1_calvarial.Rdata") #called temp4
+# load("./results/Rdata/rasd1_calvarial.Rdata") #called temp4
+# 
+# genes = "Rasd1"
+# 
+# pdf(file="~/Desktop/figs/2E.pdf", width = 10, height = 7)
+# ggplot(temp4, aes(x=Day, y=mean,ymin=mean-temp4$sem, ymax=mean+temp4$sem, colour=newGene,Group=newGene)) + 
+#   geom_errorbar(aes(ymin=mean-temp4$sem, ymax=mean+temp4$sem), width=0.5, size=1.25) +
+#   geom_line(aes(group=newGene), size=0.5) +
+#   geom_point() + scale_color_discrete(name="Gene",
+#                                       breaks=as.character(unique(temp4$Gene)),
+#                                       labels=genes,l=60) +
+#   scale_y_continuous() + facet_wrap(~newGene, scales='free_y') 
+# dev.off()
+# 
 
-ggplot(temp4, aes(x=Day, y=mean,ymin=mean-temp4$sem, ymax=mean+temp4$sem, colour=newGene,Group=newGene)) + 
-  geom_errorbar(aes(ymin=mean-temp4$sem, ymax=mean+temp4$sem), width=0.5, size=1.25) +
-  geom_line(aes(group=newGene), size=0.5) +
-  geom_point() + scale_color_discrete(name="Gene",
-                                      breaks=as.character(unique(temp4$Gene)),
-                                      labels=genes,l=60) +
-  scale_y_continuous() + facet_wrap(~newGene, scales='free_y') 
+
+
+
+
 
 
 ##Figure 3
@@ -385,7 +611,7 @@ ggplot(temp4, aes(x=Day, y=mean,ymin=mean-temp4$sem, ymax=mean+temp4$sem, colour
 #scatterplot with traits, across all chroms, color traits differently, LOD score, labels
 #load in significant qtl
 qtl = read.csv("./results/flat/qtl_loc",stringsAsFactors = F)
-qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","MAT_VOL1","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Dfx","DFmax","Wtotal","WPY","TMD","Fmax","Ffrax","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
+qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","MAT_VOL1","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Dfx","DFmax","Wtotal","WPY","TMD","Fmax","Ffx","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
 qtl[which(qtl$chr=="X"),"chr"]="20"
 qtl$chr = as.numeric(qtl$chr)
 chr_lengths = as.data.frame(matrix(nrow=2,ncol=1))
@@ -450,22 +676,33 @@ p2a=ggplot() +
 #color by group?
   #geom_label_repel
 
+cairo_pdf(file="~/Desktop/figs/3A.pdf", width = 10, height = 7)
+p2a
+dev.off()
 
-###3B
+
+
+
+
+
+
+###4A
 #chr3 Ma.Ar QTL Trace
 
 #load("./results/Rdata/DO_qtl_scan_norm.Rdata")
 
 #maar3_blup = scan1blup(apr[,3], pheno_combined[,"uCT_Ma.Ar"], k_loco[["3"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
 #save(maar3_blup,file = "./results/Rdata/maar_chr3_blup.Rdata")
+
 load("./results/Rdata/maar_chr3_blup.Rdata")
+cairo_pdf(file="~/Desktop/figs/4A.pdf", width = 10, height = 7)
 plot_coefCC(maar3_blup[1000:3300,], cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="uCT_Ma.Ar"), main = "Ma.Ar - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
-# 
+dev.off()
 
 
 
 
-##3C
+##4B
 
 query_variants <- create_variant_query_func("./data/CCdb/cc_variants.sqlite")
 query_genes <- create_gene_query_func("./data/CCdb/mouse_genes_mgi.sqlite")
@@ -499,9 +736,9 @@ if("rRNA gene" %in% genes_locus$mgi_type){
 top_maar3 <- top_snps(out_snps_maar_3$lod, out_snps_maar_3$snpinfo, drop = 0.15 * max(out_snps_maar_3$lod))
 top_maar3[order(top_maar3$lod,decreasing = T),]
 
-
-plot_snpasso(out_snps_maar_3$lod, out_snps_maar_3$snpinfo, genes = genes_locus,show_all_snps = T, drop_hilit = 0.15*7.048437)
-
+#pdf(file="~/Desktop/figs/3C.pdf", width = 10, height = 7)
+#plot_snpasso(out_snps_maar_3$lod, out_snps_maar_3$snpinfo, genes = genes_locus,show_all_snps = T, drop_hilit = 0.15*7.048437)
+#dev.off()
 
 #get the colocalizing eqtl
 load("./results/Rdata/local_eqtl.Rdata")#eqtl
@@ -530,18 +767,55 @@ MSTRG.15703 = scan1blup(apr[,3], cross_eqtl$pheno[,"MSTRG.15703"], kinship = k_l
 MSTRG.15704 = scan1blup(apr[,3], cross_eqtl$pheno[,"MSTRG.15704"], kinship = k_loco[[3]], addcovar = covar_eqtl[,c(2,11:58)])
 
 
+cairo_pdf(file="~/Desktop/figs/4B1.pdf", width = 10, height = 7)
 plot_coefCC(MSTRG.15696[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15696"), main = "Mfsd1 - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
-plot_coefCC(MSTRG.15702[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15702"), main = "Il12a - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
-plot_coefCC(MSTRG.15703[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15703"), main = "Gm17641 - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
-plot_coefCC(MSTRG.15704[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15704"), main = "1110032F04Rik - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+dev.off()
 
+cairo_pdf(file="~/Desktop/figs/4B2.pdf", width = 10, height = 7)
+plot_coefCC(MSTRG.15702[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15702"), main = "Il12a - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/4B3.pdf", width = 10, height = 7)
+plot_coefCC(MSTRG.15703[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15703"), main = "Gm17641 - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/4B4.pdf", width = 10, height = 7)
+plot_coefCC(MSTRG.15704[1000:3300,], cross_basic$pmap,scan1_output = subset(chr3_coloc_genes, lodcolumn="MSTRG.15704"), main = "1110032F04Rik - Chr. 3", legend_ncol=1,top_panel_prop = 0.6)
+dev.off()
 # 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ####
 ####
-#Figure3
+
 ####
-####4A
+####5A
 
 # plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "uCT_Ct.TMD",ylim=c(0,25),col="red")
 # plot_scan1(DO_qtl_scan_normal[5700:6200,], map = cross_basic$pmap, chr = 1, lodcolumn = "ML",col="blue",add=T)
@@ -577,30 +851,118 @@ dat = as.data.frame(dat[which(rownames(dat) %in% rownames(map)),])
 colnames(dat) = c("TMD","ML","pMOI","Imax","Ct.Ar/Tt.Ar","Tt.Ar","Ma.Ar","Por")                  
 dat$map = map[1:nrow(dat),1]
 
-x1 = ggplot(data=dat[5700:6200,], aes(x=map, y=TMD))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 8.07,col="red")
-x2 = ggplot(data=dat[5700:6200,], aes(x=map, y=ML))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.76,col="red")
-x3 = ggplot(data=dat[5700:6200,], aes(x=map, y=pMOI))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.80,col="red")
-x4 = ggplot(data=dat[5700:6200,], aes(x=map, y=Imax))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.86,col="red")
-x5 = ggplot(data=dat[5700:6200,], aes(x=map, y=`Ct.Ar/Tt.Ar`))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.59,col="red")
-x6 = ggplot(data=dat[5700:6200,], aes(x=map, y=Tt.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.72,col="red")
-x7 = ggplot(data=dat[5700:6200,], aes(x=map, y=Ma.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.63,col="red")
-x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+geom_hline(yintercept = 7.77,col="red")+xlab("Chromosome 1 Position")
+# x1 = ggplot(data=dat[5700:6200,], aes(x=map, y=TMD))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 8.07,col="red")
+# x2 = ggplot(data=dat[5700:6200,], aes(x=map, y=ML))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.76,col="red")
+# x3 = ggplot(data=dat[5700:6200,], aes(x=map, y=pMOI))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.80,col="red")
+# x4 = ggplot(data=dat[5700:6200,], aes(x=map, y=Imax))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.86,col="red")
+# x5 = ggplot(data=dat[5700:6200,], aes(x=map, y=`Ct.Ar/Tt.Ar`))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.59,col="red")
+# x6 = ggplot(data=dat[5700:6200,], aes(x=map, y=Tt.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.72,col="red")
+# x7 = ggplot(data=dat[5700:6200,], aes(x=map, y=Ma.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.63,col="red")
+# x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+geom_hline(yintercept = 7.77,col="red")+xlab("Chromosome 1 Position")
+# 
+# cairo_pdf(file="~/Desktop/figs/5A.pdf", width = 10, height = 7)
+# x1/x2/x3/x4/x5/x6/x7/x8
+# dev.off()
 
-x1/x2/x3/x4/x5/x6/x7/x8
+TMD_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.TMD"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+ML_blup = scan1blup(apr[,1], pheno_combined[,"ML"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+pMOI_blup = scan1blup(apr[,1], pheno_combined[,"uCT_pMOI"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+Imax_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Imax"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+ctarttar_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.Ar.Tt.Ar"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+ttar_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Tt.Ar"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+maar_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Ma.Ar"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
+por_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.porosity"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
 
-##4B
-#POMP data
-#from pomp_mapping_ML.R
-load("./results/Rdata/scan1_pomp.Rdata")
-load("./results/Rdata/coef_ML_pomp_blup.Rdata")
+#save(TMD_blup, ML_blup, pMOI_blup, Imax_blup, ctarttar_blup, ttar_blup, maar_blup, por_blup, file = "~/Desktop/5Ablups.Rdata")
+cairo_pdf(file="~/Desktop/figs/5Ablups1.pdf", width = 10, height = 7)
+plot_coefCC(TMD_blup[5700:6200,], cross_basic$pmap, main = "TMD - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
 
-plot_coefCC(coef_ML_pomp_blup, MM_snps1_pmap["1"], scan1_output=subset(scan1_pomp, lodcolumn=2),legend = "topleft")
+cairo_pdf(file="~/Desktop/figs/5Ablups2.pdf", width = 10, height = 7)
+plot_coefCC(ML_blup[5700:6200,], cross_basic$pmap, main = "ML - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ablups3.pdf", width = 10, height = 7)
+plot_coefCC(pMOI_blup[5700:6200,], cross_basic$pmap, main = "pMOI - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ablups4.pdf", width = 10, height = 7)
+plot_coefCC(Imax_blup[5700:6200,], cross_basic$pmap, main = "Imax - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/5Ablups5.pdf", width = 10, height = 7)
+plot_coefCC(ctarttar_blup[5700:6200,], cross_basic$pmap, main = "Ct.AR/Tt.Ar - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ablups6.pdf", width = 10, height = 7)
+plot_coefCC(ttar_blup[5700:6200,], cross_basic$pmap, main = "Tt.Ar - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ablups7.pdf", width = 10, height = 7)
+plot_coefCC(maar_blup[5700:6200,], cross_basic$pmap, main = "Ma.Ar - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ablups8.pdf", width = 10, height = 7)
+plot_coefCC(por_blup[5700:6200,], cross_basic$pmap, main = "Ct.Por - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
 
 
 
 
-#4C 
-#like 3A but after conditioning on ML index variant
+cairo_pdf(file="~/Desktop/figs/5Ascan1.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.TMD" )
+add_threshold(cross_basic$pmap, thresholdA = 8.07, col="red")
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/5Ascan2.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "ML" )
+add_threshold(cross_basic$pmap, thresholdA = 7.76, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ascan3.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_pMOI" )
+add_threshold(cross_basic$pmap, thresholdA = 7.80, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ascan4.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Imax" )
+add_threshold(cross_basic$pmap, thresholdA = 7.86, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ascan5.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.Ar.Tt.Ar" )
+add_threshold(cross_basic$pmap, thresholdA = 7.59, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ascan6.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Tt.Ar" )
+add_threshold(cross_basic$pmap, thresholdA = 7.72, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ascan7.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ma.Ar")
+add_threshold(cross_basic$pmap, thresholdA = 7.63, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Ascan8.pdf", width = 10, height = 7)
+plot_scan1(DO_qtl_scan_normal[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.porosity")
+add_threshold(cross_basic$pmap, thresholdA = 7.77, col="red")
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+# ##4B (now supplementary)
+# #POMP data
+# #from pomp_mapping_ML.R
+# load("./results/Rdata/scan1_pomp.Rdata")
+# load("./results/Rdata/coef_ML_pomp_blup.Rdata")
+# load("./data/POMP/MM_snps1_pmap.Rdata")
+# 
+# pdf(file="~/Desktop/figs/4B.pdf", width = 10, height = 7)
+# plot_coefCC(coef_ML_pomp_blup, MM_snps1_pmap["1"], scan1_output=subset(scan1_pomp, lodcolumn=2),legend = "topleft")
+# dev.off()
+# 
+
+
+#5B
+#like 5A but after conditioning on ML index variant
 
 #condition on top snp rs50769082
 snpinfo <- data.frame(chr=c("1"),
@@ -613,7 +975,7 @@ snpinfo <- index_snps(cross_basic$pmap, snpinfo)
 snp_genoprobs = genoprob_to_snpprob(apr,snpinfo)
 snp_genoprobs =as.data.frame(snp_genoprobs$`1`)
 
-covar_snp = merge(covar, snp_genoprobs, by="row.names", all = TRUE)
+covar_snp = merge(new_covar, snp_genoprobs, by="row.names", all = TRUE)
 rownames(covar_snp) = covar_snp$Row.names
 
 ##
@@ -644,8 +1006,92 @@ x6 = ggplot(data=dat[5700:6200,], aes(x=map, y=Tt.Ar))+geom_line()+theme(axis.te
 x7 = ggplot(data=dat[5700:6200,], aes(x=map, y=Ma.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.63,col="red")
 x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+geom_hline(yintercept = 7.77,col="red")+xlab("Chromosome 1 Position")
 
+pdf(file="~/Desktop/figs/5b.pdf", width = 10, height = 7)
 x1/x2/x3/x4/x5/x6/x7/x8
+dev.off()
 
+
+
+TMD_blup_c = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.TMD"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+ML_blup_c = scan1blup(apr[,1], pheno_combined[,"ML"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+pMOI_blup_c = scan1blup(apr[,1], pheno_combined[,"uCT_pMOI"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+Imax_blup_c = scan1blup(apr[,1], pheno_combined[,"uCT_Imax"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+ctarttar_blup_c = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.Ar.Tt.Ar"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+ttar_blup_c = scan1blup(apr[,1], pheno_combined[,"uCT_Tt.Ar"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+maar_blup_c = scan1blup(apr[,1], pheno_combined[,"uCT_Ma.Ar"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+por_blup_c = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.porosity"], k_loco[["1"]], addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+
+save(TMD_blup_c, ML_blup_c, pMOI_blup_c, Imax_blup_c, ctarttar_blup_c,ttar_blup_c,maar_blup_c, por_blup_c ,file = "~/Desktop/5Bblups.Rdata")
+
+
+cairo_pdf(file="~/Desktop/figs/5Bblups1.pdf", width = 10, height = 7)
+plot_coefCC(TMD_blup_c[5700:6200,], cross_basic$pmap, main = "TMD - Chr. 1", legend_ncol=1,top_panel_prop = 0.7,)
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/5Bblups2.pdf", width = 10, height = 7)
+plot_coefCC(ML_blup_c[5700:6200,], cross_basic$pmap, main = "ML - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bblups3.pdf", width = 10, height = 7)
+plot_coefCC(pMOI_blup_c[5700:6200,], cross_basic$pmap,main = "pMOI - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bblups4.pdf", width = 10, height = 7)
+plot_coefCC(Imax_blup_c[5700:6200,], cross_basic$pmap, main = "Imax - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bblups5.pdf", width = 10, height = 7)
+plot_coefCC(ctarttar_blup_c[5700:6200,], cross_basic$pmap, main = "Ct.AR/Tt.Ar - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bblups6.pdf", width = 10, height = 7)
+plot_coefCC(ttar_blup_c[5700:6200,], cross_basic$pmap, main = "Tt.Ar - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bblups7.pdf", width = 10, height = 7)
+plot_coefCC(maar_blup_c[5700:6200,], cross_basic$pmap, main = "Ma.Ar - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bblups8.pdf", width = 10, height = 7)
+plot_coefCC(por_blup_c[5700:6200,], cross_basic$pmap, legend_ncol=1,top_panel_prop = 0.7)
+dev.off()
+
+
+
+
+
+cairo_pdf(file="~/Desktop/figs/5Bscan1.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.TMD" )
+add_threshold(cross_basic$pmap, thresholdA = 8.07, col="red")
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/5Bscan2.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "ML" , ylim=c(0,10))
+add_threshold(cross_basic$pmap, thresholdA = 7.76, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bscan3.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_pMOI", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.80, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bscan4.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Imax", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.86, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bscan5.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.Ar.Tt.Ar", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.59, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bscan6.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Tt.Ar", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.72, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bscan7.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ma.Ar", ylim=c(0,10))
+add_threshold(cross_basic$pmap, thresholdA = 7.63, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Bscan8.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.porosity", ylim=c(0,10))
+add_threshold(cross_basic$pmap, thresholdA = 7.77, col="red")
+dev.off()
+
+
+
+
+#NOW 6A
 #4D
 load("./results/Rdata/qsox1_ier5.Rdata") # got from supercomputing cluster. main files too big to keep on laptop
 
@@ -658,16 +1104,18 @@ qsox1 = scan1blup(apr[,1], cross_eqtl$pheno[,"MSTRG.1311"], kinship = k_loco[[1]
 
 
 
-plot_coefCC(ier5, cross_basic$pmap,scan1_output = subset(x, lodcolumn="Ier5"), main = "Ier5 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
-plot_coefCC(qsox1, cross_basic$pmap,scan1_output = subset(x, lodcolumn="Qsox1"), main = "Qsox1 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
 
 ##
 TMD_blup = scan1blup(apr[,1], pheno_combined[,"uCT_Ct.TMD"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
 ML_blup = scan1blup(apr[,1], pheno_combined[,"ML"], k_loco[["1"]], addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 1)
 
-plot_coefCC(TMD_blup, cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="uCT_Ct.TMD"), main = "TMD - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
-plot_coefCC(MremiL_blup, cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="ML"), main = "ML - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
 
+pdf(file="~/Desktop/figs/4D.pdf", width = 10, height = 7)
+plot_coefCC(ier5[5200:6700,], cross_basic$pmap,scan1_output = subset(x, lodcolumn="Ier5"), main = "Ier5 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(qsox1[5200:6700,], cross_basic$pmap,scan1_output = subset(x, lodcolumn="Qsox1"), main = "Qsox1 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(TMD_blup[5200:6700,], cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="uCT_Ct.TMD"), main = "TMD - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+plot_coefCC(ML_blup[5200:6700,], cross_basic$pmap,scan1_output = subset(DO_qtl_scan_normal, lodcolumn="ML"), main = "ML - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+dev.off()
 
 ##
 ##4E
@@ -697,15 +1145,18 @@ biogps_means[grep(pattern = "osteoblast", x = biogps_means$tis,ignore.case = T),
 
 p = biogps_means[order(as.numeric(biogps_means$val)),"tis"]
 
+pdf(file="~/Desktop/figs/4D.pdf", width = 10, height = 7)
 ggplot(biogps_means, aes(x=tis, y=as.numeric(val), fill=col)) + 
   geom_bar(position = "dodge",stat="identity") + coord_flip()  + xlab("Tissue") + ylab("Expression") + scale_color_brewer(palette = "Dark2") + theme(legend.position = "none") + scale_x_discrete(limits = p)
-
+dev.off()
 #
 #
 #
 ##4F
 #seurat_analysis.R
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob"
+
+
 
 ####5A
 #done externally
@@ -723,8 +1174,12 @@ gr=GRanges(seqnames = c("chr1"), ranges = IRanges(start=from, end=to), strand = 
 subsetByOverlaps(transcripts(TxDb.Mmusculus.UCSC.mm10.knownGene),gr)
 plot_theme = theme(legend.position = "none")
 geneViz(TxDb.Mmusculus.UCSC.mm10.knownGene, gr, BSgenome.Mmusculus.UCSC.mm10,isoformSel = "uc007dbp.1", labelTranscript = F, plotLayer = plot_theme)
+
+
 ##5B
 #Mostly Charles Farber's code
+
+
 dat2<-read.csv('./data/pheno_data/Qsox1_data/QsoxAssay_June09.csv',header=T)
 
 dat2$pmol.H202.min.ul<-dat2$pmol.H2O2.synthesized...min/5
@@ -734,24 +1189,26 @@ dat2<-filter(dat2,Genotype!='NA')
 dat2.melt<-melt(dat2[,c(1,8,18)])
 colnames(dat2.melt)<-c('Mutation','Genotype','variable','Activity')
 
+pdf(file="~/Desktop/figs/5B.pdf", width = 10, height = 7)
 ggplot(data = dat2.melt, aes(x=Genotype, y=Activity,Group=Mutation,fill=Mutation)) + 
   geom_boxplot(outlier.shape=NA) +
   geom_point(  position="jitter", size=1) +
   ylab('QSOX1 Activity (pmol H2O2/min/ul')
-
+dev.off()
 
 ####5C
 # generate LSMEANS by sex adjusting for weight, length and mutation type
 # can add mutation type to the filter statement to look at effects
 # of individual mutation
+
 dat1<-read.csv('./data/pheno_data/Qsox1_data/qsox1_caliper.csv',header=T,na.strings='NA')
 
 dat1$Genotype<-factor(dat1$Genotype, levels=c('wt','Het','Mut'))
-dat1<-filter(dat1,dat1$Mom_genotype!='B6' & dat1$Dad_genotype!='B6')
+dat1<-dplyr::filter(dat1,dat1$Mom_genotype!='B6' & dat1$Dad_genotype!='B6')
 dat1$ML_all<-(dat1$right_Femur_ML+dat1$left_Femur_ML)/2
 
 
-dat1.m<-filter(dat1,dat1$Sex=='M')
+dat1.m<-dplyr::filter(dat1,dat1$Sex=='M')
 
 
 lf.lm.12<-lm(ML_all~Genotype+Weight+Qsox_Mutation+Length,data=dat1.m)
@@ -763,12 +1220,13 @@ lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 
 lff = as.data.frame(lff)
+pdf(file="~/Desktop/figs/5C.pdf", width = 10, height = 7)
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("2.4e-3","2.87e-7","0.044"),aes(y=lsmeans.lsmean),y_position = c(1.95,1.98,1.97)) + ylim(1.83,1.98)
-
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("2.4e-3","2.87e-7","0.044"),aes(y=lsmeans.lsmean),y_position = c(1.95,1.98,1.97)) + ylim(1.83,1.98)+ylab("ML (mm)") + xlab("Genotype")
+dev.off()
 
 #females
-dat1.f<-filter(dat1,dat1$Sex=='F')
+dat1.f<-dplyr::filter(dat1,dat1$Sex=='F')
 
 
 lf.lm.12<-lm(ML_all~Genotype+Weight+Qsox_Mutation+Length,data=dat1.f)
@@ -780,14 +1238,17 @@ lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 
 lff = as.data.frame(lff)
+pdf(file="~/Desktop/figs/5C_Females.pdf", width = 10, height = 7)
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("0.8","0.004","0.021"),aes(y=lsmeans.lsmean),y_position = c(1.70,1.74,1.73)) + ylim(1.64,1.74)
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("0.8","0.004","0.021"),aes(y=lsmeans.lsmean),y_position = c(1.70,1.74,1.73)) + ylim(1.64,1.74)+ylab("ML(mm)") + xlab("Genotype")
+dev.off()
+
 ######
 #ADD SAMPLE COUNTS PER GENOTYPE
 ######
 #5D
 #
-#"uCT_Ct.TMD","uCT_Ct.porosity"
+
 dat1<-read.csv('./data/pheno_data/Qsox1_data/qsox_uCT.csv',header=T,na.strings='NA')
 
 dat1$Genotype<-factor(dat1$Genotype, levels=c('wt','Het','Mut'))
@@ -800,9 +1261,10 @@ plot(lf,horizontal=F,ylab=expression(paste("pMOI (",mm^4,")")))
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
+pdf(file="~/Desktop/figs/5D.pdf", width = 10, height = 7)
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.02"),aes(y=lsmeans.lsmean),y_position = c(0.52)) + ylim(0.36,0.52)
-
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.02"),aes(y=lsmeans.lsmean),y_position = c(0.52)) + ylim(0.36,0.52)+xlab("Genotype") + ylab("pMOI")
+dev.off()
 #
 ####
 ####
@@ -815,9 +1277,11 @@ plot(lf,horizontal=F,ylab=expression(paste("Imax (",mm^4,")")))
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
-ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.009"),aes(y=lsmeans.lsmean),y_position = c(0.36)) + ylim(0.25,0.36)
+pdf(file="~/Desktop/figs/5E.pdf", width = 10, height = 7)
 
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.009"),aes(y=lsmeans.lsmean),y_position = c(0.36)) + ylim(0.25,0.36)+xlab("Genotype") +ylab("Imax")
+dev.off()
 #
 ###
 ####
@@ -830,13 +1294,15 @@ plot(lf,horizontal=F,ylab=expression(paste("Ct.Ar.Tt.Ar.... (",mm^4,")")))
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
-ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.031"),aes(y=lsmeans.lsmean),y_position = c(50)) + ylim(43,50)
+pdf(file="~/Desktop/figs/5F.pdf", width = 10, height = 7)
 
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.031"),aes(y=lsmeans.lsmean),y_position = c(50)) + ylim(43,50)+xlab("Genotype") + ylab("Ct.Ar/Tt.Ar")
+dev.off()
 ###
 ###
 ###
-#4G
+#5G
 #
 lf.lm.12<-lm(Tt.Ar.mm2.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
 anova(lf.lm.12)
@@ -846,8 +1312,11 @@ plot(lf,horizontal=F,ylab=expression(paste("ttar (",mm^4,")")))
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
+pdf(file="~/Desktop/figs/5G.pdf", width = 10, height = 7)
+
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.083"),aes(y=lsmeans.lsmean),y_position = c(2.075)) + ylim(1.8,2.1)
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.083"),aes(y=lsmeans.lsmean),y_position = c(2.075)) + ylim(1.8,2.1)+xlab("Genotype") + ylab("Tt.Ar")
+dev.off()
 #
 #
 #
@@ -862,8 +1331,13 @@ plot(lf,horizontal=F,ylab="Ma.Ar")
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
+pdf(file="~/Desktop/figs/5H.pdf", width = 10, height = 7)
+
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.93"),aes(y=lsmeans.lsmean),y_position = c(1.09)) + ylim(0.98,1.09)
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.93"),aes(y=lsmeans.lsmean),y_position = c(1.09)) + ylim(0.98,1.09)+xlab("Genotype") + ylab("Ma.Ar")
+dev.off()
+
+
 
 ###5I
 lf.lm.12<-lm(Ct.TMD..mgHA.cm3.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
@@ -874,9 +1348,11 @@ plot(lf,horizontal=F,ylab="Ma.Ar")
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
-ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.4"),aes(y=lsmeans.lsmean),y_position = c(1182)) + ylim(1162,1182)
+pdf(file="~/Desktop/figs/5I.pdf", width = 10, height = 7)
 
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.4"),aes(y=lsmeans.lsmean),y_position = c(1182)) + ylim(1162,1182)+xlab("Genotype")+ylab("TMD")
+dev.off()
 
 #
 #
@@ -890,9 +1366,11 @@ plot(lf,horizontal=F,ylab="Ma.Ar")
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
-ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.242"),aes(y=lsmeans.lsmean),y_position = c(1.6)) + ylim(0.85,1.6)
+pdf(file="~/Desktop/figs/5J.pdf", width = 10, height = 7)
 
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.242"),aes(y=lsmeans.lsmean),y_position = c(1.6)) + ylim(0.85,1.6)+xlab("Genotype") +ylab("Ct.Por")
+dev.off()
 #######
 ####5K
 qsox_bend_AP = read.csv("./data/pheno_data/Qsox1_data/qsox1_bending_AP.csv")
@@ -911,8 +1389,13 @@ plot(lf,horizontal=F,ylab="Ma.Ar")
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
+pdf(file="~/Desktop/figs/5K_ML.pdf", width = 10, height = 7)
+
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.001"),aes(y=lsmeans.lsmean),y_position = c(63)) + ylim(40,63)
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.001"),aes(y=lsmeans.lsmean),y_position = c(63)) + ylim(40,63)+xlab("Genotype") + ylab("Max Load (N)")
+
+dev.off()
+
 
 ###AP
 lf.lm.12<-lm(Max.Load..N.~Genotype+Weight+Qsox.Mutation,data=qsox_bend_AP)
@@ -923,8 +1406,12 @@ plot(lf,horizontal=F,ylab="Ma.Ar")
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 lff = as.data.frame(lff)
+pdf(file="~/Desktop/figs/5K_AP.pdf", width = 10, height = 7)
+
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.198"),aes(y=lsmeans.lsmean),y_position = c(33)) + ylim(26,33)
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Mut")), annotations=c("0.198"),aes(y=lsmeans.lsmean),y_position = c(33)) + ylim(26,33)+xlab("Genotype") + ylab("Max Load (N)")
+dev.off()
+
 ###
 
 
