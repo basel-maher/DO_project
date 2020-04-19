@@ -177,7 +177,6 @@ ob <- FindClusters(object = ob, resolution = 1)
 ob <- RunUMAP(ob, dims = 1:13)
 
 
-#save(ob, file = "./results/Rdata/seurat_ob.Rdata")
 
 
 DimPlot(ob,
@@ -188,10 +187,25 @@ DimPlot(ob,
 
 
 
+
+##remove the far away cluster, UMAP1 close to 15. 13 total cells
+outliers = names(which(ob@reductions$umap@cell.embeddings[,"UMAP_1"] > 14))
+not_outliers = names(which(ob@reductions$umap@cell.embeddings[,"UMAP_1"] < 14))
+ob = subset(ob, cells = not_outliers)
 #ID all cluster markers, also clusters for genes we're interested in.
 
 
+
+DimPlot(ob,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 6,
+        plot.title = "UMAP")
+
 ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
+
+
+#save(ob, file = "./results/Rdata/seurat_ob.Rdata")
 
 
 #First, Rasd1 markers. (Cluster 10)
@@ -226,43 +240,43 @@ head(cluster1.markers, 30)
 
 
 ##GO analysis, but only for positive genes in a cluster
+ 
 
+allGenes = rownames(ob)
 
-# allGenes = rownames(ob)
-# 
-# cluster1.markers <- FindMarkers(ob, ident.1 = 1, min.pct = 0.25,only.pos = T)
-# cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25, only.pos = T)
-# 
-# interesting.genes = rownames(cluster1.markers.pos)
-# 
-# geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
-# names(geneList)<-allGenes
-# ###MF###
-# GOdata <- new("topGOdata", ontology = "MF", allGenes =geneList,
-#               annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
-# test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
-# result<-getSigGroups(GOdata,test.stat)
-# t1<-GenTable(GOdata, classic=result, topNodes=length(result@score))
-# head(t1)
-# ###CC###
-# GOdata <- new("topGOdata", ontology = "CC", allGenes = geneList,
-#               annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
-# test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
-# result<-getSigGroups(GOdata,test.stat)
-# t2<-GenTable(GOdata, classic=result, topNodes=length(result@score))
-# head(t2)
-# ###BP###
-# GOdata <- new("topGOdata", ontology = "BP", allGenes = geneList,
-#               annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
-# test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
-# result<-getSigGroups(GOdata,test.stat)
-# t3<-GenTable(GOdata, classic=result, topNodes=length(result@score))
-# head(t3)
-# ####
-# t.all = NULL
-# t.all<-rbind(t1,t2,t3)
-# t.all$classic<-as.numeric(as.character(t.all$classic))
-######
+cluster1.markers.pos <- FindMarkers(ob, ident.1 = 1, min.pct = 0.25,only.pos = T)
+cluster10.markers.pos <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25, only.pos = T)
+
+interesting.genes = rownames(cluster1.markers.pos)
+
+geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
+names(geneList)<-allGenes
+###MF###
+GOdata <- new("topGOdata", ontology = "MF", allGenes =geneList,
+              annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+result<-getSigGroups(GOdata,test.stat)
+t1<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+head(t1)
+###CC###
+GOdata <- new("topGOdata", ontology = "CC", allGenes = geneList,
+              annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+result<-getSigGroups(GOdata,test.stat)
+t2<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+head(t2)
+###BP###
+GOdata <- new("topGOdata", ontology = "BP", allGenes = geneList,
+              annot = annFUN.org, mapping='org.Mm.eg.db', ID='symbol')
+test.stat<-new("classicCount", testStatistic = GOFisherTest, name='Fisher test')
+result<-getSigGroups(GOdata,test.stat)
+t3<-GenTable(GOdata, classic=result, topNodes=length(result@score))
+head(t3)
+####
+t.all = NULL
+t.all<-rbind(t1,t2,t3)
+t.all$classic<-as.numeric(as.character(t.all$classic))
+#####
 
 
 
