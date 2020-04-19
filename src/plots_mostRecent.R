@@ -65,7 +65,21 @@ rownames(covar_eqtl) = rownames(cross_eqtl$covar)
 
 
 ##########
-norm_pheno = as.data.frame(log10(cross_basic$pheno[,c(6:14,16,17,21,23:33,34,35,37:41,43:49,51,52,54:58,61:70,72,74,76)]))
+#mat is never normal, heavily right skewed, even after adding 1 to remove the exclusion of zero counts
+#for pyd, herit is higher if you add 1?
+norm_pheno = as.data.frame(cross_basic$pheno)
+
+norm_pheno$MAT_VOL1 = norm_pheno$MAT_VOL1+1
+norm_pheno$MAT_VOL2 = norm_pheno$MAT_VOL2+1
+norm_pheno$MAT_VOL3 = norm_pheno$MAT_VOL3 + 1
+norm_pheno$MAT_VOL4 = norm_pheno$MAT_VOL4 + 1
+
+norm_pheno$bending_work_post_yield = norm_pheno$bending_work_post_yield + 1
+norm_pheno$bending_disp_at_yield = norm_pheno$bending_disp_at_yield + 1
+norm_pheno$bending_PYD = norm_pheno$bending_PYD + 1
+
+norm_pheno = as.data.frame(log10(norm_pheno[,c(6:14,16,17,21,23:33,34,35,37:41,43:49,51,52,54:58,61:70,72,74,76)]))
+
 pheno_combined = cbind(norm_pheno, cross_basic$pheno[,c(15,18,19,20,22,36,42,50,53,59,60)])
 is.na(pheno_combined) = sapply(pheno_combined, is.infinite) #convert is.infinite to NA. Basically getting rid of zero observations.
 
@@ -101,9 +115,9 @@ mean_per_chrom = mean_per_chrom[match(chr,mean_per_chrom$Group.1),]
 rownames(mean_per_chrom) =mean_per_chrom$Group.1
 mean_per_chrom = mean_per_chrom[,-1]
 
-pdf(file="~/Desktop/figs/1B.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/1B.pdf", width = 10, height = 7)
 barplot(as.matrix(t(mean_per_chrom)),col = CCcolors, ylab = "Allele frequency", xlab="Chr", main = "Global allele frequency per chromosome")
-legend("topleft", fill=CCcolors, legend=c("A/J","C57BL/6J","129S1/SvImJ","NOD/ShiLtJ","NZO/HILtJ","CAST/EiJ","PWK/PhJ","WSB/EiJ"),cex = 2, box.lwd = 1.5)
+#legend("topleft", fill=CCcolors, legend=c("A/J","C57BL/6J","129S1/SvImJ","NOD/ShiLtJ","NZO/HILtJ","CAST/EiJ","PWK/PhJ","WSB/EiJ"),cex = 2, box.lwd = 1.5)
 dev.off()
 
 
@@ -162,11 +176,11 @@ pdf(file="~/Desktop/figs/1C.pdf", width = 10, height = 7)
 patch
 dev.off()
 
-pdf(file="~/Desktop/figs/1Ca.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/1Ca.pdf", width = 10, height = 7)
 p3
 dev.off()
 
-pdf(file="~/Desktop/figs/1Cb.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/1Cb.pdf", width = 10, height = 7)
 p4
 dev.off()
 # 
@@ -249,7 +263,7 @@ p5<-ggplot(hsq_table, aes(x=pheno, y=h, fill=as.factor(group))) +
   xlab("Phenotype") + ylab("Heritability") + scale_color_brewer(palette = "Dark2") + theme_bw() +scale_y_continuous(limits = c(0,1),expand=c(0,0)) +
   theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=20), axis.text = element_text(size = 15))
 
-pdf(file="~/Desktop/figs/1D.pdf", width = 12, height = 14)
+cairo_pdf(file="~/Desktop/figs/1D.pdf", width = 12, height = 14)
 p5
 dev.off()
 
@@ -541,7 +555,7 @@ dev.off()
 
 
 
-##2C
+##2D
 rasd1_impc = read.csv("./data/RASD1_IMPC_BMD_032620.txt")
 #r_m = rasd1_impc[which(rasd1_impc$Sex == "male"),]
 #r_f = rasd1_impc[which(rasd1_impc$Sex == "female"),]
@@ -561,7 +575,7 @@ x = PhenList(rasd1_impc, testGenotype = "BL3486",refGenotype = "+/+")
 t = testDataset(x, depVariable = "Value", equation = "withWeight")
 
 par(ps=12)
-cairo_pdf(file="~/Desktop/figs/2C.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/2D.pdf", width = 10, height = 7)
 ggplot(r, aes(con,Value, fill=as.factor(col) )) + geom_boxplot(width=0.1) + xlab(NULL) + ylab("BMD") + theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15), legend.position = "none")+
   scale_fill_brewer(palette = "Dark2")
 dev.off()
@@ -571,13 +585,47 @@ dev.off()
 #resid$genotype = rasd1_impc[,"Genotype"]
 #resid$sex = rasd1_impc[,"Sex"]
 
-##2D
+##2C
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
 
-cairo_pdf(file="~/Desktop/figs/2D.pdf", width = 10, height = 7)
-FeaturePlot(ob, features = c("Rasd1"),pt.size = 1, sort.cell = T)
+#plot UMAP
+ob=JackStraw(ob)
+ob <- RunUMAP(ob, dims = 1:13)
+
+cairo_pdf(file="~/Desktop/figs/2C_umap.pdf", width = 10, height = 7)
+DimPlot(ob,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 6,
+        plot.title = "UMAP")
 dev.off()
 
+cairo_pdf(file="~/Desktop/figs/2C_rasd1.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = c("Rasd1"),pt.size = 1.5, sort.cell = T)
+dev.off()
+
+
+
+ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
+
+
+#First, Rasd1 markers. (Cluster 10)
+
+ob.markers[which(ob.markers$gene =="Rasd1"),] # 10
+
+#output the top 30 cluster 10 genes
+cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,)
+
+head(cluster10.markers, 30)
+
+
+cairo_pdf(file="~/Desktop/figs/2C_dmp1.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = c("Dmp1"),pt.size = 1.5, sort.cell = T)
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/2C_phex1.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = c("Phex"),pt.size = 1.5, sort.cell = T)
+dev.off()
 
 ##2E
 #from B6>OBs_RNA_Seq.R
@@ -1162,11 +1210,22 @@ dev.off()
 #seurat_analysis.R
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob"
 
-cairo_pdf(file="~/Desktop/figs/6B.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/6Bqsox.pdf", width = 10, height = 7)
 FeaturePlot(ob, features = "Qsox1", sort.cell = T, pt.size = 1)
 dev.off()
 
 
+cairo_pdf(file="~/Desktop/figs/6Bvim.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = "Vim", sort.cell = T, pt.size = 1)
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/6Blgal.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = "Lgals1", sort.cell = T, pt.size = 1)
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/6Bprrx.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = "Prrx2", sort.cell = T, pt.size = 1)
+dev.off()
 
 
 #6C
