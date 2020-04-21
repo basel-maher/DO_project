@@ -191,12 +191,12 @@ DimPlot(ob,
 ##remove the far away cluster, UMAP1 close to 15. 13 total cells
 outliers = names(which(ob@reductions$umap@cell.embeddings[,"UMAP_1"] > 14))
 not_outliers = names(which(ob@reductions$umap@cell.embeddings[,"UMAP_1"] < 14))
-ob = subset(ob, cells = not_outliers)
+ob_s = subset(ob, cells = not_outliers)
 #ID all cluster markers, also clusters for genes we're interested in.
 
 
 
-DimPlot(ob,
+DimPlot(ob_s,
         reduction = "umap",
         label = TRUE,
         label.size = 6,
@@ -205,7 +205,7 @@ DimPlot(ob,
 ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
 
 
-#save(ob, file = "./results/Rdata/seurat_ob.Rdata")
+save(ob, file = "./results/Rdata/seurat_ob.Rdata")
 
 
 #First, Rasd1 markers. (Cluster 10)
