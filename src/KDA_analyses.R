@@ -7,6 +7,10 @@ all = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4.csv", string
 all_f = read.csv("./results/flat/key_driver_analysis_FEMALES_sft4.csv", stringsAsFactors = F)
 all_m = read.csv("./results/flat/key_driver_analysis_MALES_sft5.csv", stringsAsFactors = F)
 
+#bone gene superset
+superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
+
+superset = superset[,1]
 
 
 #Analysis
@@ -14,7 +18,7 @@ genes = c(all[which(all$hyper<=0.05), "gene"], all_m[which(all_m$hyper<=0.05), "
 genes = unique(genes)
 
 length(which(tolower(genes) %in% tolower(superset)))
-
+length(which(tolower(genes) %in% tolower(superset)==FALSE))
 ##are bone genes more highly connected in the network?
 x = all #repeat for males and females
 
@@ -34,7 +38,7 @@ load("./results/Rdata/networks/geneModMemAnnot_f_power4.RData")
 
 allGenes = unique(c(combat_annot$Gene.Name, combat_annot_f$Gene.Name, combat_annot_m$Gene.Name))
 
-interesting.genes = genes
+interesting.genes = not_bone_df$gene
 
 geneList<-factor(as.integer(allGenes %in% interesting.genes)) #If TRUE returns 1 as factor, otherwise 0
 names(geneList)<-allGenes
