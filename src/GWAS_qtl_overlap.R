@@ -86,25 +86,25 @@ pos_human = paste0(chroms_human,":",bp_human)
 
 
 
-####load in Estrada data
+# ####load in Estrada data
+# 
+# #get rsid pos
+# mart = useMart(biomart = "ENSEMBL_MART_SNP", host = "grch37.ensembl.org",path = "/biomart/martservice", dataset = "hsapiens_snp")
+# 
+# snps = getBM(attributes = c("refsnp_id", "chr_name","chrom_start"),
+#              filters = "snp_filter",
+#              values = gefos_snps,
+#              mart = mart)
 
-#get rsid pos
-mart = useMart(biomart = "ENSEMBL_MART_SNP", host = "grch37.ensembl.org",path = "/biomart/martservice", dataset = "hsapiens_snp")
 
-snps = getBM(attributes = c("refsnp_id", "chr_name","chrom_start"),
-             filters = "snp_filter",
-             values = gefos_snps,
-             mart = mart)
-
-
-snps$pos = paste0("chr",snps$chr_name, ":", snps$chrom_start)
+#snps$pos = paste0("chr",snps$chr_name, ":", snps$chrom_start)
 
 
 
 
 ####merge with morris
-pos_human = append(pos_human, snps$pos)
-pos_human = unique(pos_human)
+#pos_human = append(pos_human, snps$pos)
+#pos_human = unique(pos_human)
 ####
 
 
@@ -120,7 +120,16 @@ overlaps_mouse = overlaps@to
 x = qtl_loc[overlaps_mouse,]
 
 overlaps_merged = cbind(x,morris[overlaps_human,])
-write.csv(overlaps_merged, file="./results/flat/gwas_qtl_overlaps.csv",quote = F,row.names = F)
+write.csv(overlaps_merged, file="./results/flat/gwas_qtl_overlaps_allIncNonSig.csv",quote = F,row.names = F)
+
+
+
+
+
+
+
+
+
 
 ########calculate how many of the 11 loci's syntenic regions would overlap just by chance, 
 ########by picking 1000 human genomic intervals of the same size distribution as for the 11 human syntenic regions
