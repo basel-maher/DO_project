@@ -619,8 +619,8 @@ cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,)
 head(cluster10.markers, 30)
 
 
-cairo_pdf(file="~/Desktop/figs/2C_dmp1.pdf", width = 10, height = 7)
-FeaturePlot(ob, features = c("Dmp1"),pt.size = 1.5, sort.cell = T)
+cairo_pdf(file="~/Desktop/figs/2C_sost.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = c("Sost"),pt.size = 1.5, sort.cell = T)
 dev.off()
 
 cairo_pdf(file="~/Desktop/figs/2C_phex1.pdf", width = 10, height = 7)
@@ -1050,7 +1050,7 @@ x6 = ggplot(data=dat[5700:6200,], aes(x=map, y=Tt.Ar))+geom_line()+theme(axis.te
 x7 = ggplot(data=dat[5700:6200,], aes(x=map, y=Ma.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.63,col="red")
 x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+geom_hline(yintercept = 7.77,col="red")+xlab("Chromosome 1 Position")
 
-pdf(file="~/Desktop/figs/5b.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/5b.pdf", width = 10, height = 7)
 x1/x2/x3/x4/x5/x6/x7/x8
 dev.off()
 
@@ -1135,6 +1135,107 @@ dev.off()
 
 
 
+
+
+
+
+
+#condition on top snp rs248974780
+snpinfo <- data.frame(chr=c("1"),
+                      pos=c(155.0559),
+                      sdp=128,
+                      snp=c("rs248974780"), stringsAsFactors=FALSE)
+
+
+snpinfo <- index_snps(cross_basic$pmap, snpinfo)
+snp_genoprobs = genoprob_to_snpprob(apr,snpinfo)
+snp_genoprobs =as.data.frame(snp_genoprobs$`1`)
+
+covar_snp = merge(covar, snp_genoprobs, by="row.names", all = TRUE)
+rownames(covar_snp) = covar_snp$Row.names
+
+##
+covar_snp$alleleA = 0.5
+for(i in 1:nrow(covar_snp)){
+  if(covar_snp$A.rs248974780[i] >0.6){
+    covar_snp$alleleA[i] = 1
+  } else{if(covar_snp$B.rs248974780[i] >0.6){
+    covar_snp$alleleA[i] = 0
+  }}
+}
+
+
+
+
+
+locus1_scan_cond2 = scan1(apr, pheno_combined[,c("uCT_Ct.TMD","uCT_pMOI","uCT_Imax","uCT_Ct.Ar.Tt.Ar", "uCT_Tt.Ar","ML", "uCT_Ma.Ar","uCT_Ct.porosity")], k_loco, Xcovar=Xcovar, addcovar = covar_snp[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33", "alleleA")],cores = 1)
+
+dat = as.data.frame(locus1_scan_cond2[,c("uCT_Ct.TMD","ML","uCT_pMOI","uCT_Imax","uCT_Ct.Ar.Tt.Ar","uCT_Tt.Ar","uCT_Ma.Ar","uCT_Ct.porosity")])
+map = as.data.frame(cross_basic$pmap$`1`)
+dat = as.data.frame(dat[which(rownames(dat) %in% rownames(map)),])
+colnames(dat) = c("TMD","ML","pMOI","Imax","Ct.Ar/Tt.Ar","Tt.Ar","Ma.Ar","Por")                  
+dat$map = map[1:nrow(dat),1]
+
+x1 = ggplot(data=dat[5700:6200,], aes(x=map, y=TMD))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 8.07,col="red")
+x2 = ggplot(data=dat[5700:6200,], aes(x=map, y=ML))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.76,col="red")
+x3 = ggplot(data=dat[5700:6200,], aes(x=map, y=pMOI))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.80,col="red")
+x4 = ggplot(data=dat[5700:6200,], aes(x=map, y=Imax))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.86,col="red")
+x5 = ggplot(data=dat[5700:6200,], aes(x=map, y=`Ct.Ar/Tt.Ar`))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.59,col="red")
+x6 = ggplot(data=dat[5700:6200,], aes(x=map, y=Tt.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.72,col="red")
+x7 = ggplot(data=dat[5700:6200,], aes(x=map, y=Ma.Ar))+geom_line()+theme(axis.text = element_blank(),axis.ticks = element_blank(), axis.title.x = element_blank())+geom_hline(yintercept = 7.63,col="red")
+x8 = ggplot(data=dat[5700:6200,], aes(x=map, y=Por))+geom_line()+theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+geom_hline(yintercept = 7.77,col="red")+xlab("Chromosome 1 Position")
+
+cairo_pdf(file="~/Desktop/figs/5c.pdf", width = 10, height = 7)
+x1/x2/x3/x4/x5/x6/x7/x8
+dev.off()
+
+
+
+
+cairo_pdf(file="~/Desktop/figs/5Cscan1.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.TMD", ylim=c(0,10))
+add_threshold(cross_basic$pmap, thresholdA = 8.07, col="red")
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/5Cscan2.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "ML" , ylim=c(0,10))
+add_threshold(cross_basic$pmap, thresholdA = 7.76, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Cscan3.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_pMOI", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.80, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Cscan4.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Imax", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.86, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Cscan5.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.Ar.Tt.Ar", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.59, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Cscan6.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Tt.Ar", ylim=c(0,10) )
+add_threshold(cross_basic$pmap, thresholdA = 7.72, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Cscan7.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ma.Ar", ylim=c(0,10))
+add_threshold(cross_basic$pmap, thresholdA = 7.63, col="red")
+dev.off()
+cairo_pdf(file="~/Desktop/figs/5Cscan8.pdf", width = 10, height = 7)
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.porosity", ylim=c(0,10))
+add_threshold(cross_basic$pmap, thresholdA = 7.77, col="red")
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
 #NOW 6A
 #
 load("./results/Rdata/qsox1_ier5.Rdata") # got from supercomputing cluster. main files too big to keep on laptop
@@ -1146,7 +1247,13 @@ load("./results/Rdata/qsox1_ier5.Rdata") # got from supercomputing cluster. main
 ier5= scan1blup(apr[,1], cross_eqtl$pheno[,"MSTRG.1301"], kinship = k_loco[[1]], addcovar = covar_eqtl[,c(2,11:58)])
 qsox1 = scan1blup(apr[,1], cross_eqtl$pheno[,"MSTRG.1311"], kinship = k_loco[[1]], addcovar = covar_eqtl[,c(2,11:58)])
 
+cairo_pdf(file="~/Desktop/figs/5A1.pdf", width = 10, height = 7)
+plot_coefCC(ier5[5200:6700,], cross_basic$pmap,scan1_output = subset(x, lodcolumn="Ier5"), main = "Ier5 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+dev.off()
 
+cairo_pdf(file="~/Desktop/figs/5A2.pdf", width = 10, height = 7)
+plot_coefCC(qsox1[5200:6700,], cross_basic$pmap,scan1_output = subset(x, lodcolumn="Qsox1"), main = "Qsox1 - Chr. 1", legend_ncol=1,top_panel_prop = 0.6)
+dev.off()
 
 
 ##
@@ -1210,20 +1317,20 @@ dev.off()
 #seurat_analysis.R
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob"
 
-cairo_pdf(file="~/Desktop/figs/6Bqsox.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/5Bqsox.pdf", width = 10, height = 7)
 FeaturePlot(ob, features = "Qsox1", sort.cell = T, pt.size = 1)
 dev.off()
 
 
-cairo_pdf(file="~/Desktop/figs/6Bvim.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/5Bvim.pdf", width = 10, height = 7)
 FeaturePlot(ob, features = "Vim", sort.cell = T, pt.size = 1)
 dev.off()
 
-cairo_pdf(file="~/Desktop/figs/6Blgal.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/5Blgal.pdf", width = 10, height = 7)
 FeaturePlot(ob, features = "Lgals1", sort.cell = T, pt.size = 1)
 dev.off()
 
-cairo_pdf(file="~/Desktop/figs/6Bprrx.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/5Bprrx.pdf", width = 10, height = 7)
 FeaturePlot(ob, features = "Prrx2", sort.cell = T, pt.size = 1)
 dev.off()
 
@@ -1506,6 +1613,17 @@ dev.off()
 
 
 
+##SUPP FIG 1 in plot_overlaps_supplement.R
 
+##SUPP fig 2
+# #POMP data
+# #from pomp_mapping_ML.R
+load("./results/Rdata/scan1_pomp.Rdata")
+load("./results/Rdata/coef_ML_pomp_blup.Rdata")
+load("./data/POMP/MM_snps1_pmap.Rdata")
 
+cairo_pdf(file="~/Desktop/figs/supp2_legend.pdf", width = 10, height = 7)
+plot_coefCC(coef_ML_pomp_blup, MM_snps1_pmap["1"], scan1_output=subset(scan1_pomp, lodcolumn=2),legend = "topleft")
+dev.off()
+ 
 
