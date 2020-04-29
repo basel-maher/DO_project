@@ -3,17 +3,18 @@ library(org.Hs.eg.db)
 ###############################################################################################
 # integrating human and mouse gwas results
 # read in human gwas snps
-snps<-read.table("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt",header=T)
+#snps<-read.table("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt",header=T)
 
 # read in human snps found in region syntenic with chr. 1 association in the mouse
-h = read.csv("./results/flat/gwas_qtl_overlaps.csv")
+h = read.csv("./results/flat/gwas_qtl_overlaps_allIncNonSig.csv")
 
 h1<- h[which(h$locus == 1),]
-par(mfrow=c(1,3))
 
+
+cairo_pdf(file="~/Desktop/figs/sup1a.pdf", width = 10, height = 7)
 plot(h1$BP,-log10(h1$P.NI),type="p",
      col= 'red', cex=1.5,
-     axes=T,ylab='-logP',xlab='Chromosome',ylim=c(-2,9), lwd=1)
+     axes=T,ylab='-logP',xlab='Chromosome',ylim=c(-3,max(-log10(h1$P.NI))+1), lwd=1)
 abline(h=7.30103)
 
 mapping = as.data.frame(org.Hs.egSYMBOL)
@@ -39,12 +40,13 @@ y0=y1=-1
 for(i in 1:nrow(genes)){
   arrows(x0=genes[i,'start'],y0=y0,x1=genes[i,'end'],y1=y1, code=genes[i,'strand2'], length=0.05, lwd=2, 
          col='red')
-  text(x=genes[i,'start'],y=-2,genes$symbol[i],cex=1, 
+  text(x=genes[i,'start'],y=-2,genes$symbol[i],cex=0.5, 
        col='red',srt=90)
-  y0 = y0-0.01
-  y1=y1-0.01
+  y0 = y0-0.015
+  y1=y1-0.015
 }
 
+dev.off()
 
 
 #2
@@ -380,7 +382,7 @@ h9<- h[which(h$locus == 9),]
 
 plot(h9$BP,-log10(h9$P.NI),type="p",
      col= 'red', cex=1.5,
-     axes=T,ylab='-logP',xlab='Chromosome',ylim=c(-5,185), lwd=1)
+     axes=T,ylab='-logP',xlab='Chromosome',ylim=c(-5,20), lwd=1)
 abline(h=7.30103)
 
 mapping = as.data.frame(org.Hs.egSYMBOL)
