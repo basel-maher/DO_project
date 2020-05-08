@@ -16,6 +16,8 @@ library(ggsignif)
 library(RACER)
 library(PhenStat)
 library(Seurat)
+library(igraph)
+library(bnlearn)
 #
 #load the geno probs
 load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
@@ -75,7 +77,6 @@ norm_pheno$MAT_VOL3 = norm_pheno$MAT_VOL3 + 1
 norm_pheno$MAT_VOL4 = norm_pheno$MAT_VOL4 + 1
 
 norm_pheno$bending_work_post_yield = norm_pheno$bending_work_post_yield + 1
-norm_pheno$bending_disp_at_yield = norm_pheno$bending_disp_at_yield + 1
 norm_pheno$bending_PYD = norm_pheno$bending_PYD + 1
 
 norm_pheno = as.data.frame(log10(norm_pheno[,c(6:14,16,17,21,23:33,34,35,37:41,43:49,51,52,54:58,61:70,72,74,76)]))
@@ -316,17 +317,37 @@ p1+p1+patch+p5+plot_layout(design = layout)+plot_annotation(tag_levels = "A")
 #
 #
 
+####################################################################################################################################################################################
+####################################################################################################################################################################################
+####################################################################################################################################################################################
+
 ##Figure 2
 #2A - mirrorplot
+#Sertad4 - adipose_subcutaneous
+
+morris_lead_snps = read.csv("./data/Morrisetal2018.NatGen.SumStats/Morris_eBMD_conditionally_ind_snps.csv", header=T, stringsAsFactors = F)
+
 ebmd = read.delim("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt",stringsAsFactors = FALSE)
 
-gtex = read.delim("./data/stomach_RASD1_GTEx_v7", stringsAsFactors = F, header = FALSE, sep = " ")
+gtex = read.delim("./data/adipose_subcutaneous_SERTAD4_GTEX_v7", stringsAsFactors = F, header = FALSE, sep = " ")
 
+gtex = gtex[which(gtex$V3 %in% ebmd$RSID),]
+
+
+#gtex$a1 =  sapply(strsplit(gtex$V2, "_"), "[[", 3)
+#gtex$a2 =  sapply(strsplit(gtex$V2, "_"), "[[", 4)
 
 ebmd = ebmd[which(ebmd$RSID %in% gtex$V3),]
 
+#remove duplicated by matching alleles in ebmd and gtex
+ebmd[which(duplicated(ebmd$RSID)), "RSID"]
+ #317,636,907, 1099
+ebmd = ebmd[-c(317,636,907,1099),]
 
-gtex = gtex[which(gtex$V3 %in% ebmd$RSID),]
+
+
+
+
 
 
 for(i in 1:nrow(gtex)){
@@ -343,112 +364,99 @@ bmd_racer = bmd_racer[,-11]
 
 gtex_racer = RACER::formatRACER(assoc_data = gtex, chr_col = 11, pos_col = 13, p_col = 5)
 
-bmd_racer_ld = (RACER::ldRACER(assoc_data = bmd_racer, rs_col = 2, pops = "EUR", lead_snp = "rs1736213"))
-gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR", lead_snp = "rs1736213"))
+bmd_racer_ld = (RACER::ldRACER(assoc_data = bmd_racer, rs_col = 2, pops = "EUR", lead_snp = "rs7516171"))
+gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR", lead_snp = "rs7516171"))
 
-cairo_pdf(file="~/Desktop/figs/2A.pdf", width = 9, height = 7)
+cairo_pdf(file="~/Desktop/figs/2A_sertad.pdf", width = 9, height = 7)
 par(ps=12)
-mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 17, plotby = "coord",start_plot = 17050000, end_plot = 17410000 ,build = "hg19", name1 = "eBMD", name2 = "RASD1 - Stomach")
+mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 1, plotby = "snp",snp_plot = "rs7516171",build = "hg19", name1 = "eBMD", name2 = "SERTAD4 - Adipose Subcutaneous")
+dev.off()
+####
+
+
+####################################################################################################################################################################################
+#Glt8d2 pituitary
+
+morris_lead_snps = read.csv("./data/Morrisetal2018.NatGen.SumStats/Morris_eBMD_conditionally_ind_snps.csv", header=T, stringsAsFactors = F)
+
+ebmd = read.delim("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt",stringsAsFactors = FALSE)
+
+gtex = read.delim("./data/pituitary_GLT8D2_GTEX_V7", stringsAsFactors = F, header = FALSE, sep = " ")
+
+gtex = gtex[which(gtex$V3 %in% ebmd$RSID),]
+
+
+#gtex$a1 =  sapply(strsplit(gtex$V2, "_"), "[[", 3)
+#gtex$a2 =  sapply(strsplit(gtex$V2, "_"), "[[", 4)
+
+ebmd = ebmd[which(ebmd$RSID %in% gtex$V3),]
+
+#remove duplicated by matching alleles in ebmd and gtex
+ebmd[which(duplicated(ebmd$RSID)), "RSID"]
+#71 642 942 981 988
+ebmd = ebmd[-c(71, 642, 942, 981, 988),]
+
+
+
+
+
+
+
+for(i in 1:nrow(gtex)){
+  gtex$pos[i] = strsplit(gtex$V2[i], split = "_")[[1]][2]
+}
+
+ebmd$pos = gtex[match(ebmd$RSID,gtex$V3),"pos"]
+
+
+bmd_racer = RACER::formatRACER(assoc_data = ebmd, chr_col = 3, pos_col = 15, p_col = 13)
+bmd_racer = bmd_racer[,-11]
+#
+
+
+gtex_racer = RACER::formatRACER(assoc_data = gtex, chr_col = 11, pos_col = 13, p_col = 5)
+
+bmd_racer_ld = (RACER::ldRACER(assoc_data = bmd_racer, rs_col = 2, pops = "EUR", lead_snp = "rs2722176"))
+gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR", lead_snp = "rs2722176"))
+
+cairo_pdf(file="~/Desktop/figs/2A_glt8d2.pdf", width = 9, height = 7)
+par(ps=12)
+mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 12, plotby = "snp",snp_plot = "rs2722176",build = "hg19", name1 = "eBMD", name2 = "GLT8D2 - Pituitary")
 dev.off()
 ####
 
 #2B
-net = readRDS("./results/Rdata/networks/wgcna_4.RDS")
+net = readRDS("./results/Rdata/networks/wgcna_m_5.RDS")
 rnames = rownames(net$MEs)
-tan = as.data.frame(net$MEs[,"ME12"])
-tan$DO = rnames
-tan = tan[order(as.numeric(tan$DO)),]
+royalblue = as.data.frame(net$MEs[,"ME20"])
+royalblue$DO = rnames
+royalblue = royalblue[order(as.numeric(royalblue$DO)),]
 
-bvtv = pheno_combined[,"uCT_BV.TV"]
+tbsp = pheno_combined[,"uCT_Tb.Sp"]
 
 n=c()
-for(i in names(bvtv)){
+for(i in names(tbsp)){
   x=strsplit(i, split = "[.]")[[1]][1]
   n=append(n,x)
 }
-names(bvtv) = n
-bvtv = bvtv[which(names(bvtv) %in% tan$DO)]
+names(tbsp) = n
+tbsp = tbsp[which(names(tbsp) %in% royalblue$DO)]
 
-bvtv = bvtv[order(as.numeric(names(bvtv)))]
+tbsp = tbsp[order(as.numeric(names(tbsp)))]
 
-cor(tan$`net$MEs[, "ME12"]`, bvtv, method = "s")
-cor.test(tan$`net$MEs[, "ME12"]`, bvtv,method = "s")
+cor(royalblue$`net$MEs[, "ME20"]`, tbsp, method = "s", use = "p")
+cor.test(royalblue$`net$MEs[, "ME20"]`, tbsp,method = "s", use="p")
 
 
-d = cbind(bvtv,tan)
-#rho -.262
-#pval 0.0002418
-#pdf(file="~/Desktop/figs/2B1.pdf", width = 9, height = 7)
-p1 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=bvtv)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab("Bone volume fraction (%)") + 
+d = cbind(tbsp,royalblue)
+colnames(d)[2] = "ME20"
+#rho 0.2732899
+#pval 0.007058
+pdf(file="~/Desktop/figs/2B1.pdf", width = 9, height = 7)
+ggplot(d, aes(y=ME20, x=tbsp)) + geom_point() + geom_smooth(method=lm) + ylab("Royalblue_m module eigengenes") + xlab("Trabecular Separation ()") + 
   theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
 
-#dev.off()
-
-
-
-
-
-
-
-
-p = pheno_combined[,"uCT_BMD"]
-
-n=c()
-for(i in names(p)){
-  x=strsplit(i, split = "[.]")[[1]][1]
-  n=append(n,x)
-}
-names(p) = n
-p = p[which(names(p) %in% tan$DO)]
-
-p = p[order(as.numeric(names(p)))]
-
-cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #-0.276
-cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
-
-
-d = cbind(p,tan)
-#rho -.262
-
-#pdf(file="~/Desktop/figs/2B2.pdf", width = 9, height = 7)
-p2 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab(expression(paste("Volumetric BMD (mgHA/", cm^3,")"))) +
-  theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
-
-#dev.off()
-
-
-
-
-
-
-
-p = pheno_combined[,"AP"]
-
-n=c()
-for(i in names(p)){
-  x=strsplit(i, split = "[.]")[[1]][1]
-  n=append(n,x)
-}
-names(p) = n
-p = p[which(names(p) %in% tan$DO)]
-
-p = p[order(as.numeric(names(p)))]
-
-cor(tan$`net$MEs[, "ME12"]`, p, method = "s", use = "p") #
-cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
-
-
-d = cbind(p,tan)
-#rho -.258
-
-#pdf(file="~/Desktop/figs/2B4.pdf", width = 9, height = 7)
-p3 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab("Anterior-posterior femoral width (mm)") +
-theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
-
-#dev.off()
-
-
-
+dev.off()
 
 
 
@@ -465,98 +473,67 @@ for(i in names(p)){
   n=append(n,x)
 }
 names(p) = n
-p = p[which(names(p) %in% tan$DO)]
+p = p[which(names(p) %in% royalblue$DO)]
 
 p = p[order(as.numeric(names(p)))]
 
-cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #
-cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
+cor(royalblue$`net$MEs[, "ME20"]`, p, method = "s", use = "p") #-0.263
+cor.test(royalblue$`net$MEs[, "ME20"]`, p,method = "s", use="p")#p=0.009517
 
 
-d = cbind(p,tan)
-#rho -.347
-
-#pdf(file="~/Desktop/figs/2B3.pdf", width = 9, height = 7)
-p4 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab(expression(paste("Trabecular number (", mm^-1,")"))) +
-theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
+d = cbind(p,royalblue)
+colnames(d)[2] = "ME20"
 
 
-
-
-
-
-
-
-
-
-p = pheno_combined[,"uCT_Tb.Sp"]
-
-n=c()
-for(i in names(p)){
-  x=strsplit(i, split = "[.]")[[1]][1]
-  n=append(n,x)
-}
-names(p) = n
-p = p[which(names(p) %in% tan$DO)]
-
-p = p[order(as.numeric(names(p)))]
-
-cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #0.34
-cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
-
-
-d = cbind(p,tan)
-#rho -.347
-
-#pdf(file="~/Desktop/figs/2B3.pdf", width = 9, height = 7)
-p5 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab("Trabecular separation (mm)") +
+pdf(file="~/Desktop/figs/2B2.pdf", width = 9, height = 7)
+ggplot(d, aes(y=ME20, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Roaylblue module eigengenes") + xlab(expression(paste("Trabecular Number "))) +
   theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
 
-
-
-
-
-
-p = pheno_combined[,"uCT_conn_density"]
-
-n=c()
-for(i in names(p)){
-  x=strsplit(i, split = "[.]")[[1]][1]
-  n=append(n,x)
-}
-names(p) = n
-p = p[which(names(p) %in% tan$DO)]
-
-p = p[order(as.numeric(names(p)))]
-
-cor(tan$`net$MEs[, "ME12"]`, p, method = "s") #-0.34
-cor.test(tan$`net$MEs[, "ME12"]`, p,method = "s")
-
-
-d = cbind(p,tan)
-#rho -.347
-
-#pdf(file="~/Desktop/figs/2B3.pdf", width = 9, height = 7)
-p6 = ggplot(d, aes(y=`net$MEs[, "ME12"]`, x=p)) + geom_point() + geom_smooth(method=lm) + ylab("Tan module eigengenes") + xlab(expression(paste("Connectivity density (", mm^-3,")"))) +
-  theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15))
-
-
-
-layout = "
-ABC
-DEF
-"
-
-par(ps=12)
-cairo_pdf(file="~/Desktop/figs/2B.pdf", width = 15, height = 12)
-p1+p2+p3+p4+p5+p6+plot_layout(design = layout)
 dev.off()
 
 
 
 
+# layout = "
+# ABC
+# DEF
+# "
+# 
+# par(ps=12)
+# cairo_pdf(file="~/Desktop/figs/2B.pdf", width = 15, height = 12)
+# p1+p2+p3+p4+p5+p6+plot_layout(design = layout)
+# dev.off()
+# 
+
+####################################################################################################################################################################################
+
+#2C
+bn2igraph <- function(g.bn){
+  g <- igraph.from.graphNEL(as.graphNEL(g.bn))
+}
+
+
+
+
+load("./results/Rdata/networks/bn_m_5/hybrid_royalblue_m_5.RData")
+
+assign(x = "royalblue_bn" ,bn)
+#convert and plot a particular BN
+x = bn2igraph(royalblue_bn)
+
+
+subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Glt8d2"))))
+plot(subgraph,vertex.label.cex=0.65,edge.width=2, vertex.size=10, margin=-0.1, vertex.label.dist=0.2, vertex.label.degree=-pi)
+
+
+subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Sertad4"))))
+plot(subgraph,vertex.label.cex=0.65,edge.width=2, vertex.size=10, margin=-0.1, vertex.label.dist=0.2, vertex.label.degree=-pi)
+
+
+
+
 ##2D
-rasd1_impc = read.csv("./data/RASD1_IMPC_BMD_032620.txt")
+rasd1_impc = read.csv("~/Desktop/test.txt")
 #r_m = rasd1_impc[which(rasd1_impc$Sex == "male"),]
 #r_f = rasd1_impc[which(rasd1_impc$Sex == "female"),]
 r = rasd1_impc
@@ -570,7 +547,7 @@ r[which(r$con == "BL3486male"),"con"] = "KO Male"
 r$con = factor(r$con, levels = c("Female WT","KO Female","Male WT", "KO Male"))
 r$col = 1
 r$col[which(r$con == "Female WT" | r$con == "Male WT")] = 0
-x = PhenList(rasd1_impc, testGenotype = "BL3486",refGenotype = "+/+")
+x = PhenList(rasd1_impc, testGenotype = "EPD0098_5_B05",refGenotype = "+/+")
 
 t = testDataset(x, depVariable = "Value", equation = "withWeight")
 

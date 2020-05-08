@@ -36,7 +36,7 @@ for(i in 1:length(unique(qtl_loc$locus))){
 # BED 12 Options
 # Min ratio of alignment blocks or exons that must map: 	1.00
 # If thickStart/thickEnd is not mapped, use the closest mapped base: 	off
-#accessed MAR 8 2020
+#accessed MAY 2 2020
 
 #saved as "./results/flat/lifted_qtl_loci.bed"
 
@@ -48,7 +48,7 @@ lifted = read.table("./results/flat/lifted_qtl_loci.bed")
 colnames(lifted) = c("hg19_chr","hg19_start","hg19_end")
 
 
-lifted$locus = 1:11
+lifted$locus = 1:10
 
 #merge with qtl loci
 lifted = merge(lifted, qtl_loc, by="locus")
@@ -69,7 +69,7 @@ lifted_mouse_loci = as(lifted_mouse_loci, "GRanges")
 morris_lead_snps = read.csv("./data/Morrisetal2018.NatGen.SumStats/Morris_eBMD_conditionally_ind_snps.csv", header=T, stringsAsFactors = F)
 morris = read.table("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt", header=T)
 #get vars that are genome wide significant
-morris = morris[which(morris$P.NI <= 5e-8),]
+#morris = morris[which(morris$P.NI <= 5e-8),] #ADD THIS IF YOU WANT THE OVERLAP FOR THE RESULTS, REMOVE FOR SUPP FIG 1
 
 #make into GRanges format
 chroms_human = paste0("chr",morris$CHR)
@@ -122,6 +122,7 @@ x = qtl_loc[overlaps_mouse,]
 overlaps_merged = cbind(x,morris[overlaps_human,])
 write.csv(overlaps_merged, file="./results/flat/gwas_qtl_overlaps_allIncNonSig.csv",quote = F,row.names = F)
 
+unique(overlaps_merged$locus)
 
 
 
@@ -130,9 +131,9 @@ write.csv(overlaps_merged, file="./results/flat/gwas_qtl_overlaps_allIncNonSig.c
 
 
 
-
-########calculate how many of the 11 loci's syntenic regions would overlap just by chance, 
-########by picking 1000 human genomic intervals of the same size distribution as for the 11 human syntenic regions
+########calculate how many of the 10 loci's syntenic regions would overlap just by chance, 
+########by picking 1000 human genomic intervals of the same size distribution as for the 10 human syntenic regions
+'set.seed(8675309)
 chrom_lengths = seqlengths(TxDb.Hsapiens.UCSC.hg19.knownGene)[1:23]
 chr = names(chrom_lengths)
 
@@ -142,7 +143,7 @@ interval_widths = lifted_mouse_loci@ranges@width
 
 
 ##
-sim_frame = as.data.frame(matrix(nrow=1000, ncol=11))
+sim_frame = as.data.frame(matrix(nrow=1000, ncol=10))
 for(i in 1:ncol(sim_frame)){
   chr_sample = sample(x=chr, size = 1000, replace=T, prob = chrom_lengths)
   for(j in 1:1000){
@@ -170,12 +171,15 @@ for(i in 1:nrow(sim_frame)){
   g8 = as(sim_frame[i,8], "GRanges")
   g9 = as(sim_frame[i,9], "GRanges")
   g10 = as(sim_frame[i,10], "GRanges")
-  g11 = as(sim_frame[i,11], "GRanges")
+
   
-  g = unlist(GRangesList(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11))
+  g = unlist(GRangesList(g1,g2,g3,g4,g5,g6,g7,g8,g9,g10))
   
   sim_overlaps = GenomicRanges::findOverlaps(query = pos_human_grange, subject = g)
   sim_o = append(sim_o, length(unique(sim_overlaps@to)))
   print(i)
 }
 quantile(sim_o,probs=0.95)
+
+x=ecdf(sim_o) 
+x(6)

@@ -36,6 +36,8 @@ genes = overlap
 #genes<-genes[,c('txStart','txEnd','name2','strand')]
 genes[,'strand2']<-ifelse(genes[,'strand']=='+',2,1)
 
+genes = genes[-which(genes$symbol %in% c("LINC01699", "RASAL2-AS1", "MIR3121", "LXH4-AS1", "MIR4424")),]
+
 y0=y1=-1
 for(i in 1:nrow(genes)){
   arrows(x0=genes[i,'start'],y0=y0,x1=genes[i,'end'],y1=y1, code=genes[i,'strand2'], length=0.05, lwd=2, 

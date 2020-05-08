@@ -18,13 +18,15 @@ norm_pheno$MAT_VOL3 = norm_pheno$MAT_VOL3 + 1
 norm_pheno$MAT_VOL4 = norm_pheno$MAT_VOL4 + 1
 
 norm_pheno$bending_work_post_yield = norm_pheno$bending_work_post_yield + 1
-norm_pheno$bending_disp_at_yield = norm_pheno$bending_disp_at_yield + 1
 norm_pheno$bending_PYD = norm_pheno$bending_PYD + 1
 
 norm_pheno = as.data.frame(log10(norm_pheno[,c(6:14,16,17,21,23:33,34,35,37:41,43:49,51,52,54:58,61:70,72,74,76)]))
 
 pheno_combined = cbind(norm_pheno, cross_basic$pheno[,c(15,18,19,20,22,36,42,50,53,59,60)])
 is.na(pheno_combined) = sapply(pheno_combined, is.infinite) #convert is.infinite to NA. Basically getting rid of zero observations.
+
+new_covar = covar
+is.na(new_covar) = sapply(new_covar, is.infinite) #convert is.infinite to NA. Basically getting rid of zero observations.
 
 pheno_combined = as.matrix(pheno_combined)
 for(i in ncol(pheno_combined)){

@@ -10,7 +10,7 @@ options(stringsAsFactors = F)
 #qtl file
 qtl_norm = read.csv("./results/flat/qtl_norm_pass_thresh", stringsAsFactors = FALSE)
 
-#remove FFP and soleus
+#remove FFP and soleus and MAT vol1_nonzero
 qtl_norm = qtl_norm[-c(1:3),]
 #remove MAT_vol1_nonzero
 qtl_norm = qtl_norm[-(which(qtl_norm$lodcolumn == "MAT_VOL1_nonzero")),]
@@ -148,6 +148,14 @@ for(i in unique(qtl_loc$locus)){
   }
 
 nonsyn_frame = do.call(rbind, lapply(nonsyn, as.data.frame))
+
+
+
+
+#SIFT
+
+#eqtl genes that are located within a phenotypic qtl and regulated by a local eqtl
+phenos_w_genes
 
 # out_snps_totwork <- scan1snps(pr, cross_basic$pmap, pheno_combined[,"bending_total_work"], k_loco[[10]],  addcovar =  new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
 #                       query_func=query_variants,chr=10, start=23.5, end=24.6, keep_all_snps=TRUE)

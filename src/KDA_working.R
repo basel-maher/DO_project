@@ -35,7 +35,7 @@ bns = list.files("./results/Rdata/networks/bn_4/")
 
 #convert and plot a particular BN
  x = bn2igraph(tan_bn)
- subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Rasd1"))))
+ subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,3,nodes = "Rasd1"))))
  plot(subgraph,vertex.label.cex=0.65,edge.width=1, vertex.size=5, margin=-0.2, vertex.label.dist=0.2, vertex.label.degree=-pi, layout = layout.fruchterman.reingold)
 
 ####

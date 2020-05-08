@@ -73,7 +73,7 @@ t.all$classic<-as.numeric(as.character(t.all$classic))
 ######
 ##How many nominal key drivers are located within BMD GWAS loci?
 
-homology = read.table("./data/mgi_homologs.txt",sep = "\t", header = T)
+homology = read.table("./data/mgi_homologs.txt",sep = "\t", header = T,stringsAsFactors = FALSE)
 
 convertMousetoHuman = function(x){
   human=c()
@@ -103,7 +103,7 @@ gene_pos = getBM(attributes = c("hgnc_symbol","chromosome_name", "start_position
              mart = mart)
 
 gene_pos = gene_pos[-which(gene_pos$chromosome_name %in% c(1:22,"X")==FALSE),]
-
+gene_pos = gene_pos[-which(gene_pos$hgnc_symbol == ""),] #remove genes with no name (4 of them)
 gene_pos_grange = paste0("chr",gene_pos$chromosome_name, ":", gene_pos$start_position, "-", gene_pos$end_position)
 gene_pos_grange = as(gene_pos_grange, "GRanges")
 
@@ -124,15 +124,55 @@ bp_human$chr = chroms_human
 #convert to GRanges format
 pos_human = paste0(bp_human$chr,":",bp_human$start,"-",bp_human$end)
 
+
+
+#add gefos loci
+gefos = read.csv("./data/GEFOS_bmd_loci.csv")
+for( i in 1:nrow(gefos)){
+  gefos$chrom[i] = unlist(strsplit(gefos$Coord[i], ":"))[1]
+  gefos$bp[i] = unlist(strsplit(gefos$Coord[i], ":"))[2]
+}
+
+gefos$start = as.numeric(gefos$bp) - 1000000
+gefos$start[which(gefos$start <0)] = 1
+gefos$end = as.numeric(gefos$bp) + 1000000
+
+#convert to GRanges format
+pos_gefos = paste0(gefos$chr,":",gefos$start,"-",gefos$end)
+
+
+pos = append(pos_human, pos_gefos)
+pos = unique(pos)
+
 #GRanges
-pos_human_grange = as(pos_human, "GRanges")
+pos_human_grange = as(pos, "GRanges")
 
 #overlap
 overlaps = GenomicRanges::findOverlaps(query = pos_human_grange, subject = gene_pos_grange)
 
 length(unique(overlaps@to))
 
-#545 genes overlap 680 loci
+#544 genes overlap 715? loci
+aa = read.csv("./results/flat/coloc/all_coloc_greaterorover75", stringsAsFactors = FALSE)
+
+
+homologs_win_1 = unique(gene_pos$hgnc_symbol[overlaps@to])
+x = aa[which(aa$gene %in% tolower(homologs_win_1)),]
+
+
+x$gene = toupper(x$gene)
+
+z = as.data.frame(matrix(nrow=46, ncol=2))
+counter = 1
+for(i in sort(unique(x$gene))){
+  print(i)
+  sub = subset(x, gene==i)
+  p = paste0(sort(unique(sub$BMD)),collapse = ",")
+  print(p)
+  z[counter,] = c(i, p)
+  counter = counter+1
+}
+write.csv(z,file="~/Desktop/table1.csv")
 
 #permute. how many expected by chance?
 allGenes = c(all$gene, all_m$gene, all_f$gene)

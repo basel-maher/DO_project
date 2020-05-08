@@ -55,19 +55,28 @@ rownames(covar_eqtl) = rownames(cross_eqtl$covar)#make sure rownames match origi
 
 ####
 #### Normalization####
-norm_pheno = as.data.frame(log10(cross_basic$pheno[,c(6:14,16,17,21,23:33,34,35,37:41,43:49,51,52,54:58,61:70,72,74,76)]))
+norm_pheno = as.data.frame(cross_basic$pheno)
+
+norm_pheno$MAT_VOL1 = norm_pheno$MAT_VOL1 + 1
+norm_pheno$MAT_VOL2 = norm_pheno$MAT_VOL2 + 1
+norm_pheno$MAT_VOL3 = norm_pheno$MAT_VOL3 + 1
+norm_pheno$MAT_VOL4 = norm_pheno$MAT_VOL4 + 1
+
+norm_pheno$bending_work_post_yield = norm_pheno$bending_work_post_yield + 1
+norm_pheno$bending_PYD = norm_pheno$bending_PYD + 1
+
+norm_pheno = as.data.frame(log10(norm_pheno[,c(6:14,16,17,21,23:33,34,35,37:41,43:49,51,52,54:58,61:70,72,74,76)]))
+
 pheno_combined = cbind(norm_pheno, cross_basic$pheno[,c(15,18,19,20,22,36,42,50,53,59,60)])
 is.na(pheno_combined) = sapply(pheno_combined, is.infinite) #convert is.infinite to NA. Basically getting rid of zero observations.
+
+new_covar = covar
+is.na(new_covar) = sapply(new_covar, is.infinite) #convert is.infinite to NA. Basically getting rid of zero observations.
 
 pheno_combined = as.matrix(pheno_combined)
 for(i in ncol(pheno_combined)){
   names(pheno_combined[,i]) = names(cross_basic$pheno[,6])
 }
-
-
-new_covar = covar
-is.na(new_covar) = sapply(new_covar, is.infinite) #convert is.infinite to NA. Basically getting rid of zero observations.
-
 
 #
 #
@@ -123,56 +132,56 @@ save(merge_top,file = "./results/Rdata/merge_top_QTL.Rdata")
 ##
 ##
 #chr3 Ma.Ar QTL Trace
-
-load("./results/Rdata/DO_qtl_scan_norm.Rdata")
-
-
-start = 66.56421 - 0.250
-end = 69.96983 + 0.250
-chr = 3
-out_snps_maar_3 <- scan1snps(pr, cross_basic$pmap, pheno_combined[,"uCT_Ma.Ar"], k_loco[["3"]],  addcovar =  covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
-                             query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=T)
-
-
-variants_locus = query_variants(chr, start, end)
-genes_locus <- query_genes(chr, start, end)
-
-
-if("pseudogene" %in% genes_locus$mgi_type){
-  genes_locus = genes_locus[-which(genes_locus$mgi_type == "pseudogene"),]
-}
-
-if("miRNA gene" %in% genes_locus$mgi_type){
-  genes_locus = genes_locus[-which(genes_locus$mgi_type == "miRNA gene"),]
-}
-
-if("rRNA gene" %in% genes_locus$mgi_type){
-  genes_locus = genes_locus[-which(genes_locus$mgi_type == "rRNA gene"),]
-}
-
-top_maar3 <- top_snps(out_snps_maar_3$lod, out_snps_maar_3$snpinfo, drop = 0.15 * max(out_snps_maar_3$lod))
-top_maar3[order(top_maar3$lod,decreasing = T),]
-
-
-#get the colocalizing eqtl
-load("./results/Rdata/local_eqtl.Rdata")#eqtl
-
-x = local_eqtl[which(local_eqtl$Gene.Name %in% genes_locus$Name),"lodcolumn"]
-x = paste0(x,"_3")
-
-load("./results/Rdata/merge_top_local_eqtl.Rdata") #merge frame
-
-merge_top_maar = merge_top[which(names(merge_top) %in% x)]
-
-coloc_snps = c()
-for(i in 1:length(merge_top_maar)){
-  if(any(top_maar3$snp_id %in% merge_top_maar[[i]]$snp_id)){
-    print(names(merge_top_maar)[i])
-    coloc_snps = append(coloc_snps,top_maar3[which(top_maar3$snp_id %in% merge_top_maar[[i]]$snp_id),"snp_id"])
-  }
-}
-
-
-coloc_snps = unique(coloc_snps) #colocalizing snps
-
-
+# 
+# load("./results/Rdata/DO_qtl_scan_norm.Rdata")
+# 
+# 
+# start = 66.56421 - 0.250
+# end = 69.96983 + 0.250
+# chr = 3
+# out_snps_maar_3 <- scan1snps(pr, cross_basic$pmap, pheno_combined[,"uCT_Ma.Ar"], k_loco[["3"]],  addcovar =  covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],Xcovar=Xcovar,
+#                              query_func=query_variants,chr=chr, start=start, end=end, keep_all_snps=T)
+# 
+# 
+# variants_locus = query_variants(chr, start, end)
+# genes_locus <- query_genes(chr, start, end)
+# 
+# 
+# if("pseudogene" %in% genes_locus$mgi_type){
+#   genes_locus = genes_locus[-which(genes_locus$mgi_type == "pseudogene"),]
+# }
+# 
+# if("miRNA gene" %in% genes_locus$mgi_type){
+#   genes_locus = genes_locus[-which(genes_locus$mgi_type == "miRNA gene"),]
+# }
+# 
+# if("rRNA gene" %in% genes_locus$mgi_type){
+#   genes_locus = genes_locus[-which(genes_locus$mgi_type == "rRNA gene"),]
+# }
+# 
+# top_maar3 <- top_snps(out_snps_maar_3$lod, out_snps_maar_3$snpinfo, drop = 0.15 * max(out_snps_maar_3$lod))
+# top_maar3[order(top_maar3$lod,decreasing = T),]
+# 
+# 
+# #get the colocalizing eqtl
+# load("./results/Rdata/local_eqtl.Rdata")#eqtl
+# 
+# x = local_eqtl[which(local_eqtl$Gene.Name %in% genes_locus$Name),"lodcolumn"]
+# x = paste0(x,"_3")
+# 
+# load("./results/Rdata/merge_top_local_eqtl.Rdata") #merge frame
+# 
+# merge_top_maar = merge_top[which(names(merge_top) %in% x)]
+# 
+# coloc_snps = c()
+# for(i in 1:length(merge_top_maar)){
+#   if(any(top_maar3$snp_id %in% merge_top_maar[[i]]$snp_id)){
+#     print(names(merge_top_maar)[i])
+#     coloc_snps = append(coloc_snps,top_maar3[which(top_maar3$snp_id %in% merge_top_maar[[i]]$snp_id),"snp_id"])
+#   }
+# }
+# 
+# 
+# coloc_snps = unique(coloc_snps) #colocalizing snps
+# 
+# 
