@@ -116,7 +116,7 @@ mean_per_chrom = mean_per_chrom[match(chr,mean_per_chrom$Group.1),]
 rownames(mean_per_chrom) =mean_per_chrom$Group.1
 mean_per_chrom = mean_per_chrom[,-1]
 
-cairo_pdf(file="~/Desktop/figs/1B.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/S1A.pdf", width = 10, height = 7)
 barplot(as.matrix(t(mean_per_chrom)),col = CCcolors, ylab = "Allele frequency", xlab="Chr", main = "Global allele frequency per chromosome")
 #legend("topleft", fill=CCcolors, legend=c("A/J","C57BL/6J","129S1/SvImJ","NOD/ShiLtJ","NZO/HILtJ","CAST/EiJ","PWK/PhJ","WSB/EiJ"),cex = 2, box.lwd = 1.5)
 dev.off()
@@ -264,7 +264,7 @@ p5<-ggplot(hsq_table, aes(x=pheno, y=h, fill=as.factor(group))) +
   xlab("Phenotype") + ylab("Heritability") + scale_color_brewer(palette = "Dark2") + theme_bw() +scale_y_continuous(limits = c(0,1),expand=c(0,0)) +
   theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=20), axis.text = element_text(size = 15))
 
-cairo_pdf(file="~/Desktop/figs/1D.pdf", width = 12, height = 14)
+cairo_pdf(file="~/Desktop/figs/S1B.pdf", width = 12, height = 14)
 p5
 dev.off()
 
@@ -370,6 +370,8 @@ gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR
 cairo_pdf(file="~/Desktop/figs/2A_sertad.pdf", width = 9, height = 7)
 par(ps=12)
 mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 1, plotby = "snp",snp_plot = "rs7516171",build = "hg19", name1 = "eBMD", name2 = "SERTAD4 - Adipose Subcutaneous")
+mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 1, plotby = "coord",start_plot = 210100000,end_plot = 210850000,build = "hg19", name1 = "eBMD", name2 = "SERTAD4 - Adipose Subcutaneous")
+
 dev.off()
 ####
 
@@ -421,7 +423,7 @@ gtex_racer_ld = (RACER::ldRACER(assoc_data = gtex_racer, rs_col = 3, pops = "EUR
 
 cairo_pdf(file="~/Desktop/figs/2A_glt8d2.pdf", width = 9, height = 7)
 par(ps=12)
-mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 12, plotby = "snp",snp_plot = "rs2722176",build = "hg19", name1 = "eBMD", name2 = "GLT8D2 - Pituitary")
+mirrorPlotRACER(assoc_data1 = bmd_racer_ld, assoc_data2 = gtex_racer_ld, chr = 12, plotby = "coord", start_plot = 103900000, end_plot = 104550000, build = "hg19", name1 = "eBMD", name2 = "GLT8D2 - Pituitary")
 dev.off()
 ####
 
@@ -530,79 +532,125 @@ subgraph <- induced.subgraph(x, names(unlist(neighborhood(x,2,nodes = "Sertad4")
 plot(subgraph,vertex.label.cex=0.65,edge.width=2, vertex.size=10, margin=-0.1, vertex.label.dist=0.2, vertex.label.degree=-pi)
 
 
+  ####################################################################################################################################################################################
+#2D
+#FROM B6_OBs_RNA_SEQ
+####################################################################################################################################################################################
 
-
-##2D
-rasd1_impc = read.csv("~/Desktop/test.txt")
-#r_m = rasd1_impc[which(rasd1_impc$Sex == "male"),]
-#r_f = rasd1_impc[which(rasd1_impc$Sex == "female"),]
-r = rasd1_impc
-
-r$con = paste0(r$Genotype, r$Sex)
-r[which(r$con == "+/+female"),"con"] = "Female WT"
-r[which(r$con == "+/+male"),"con"] = "Male WT"
-r[which(r$con == "BL3486female"),"con"] = "KO Female"
-r[which(r$con == "BL3486male"),"con"] = "KO Male"
-
-r$con = factor(r$con, levels = c("Female WT","KO Female","Male WT", "KO Male"))
-r$col = 1
-r$col[which(r$con == "Female WT" | r$con == "Male WT")] = 0
-x = PhenList(rasd1_impc, testGenotype = "EPD0098_5_B05",refGenotype = "+/+")
-
-t = testDataset(x, depVariable = "Value", equation = "withWeight")
-
-par(ps=12)
-cairo_pdf(file="~/Desktop/figs/2D.pdf", width = 10, height = 7)
-ggplot(r, aes(con,Value, fill=as.factor(col) )) + geom_boxplot(width=0.1) + xlab(NULL) + ylab("BMD") + theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15), legend.position = "none")+
-  scale_fill_brewer(palette = "Dark2")
-dev.off()
-
-#resid = as.data.frame(t@analysisResults$model.output$residuals)
-
-#resid$genotype = rasd1_impc[,"Genotype"]
-#resid$sex = rasd1_impc[,"Sex"]
-
-##2C
+#2E
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
 
-#plot UMAP
-ob=JackStraw(ob)
-ob <- RunUMAP(ob, dims = 1:13)
 
-cairo_pdf(file="~/Desktop/figs/2C_umap.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/2E_umap.pdf", width = 10, height = 7)
 DimPlot(ob,
         reduction = "umap",
         label = TRUE,
         label.size = 6,
-        plot.title = "UMAP")
+        pt.size = 1.5)
 dev.off()
 
-cairo_pdf(file="~/Desktop/figs/2C_rasd1.pdf", width = 10, height = 7)
-FeaturePlot(ob, features = c("Rasd1"),pt.size = 1.5, sort.cell = T)
+cairo_pdf(file="~/Desktop/figs/2E_sertad4.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = c("Sertad4"),pt.size = 1.5, sort.cell = T)
 dev.off()
 
 
 
-ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
-
-
-#First, Rasd1 markers. (Cluster 10)
-
-ob.markers[which(ob.markers$gene =="Rasd1"),] # 10
-
-#output the top 30 cluster 10 genes
-cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,)
-
-head(cluster10.markers, 30)
-
-
-cairo_pdf(file="~/Desktop/figs/2C_sost.pdf", width = 10, height = 7)
-FeaturePlot(ob, features = c("Sost"),pt.size = 1.5, sort.cell = T)
+cairo_pdf(file="~/Desktop/figs/2E_Glt8d2.pdf", width = 10, height = 7)
+FeaturePlot(ob, features = c("Glt8d2"),pt.size = 1.5, sort.cell = T)
 dev.off()
 
-cairo_pdf(file="~/Desktop/figs/2C_phex1.pdf", width = 10, height = 7)
-FeaturePlot(ob, features = c("Phex"),pt.size = 1.5, sort.cell = T)
+####################################################################################################################################################################################
+#2F
+library(IMPCdata)
+t1<-getIMPCDataset('WTSI','MGP_001','IMPC_DXA_001','IMPC_DXA_004_001','MGI:4364018')
+library(PhenStat)
+t1<-subset(t1,t1$Genotype!="colony_id")
+plot(as.vector(as.character(t1$Weight)),as.numeric(as.character(t1$Value)))
+t1$Value<-as.numeric(as.character(t1$Value))
+t1$Weight<-as.numeric(as.character(t1$Weight))
+o1<-unique(t1$Genotype)
+d2<-PhenList(t1, testGenotype=as.character(unique(t1$Genotype)[which(o1!='+/+')]),refGenotype='+/+',outputMessages = F)
+d3<-testDataset(d2,depVariable='Value',method='MM',equation='withWeight', outputMessages = T,transformValues = T)
+#d3@analysisResults$model.output.summary.
+
+cairo_pdf(file="~/Desktop/figs/2F.pdf", width = 10, height = 7)
+ggplot(t1,aes(x=Sex, y=Value, fill=factor(Genotype))) +
+  geom_boxplot() +
+  labs(fill = "Genotype") + 
+  geom_point(position=position_jitterdodge(),alpha=0.3) +
+  theme_bw(base_size = 16)
 dev.off()
+# ##2D
+# rasd1_impc = read.csv("~/Desktop/test.txt")
+# #r_m = rasd1_impc[which(rasd1_impc$Sex == "male"),]
+# #r_f = rasd1_impc[which(rasd1_impc$Sex == "female"),]
+# r = rasd1_impc
+# 
+# r$con = paste0(r$Genotype, r$Sex)
+# r[which(r$con == "+/+female"),"con"] = "Female WT"
+# r[which(r$con == "+/+male"),"con"] = "Male WT"
+# r[which(r$con == "BL3486female"),"con"] = "KO Female"
+# r[which(r$con == "BL3486male"),"con"] = "KO Male"
+# 
+# r$con = factor(r$con, levels = c("Female WT","KO Female","Male WT", "KO Male"))
+# r$col = 1
+# r$col[which(r$con == "Female WT" | r$con == "Male WT")] = 0
+# x = PhenList(rasd1_impc, testGenotype = "EPD0098_5_B05",refGenotype = "+/+")
+# 
+# t = testDataset(x, depVariable = "Value", equation = "withWeight")
+# 
+# par(ps=12)
+# cairo_pdf(file="~/Desktop/figs/2D.pdf", width = 10, height = 7)
+# ggplot(r, aes(con,Value, fill=as.factor(col) )) + geom_boxplot(width=0.1) + xlab(NULL) + ylab("BMD") + theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(), axis.title = element_text(size=18), axis.text = element_text(size = 15), legend.position = "none")+
+#   scale_fill_brewer(palette = "Dark2")
+# dev.off()
+# 
+# #resid = as.data.frame(t@analysisResults$model.output$residuals)
+# 
+# #resid$genotype = rasd1_impc[,"Genotype"]
+# #resid$sex = rasd1_impc[,"Sex"]
+# 
+# ##2C
+# load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
+# 
+# #plot UMAP
+# ob=JackStraw(ob)
+# ob <- RunUMAP(ob, dims = 1:13)
+# 
+# cairo_pdf(file="~/Desktop/figs/2C_umap.pdf", width = 10, height = 7)
+# DimPlot(ob,
+#         reduction = "umap",
+#         label = TRUE,
+#         label.size = 6,
+#         plot.title = "UMAP")
+# dev.off()
+# 
+# cairo_pdf(file="~/Desktop/figs/2C_rasd1.pdf", width = 10, height = 7)
+# FeaturePlot(ob, features = c("Rasd1"),pt.size = 1.5, sort.cell = T)
+# dev.off()
+# 
+# 
+# 
+# ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
+# 
+# 
+# #First, Rasd1 markers. (Cluster 10)
+# 
+# ob.markers[which(ob.markers$gene =="Rasd1"),] # 10
+# 
+# #output the top 30 cluster 10 genes
+# cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,)
+# 
+# head(cluster10.markers, 30)
+# 
+# 
+# cairo_pdf(file="~/Desktop/figs/2C_sost.pdf", width = 10, height = 7)
+# FeaturePlot(ob, features = c("Sost"),pt.size = 1.5, sort.cell = T)
+# dev.off()
+# 
+# cairo_pdf(file="~/Desktop/figs/2C_phex1.pdf", width = 10, height = 7)
+# FeaturePlot(ob, features = c("Phex"),pt.size = 1.5, sort.cell = T)
+# dev.off()
 
 ##2E
 #from B6>OBs_RNA_Seq.R
@@ -632,7 +680,7 @@ dev.off()
 #scatterplot with traits, across all chroms, color traits differently, LOD score, labels
 #load in significant qtl
 qtl = read.csv("./results/flat/qtl_loc",stringsAsFactors = F)
-qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","MAT_VOL1","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Dfx","DFmax","Wtotal","WPY","TMD","Fmax","Ffx","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
+qtl$pheno_name = c("ML","Ma.Ar","Tt.Ar","TMD","Ct.Por","pMOI","Imax","Ct.Ar/Tt.Ar","ML","Ma.Ar","Ma.Ar","Tt.Ar","Ct.Ar/Tt.Ar","BMD","Dfx","DFmax","Wtotal","WPY","TMD","Fmax","Ffx","Ct.Ar","pMOI","Imax","Imin","Tb.Sp","Tb.N","Ct.Th")
 qtl[which(qtl$chr=="X"),"chr"]="20"
 qtl$chr = as.numeric(qtl$chr)
 chr_lengths = as.data.frame(matrix(nrow=2,ncol=1))
@@ -697,7 +745,7 @@ p2a=ggplot() +
 #color by group?
   #geom_label_repel
 
-cairo_pdf(file="~/Desktop/figs/3A.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/figs/S2.pdf", width = 10, height = 7)
 p2a
 dev.off()
 

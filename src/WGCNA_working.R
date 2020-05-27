@@ -258,9 +258,9 @@ rownames(moduleTraitPvalue) = rownames(moduleTraitCor)
 
 #moduleTraitPvalue = as.matrix(moduleTraitPvalue)
 
-#keep all but  weight, length, glucose , fat pads, muscle masses and MAT
-moduleTraitPvalue = moduleTraitPvalue[,c(11:61)]
-moduleTraitCor = moduleTraitCor[,c(11:61)]
+#keep all but  weight, length, glucose , fat pads, muscle masses
+moduleTraitPvalue = moduleTraitPvalue[,c(11:65)]
+moduleTraitCor = moduleTraitCor[,c(11:65)]
 
 
 moduleTraitPvalue = as.matrix(moduleTraitPvalue)

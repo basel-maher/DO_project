@@ -99,7 +99,7 @@ S4 = merge(full, female,by="Gene.Name", all=T)
 S4 = merge(S4, male,by="Gene.Name", all=T)
 
 
-S4 = S4[,c(1,2,42,88, 3:41, 89:128)]
+S4 = S4[,c(1,2,42,88, 3:41, 43:87,89:128)]
 write.csv(S4, file = "~/Desktop/supp_tables/S4.csv", row.names = F)
 
 
@@ -223,26 +223,56 @@ write.csv(S7, file = "~/Desktop/supp_tables/S7.csv", row.names = F)
 
 
 
-#S8 genes that define rasd1 cluster
-library(Seurat)
-load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
+#S8 correlation between modules and bone phenotypes
+rows = match(colnames(pheno_combined), colnames(moduleTraitCor))
+
+cor = t(moduleTraitCor)[rows,]
+pval = t(moduleTraitPvalue)[rows,]
+
+c = cor
+for(i in 1:length(c)){
+  c[i] = paste0(cor[i], " (", pval[i], ")")
+}  
+
+colnames(c) = sapply(strsplit(colnames(c), 'ME'), "[",2)
+colnames(c) = paste0(colnames(c), "_C")
+
+
+cor_F = t(moduleTraitCor_f)[rows,]
+pval_F = t(moduleTraitPvalue_f)[rows,]
+
+f= cor_F
+for(i in 1:length(f)){
+  f[i] = paste0(cor_F[i], " (", pval_F[i], ")")
+}  
+
+colnames(f) = sapply(strsplit(colnames(f), 'ME'), "[",2)
+colnames(f) = paste0(colnames(f), "_F")
 
 
 
-ob.markers <- FindAllMarkers(ob, only.pos = T)
+cor_M = t(moduleTraitCor_m)[rows,]
+pval_M = t(moduleTraitPvalue_m)[rows,]
 
-#Rasd1 cluster (Cluster 10)
+m= cor_M
+for(i in 1:length(m)){
+  m[i] = paste0(cor_M[i], " (", pval_M[i], ")")
+}  
 
-ob.markers[which(ob.markers$gene =="Sertad4"),] # 10
+colnames(m) = sapply(strsplit(colnames(m), 'ME'), "[",2)
+colnames(m) = paste0(colnames(m), "_M")
 
-#cluster 10 genes
-cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,only.pos = T)
-S8 = cluster10.markers[which(cluster10.markers$p_val_adj <= 0.05),]
+S8 = cbind(c,f,m)
 
 write.csv(S8, file = "~/Desktop/supp_tables/S8.csv", row.names = T)
 
 
+
+
+
+
 #S9
+
 qtl_loc = read.csv("./results/flat/qtl_loc", stringsAsFactors = FALSE)
 
 #convert to BED3 format while getting max interval size in each CI
@@ -272,11 +302,13 @@ colnames(S9) = c("mouse loci", "syntenic human loci")
 write.csv(S9, file = "~/Desktop/supp_tables/S9.csv", row.names = F)
 
 
+
+
+
+
+
 #S10
 #SIFT annotations
-
-
-
 
 
 
@@ -301,7 +333,6 @@ load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
 
 ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
 
-#Rasd1 cluster (Cluster 10)
 
 ob.markers[which(ob.markers$gene =="Qsox1"),] # 11
 
@@ -310,6 +341,20 @@ cluster1.markers <- FindMarkers(ob, ident.1 = 1, min.pct = 0.25,only.pos = T)
 S12 = cluster1.markers[which(cluster1.markers$p_val_adj <= 0.05),]
 
 write.csv(S12, file = "~/Desktop/supp_tables/S12.csv", row.names = T)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #S13 nad S14 from Larry

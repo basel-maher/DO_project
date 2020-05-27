@@ -310,12 +310,12 @@ colnames(moduleTraitPvalue_f) = colnames(moduleTraitCor_f)
 rownames(moduleTraitPvalue_f) = rownames(moduleTraitCor_f)
 
 
-#keep all but  weight, length, glucose , fat pads, muscle masses and MAT
-moduleTraitPvalue_m = moduleTraitPvalue_m[,c(11:61)]
-moduleTraitCor_m = moduleTraitCor_m[,c(11:61)]
+#keep all but  weight, length, glucose , fat pads, muscle masses 
+moduleTraitPvalue_m = moduleTraitPvalue_m[,c(11:65)]
+moduleTraitCor_m = moduleTraitCor_m[,c(11:65)]
 
-moduleTraitPvalue_f = moduleTraitPvalue_f[,c(11:61)]
-moduleTraitCor_f = moduleTraitCor_f[,c(11:61)]
+moduleTraitPvalue_f = moduleTraitPvalue_f[,c(11:65)]
+moduleTraitCor_f = moduleTraitCor_f[,c(11:65)]
 
 
 moduleTraitPvalue_m = as.matrix(moduleTraitPvalue_m)

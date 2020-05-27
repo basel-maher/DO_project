@@ -39,7 +39,7 @@ gene.ann<-subset(gene.ann, !duplicated(gene.ann[,1]))
 #grep('ENSMUST00000182158',gene.ann[,1])
 #grep('A430106G13Rik',gene.ann[,2])
 #dat1<-c()
-genes<-c('Sertad4')#A930004D18Rik
+genes<-c('Glt8d2')#A930004D18Rik
 genes<-unique(genes)
 rm(dat1)
 dat1<-c()
@@ -84,7 +84,7 @@ temp4$newGene<-mapvalues(temp4$Gene, from=unique(temp4$Gene), to=toupper(genes))
 
 save(temp4,file = "./results/Rdata/rasd1_calvarial.Rdata")
 
-cairo_pdf(filename="~/Desktop/figs/6A.pdf", width = 10, height = 7)
+cairo_pdf(filename="~/Desktop/figs/2D_glt8d2.pdf", width = 10, height = 7)
 ggplot(temp4, aes(x=Day, y=mean,ymin=mean-temp4$sem, ymax=mean+temp4$sem, colour=newGene,Group=newGene)) + 
   geom_errorbar(aes(ymin=mean-temp4$sem, ymax=mean+temp4$sem), width=0.5, size=1.25) +
   geom_line(aes(group=newGene), size=0.5) +
