@@ -1,4 +1,4 @@
-#RNA-seq pipeline
+# RNA-seq pipeline
 
 1. Fastq files were downloaded from Illumina Basespace. 
   * Paired-end, 2x76 bp
@@ -100,7 +100,48 @@ Then, keep genes that pass the TPM filter in step 6 above.
   write.csv(final, "genes_over_6reads_in_morethan_38samps_tpm_over0.1_38samps_COUNTS.csv",row.names=F, quote=F)
 ```
 
+9. Transform using VST and quantile-based inverse Normal transform
+  * [src/normalize_RNAseq.R](../src/normalize_RNAseq.R)
+  
+10. PEER factors were calculated using the output from above. These were used as covariates for eQTL mapping.
+  *  Calculated 48 PEER factors (25% of samples)
+  * No covariates were included, and neither was an intercept.
+  
+  ```python
+  import peer
+  import scipy as SP
+  import pickle
+  import numpy
 
+  expr = SP.loadtxt('counts_vst_qnorm_nohead.csv', delimiter=',')
+
+  model = peer.PEER()
+  model.setPhenoMean(expr)
+  expr.shape
+
+  #25% of samples as hidden confounders
+  model.setNk(48)
+
+  #run
+  model.update()
+
+  factors = model.getX()
+  pickle.dump(factors, open("save.X", "wb"))
+  numpy.savetxt("factors.txt", factors)
+
+  weights = model.getW()
+  pickle.dump(weights, open("save.W", "wb"))
+  numpy.savetxt("weights.txt", weights)
+
+  precision = model.getAlpha()
+  pickle.dump(precision, open("save.Alpha", "wb"))
+  numpy.savetxt("precision.txt", precision)
+
+
+  residuals = model.getResiduals()
+  pickle.dump(residuals, open("save.residuals", "wb"))
+  numpy.savetxt("residuals.txt", residuals)
+```
   
 
     
