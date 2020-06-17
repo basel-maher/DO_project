@@ -68,7 +68,7 @@
     get pheno_combined as output
 
 10. eQTL mapping
-    * [put pipeline here](rna_seq_pipeline.md)
+    * [doc/rna_seq_pipeline.md](./rna_seq_pipeline.md)
     * ALIGNMENT STATS
     * PEER stuff
         -used VST + qnormed counts
