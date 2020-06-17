@@ -9,7 +9,7 @@
 2. Each samples merged lanes (per run) were aligned using Hisat2. Alignment was done to the GRCm38_snp index.
 
   * last base was trimmed (3' end)
-  * 
+
   ```bash 
   i=$SLURM_ARRAY_TASK_ID
   line=$(sed -n "${i}{p;}" < ../hisat_aligned_lanes/samples)
