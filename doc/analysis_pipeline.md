@@ -69,11 +69,6 @@
 
 10. eQTL mapping
     * [doc/rna_seq_pipeline.md](./rna_seq_pipeline.md)
-    * ALIGNMENT STATS
-    * PEER stuff
-        -used VST + qnormed counts
-        - 48 PEER factors, no covars and no intercept
-
 
     * Make the annotation file that links between Stringtie gene IDs and gene names:
       * [src/make_annot.R](../src/make_annot.R)
@@ -86,7 +81,7 @@
     	* [src/normalize_RNAseq.R](../src/normalize_RNAseq.R)
 
     * make an eqtl specific cross file
-        * [src/make_cross_eqtl.R](../src/make_cross_eqtl.R)
+        * [src/make_cross_eQTL.R](../src/make_cross_eQTL.R)
 
     - calc eqtl perms
     	* based on mapping local varying covariates, we chose to map local
@@ -172,4 +167,6 @@
     * Key Driver Analysis performed in [src/seurat_analysis.R](../src/seurat_analysis.R)
         
 
+
+#annotate_KDA_GTEx
 
