@@ -57,15 +57,13 @@
     * [src/map_qtl.R](../src/map_qtl.R)
     * will also perform permutation analysis
         * output: 
-		* results/Rdata/qtl_perms/
+		      * results/Rdata/qtl_perms/
 		
-		* Ellipticity calculation and mapping in [src/ellipticity.R](../src/ellipticity.R)
+		* [src/make_crossfile.R](../src/GWAS_qtl_overlap.R)
         
-    GWAS-QTL overlap
     
-    LASSO
-    
-    get pheno_combined as output
+    -fix map_qtl
+    -qtl_loc output (merge_analysis or map_qtl)
 
 10. eQTL mapping
     * [doc/rna_seq_pipeline.md](./rna_seq_pipeline.md)
@@ -93,11 +91,9 @@
 
     * Map eQTL
 
-    	* [src/map_local_and_distal_eqtl.R](../src/map_local_eqtl.R)
+    	* [src/map_local_eqtl.R](../src/map_local_eqtl.R)
     	* outputs: 
         	* ./results/Rdata/local_eqtl.Rdata
-			* CHECK OUTS, SOME FROM RIVANNA (1-4)
-			*
         
  
 11. Merge Analysis 
@@ -106,7 +102,8 @@
   * [src/merge_analysis_chr1.R](../src/merge_analysis_chr1.R)
 
 13. QSOX1 analysis
-
+  * [src/qsox1_analysis.R](../src/qsox1_analysis.R)
+  
 12. Networks
     
     * Make bone "superset" [src/make_bone_geneset.R](../src/make_bone_geneset.R)
@@ -168,5 +165,9 @@
         
 
 
-#annotate_KDA_GTEx
+
+#impc
+#mouse_human_syntenic regions
+#plots for paper
+#replication POMP
 

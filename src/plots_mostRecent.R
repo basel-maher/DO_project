@@ -540,6 +540,17 @@ plot(subgraph,vertex.label.cex=0.65,edge.width=2, vertex.size=10, margin=-0.1, v
 #2E
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
 
+cairo_pdf(file="~/Desktop/figs/qsox1_vln.pdf", width = 10, height = 7)
+VlnPlot(ob,features = "Qsox1")
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/glt8d2_vln.pdf", width = 10, height = 7)
+VlnPlot(ob,features = "Glt8d2")
+dev.off()
+
+cairo_pdf(file="~/Desktop/figs/sertad4_vln.pdf", width = 10, height = 7)
+VlnPlot(ob,features = "Sertad4")
+dev.off()
 
 cairo_pdf(file="~/Desktop/figs/2E_umap.pdf", width = 10, height = 7)
 DimPlot(ob,

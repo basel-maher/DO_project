@@ -69,7 +69,7 @@ lifted_mouse_loci = as(lifted_mouse_loci, "GRanges")
 morris_lead_snps = read.csv("./data/Morrisetal2018.NatGen.SumStats/Morris_eBMD_conditionally_ind_snps.csv", header=T, stringsAsFactors = F)
 morris = read.table("./data/Morrisetal2018.NatGen.SumStats/Biobank2-British-Bmd-As-C-Gwas-SumStats.txt", header=T)
 #get vars that are genome wide significant
-#morris = morris[which(morris$P.NI <= 5e-8),] #ADD THIS IF YOU WANT THE OVERLAP FOR THE RESULTS, REMOVE FOR SUPP FIG 1
+morris = morris[which(morris$P.NI <= 5e-8),] #KEEP THIS IF YOU WANT THE OVERLAP FOR THE RESULTS, REMOVE FOR SUPP FIG
 
 #make into GRanges format
 chroms_human = paste0("chr",morris$CHR)
@@ -133,7 +133,7 @@ unique(overlaps_merged$locus)
 
 ########calculate how many of the 10 loci's syntenic regions would overlap just by chance, 
 ########by picking 1000 human genomic intervals of the same size distribution as for the 10 human syntenic regions
-'set.seed(8675309)
+set.seed(8675309)
 chrom_lengths = seqlengths(TxDb.Hsapiens.UCSC.hg19.knownGene)[1:23]
 chr = names(chrom_lengths)
 
