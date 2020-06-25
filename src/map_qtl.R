@@ -46,7 +46,7 @@ for(i in quant_pheno_columns){
 DO_qtl_scan = scan1(apr, cross_basic$pheno[,c(6:70,72,74,76)], k_loco, Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 #save(DO_qtl_scan,file = "./results/Rdata/DO_qtl_scan.Rdata")
 
-
+#scan MAT as binary traits
 DO_qtl_scan_binary = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],cores = 2)
 #save(DO_qtl_scan_binary,file = "./results/Rdata/DO_qtl_scan_binary.Rdata")
 load("./results/Rdata/DO_qtl_scan_binary.Rdata")
@@ -59,7 +59,7 @@ qtl_peaks_both = rbind(qtl_peaks,qtl_peaks_binary)
 write.csv(qtl_peaks_both, file = "./results/flat/qtl_peaks.csv",row.names = FALSE,quote = FALSE)
 
 
-####try after Normalization####
+####try after transforming####
 norm_pheno = as.data.frame(cross_basic$pheno)
 
 norm_pheno$MAT_VOL1 = norm_pheno$MAT_VOL1 + 1
@@ -98,7 +98,7 @@ qtl_peaks_both_norm = rbind(qtl_peaks_norm,qtl_peaks_bin_norm)
 #
 #
 
-#heritability
+#calc heritability
 h = est_herit(pheno = pheno_combined, kinship = k,addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")] )
 
 h_df = as.data.frame(h)
@@ -107,44 +107,49 @@ h_df = as.data.frame(h)
 #
 
 
+# 
+# ### interactive model w/ sex
+# DO_qtl_int = scan1(apr, cross_basic$pheno[,c(6:70,72,74,76)], k_loco, Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = covar[,"sex"],cores = 2)
+# #save(DO_qtl_int,file = "./results/Rdata/DO_qtl_int.Rdata")
+# load("./results/Rdata/DO_qtl_int.Rdata")
+# qtl_peaks_int = find_peaks(DO_qtl_int, cross_basic$pmap, threshold=4, drop=1.5)
+# 
+# 
+# DO_qtl_int_binary = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = covar[,"sex"],cores = 2)
+# #save(DO_qtl_int_binary,file = "./results/Rdata/DO_qtl_int_binary.Rdata")
+# load("./results/Rdata/DO_qtl_int_binary.Rdata")
+# 
+# qtl_peaks_binary_int = find_peaks(DO_qtl_int_binary, cross_basic$pmap, threshold=4, drop=1.5)
+# qtl_peaks_both_int = rbind(qtl_peaks_int,qtl_peaks_binary_int)
+# 
+# 
+# ##diff both
+# x = merge(qtl_peaks_both_int,qtl_peaks_both_norm, by=c("lodcolumn","chr"))
+# 
+# #same but norm
+# DO_qtl_int_norm = scan1(apr, pheno_combined, k_loco, Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = new_covar[,"sex"],cores = 2)
+# save(DO_qtl_int_norm,file = "./results/Rdata/DO_qtl_int_norm.Rdata")
+# load("./results/Rdata/DO_qtl_int_norm.Rdata")
+# 
+# qtl_peaks_int_norm = find_peaks(DO_qtl_int_norm, cross_basic$pmap, threshold=4, drop=1.5)
+# 
+# DO_qtl_int_binary_norm = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = new_covar[,"sex"],cores = 2)
+# save(DO_qtl_int_binary_norm,file = "./results/Rdata/DO_qtl_int_binary_norm.Rdata")
+# load("./results/Rdata/DO_qtl_int_binary_norm.Rdata")
+# qtl_peaks_int_bin_norm = find_peaks(DO_qtl_int_binary_norm, cross_basic$pmap, threshold=4, drop=1.5)
+# 
+# qtl_peaks_both_int = rbind(qtl_peaks_int_bin_norm,qtl_peaks_int_norm)
+# 
+# 
+# 
+# 
 
-### interactive model w/ sex
-DO_qtl_int = scan1(apr, cross_basic$pheno[,c(6:70,72,74,76)], k_loco, Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = covar[,"sex"],cores = 2)
-#save(DO_qtl_int,file = "./results/Rdata/DO_qtl_int.Rdata")
-load("./results/Rdata/DO_qtl_int.Rdata")
-qtl_peaks_int = find_peaks(DO_qtl_int, cross_basic$pmap, threshold=4, drop=1.5)
 
-
-DO_qtl_int_binary = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = covar[,"sex"],cores = 2)
-#save(DO_qtl_int_binary,file = "./results/Rdata/DO_qtl_int_binary.Rdata")
-load("./results/Rdata/DO_qtl_int_binary.Rdata")
-
-qtl_peaks_binary_int = find_peaks(DO_qtl_int_binary, cross_basic$pmap, threshold=4, drop=1.5)
-qtl_peaks_both_int = rbind(qtl_peaks_int,qtl_peaks_binary_int)
-
-
-##diff both
-x = merge(qtl_peaks_both_int,qtl_peaks_both_norm, by=c("lodcolumn","chr"))
-
-#same but norm
-DO_qtl_int_norm = scan1(apr, pheno_combined, k_loco, Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = new_covar[,"sex"],cores = 2)
-save(DO_qtl_int_norm,file = "./results/Rdata/DO_qtl_int_norm.Rdata")
-load("./results/Rdata/DO_qtl_int_norm.Rdata")
-
-qtl_peaks_int_norm = find_peaks(DO_qtl_int_norm, cross_basic$pmap, threshold=4, drop=1.5)
-
-DO_qtl_int_binary_norm = scan1(apr, cross_basic$pheno[,c(71,73,75,77)], Xcovar=Xcovar, addcovar = new_covar[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],intcovar = new_covar[,"sex"],cores = 2)
-save(DO_qtl_int_binary_norm,file = "./results/Rdata/DO_qtl_int_binary_norm.Rdata")
-load("./results/Rdata/DO_qtl_int_binary_norm.Rdata")
-qtl_peaks_int_bin_norm = find_peaks(DO_qtl_int_binary_norm, cross_basic$pmap, threshold=4, drop=1.5)
-
-qtl_peaks_both_int = rbind(qtl_peaks_int_bin_norm,qtl_peaks_int_norm)
-
-#Do LODi = LODf-LODa. F is full model (additive + int), a is additive only
-
-
-
-
+#use qtl2::scan1perm() for permutations. We did 1000 permutations for each pheno.
+#this was done on our supercomputing cluster
+#example:
+#scan1perm(apr,pheno_combined,k_loco, Xcovar=Xcovar, addcovar = cov[,c("sex", "age_at_sac_days","body_weight","generationG24","generationG25","generationG26","generationG27","generationG28","generationG29","generationG30","generationG31","generationG32","generationG33")],n_perm = 1000,perm_Xsp = TRUE,chr_lengths=chr_lengths(cross_basic$gmap)
+#
 
 #####get qtl that pass perm threshold
 qtl_peaks_both$perm_thresh = NA
@@ -208,41 +213,40 @@ write.csv(qtl_norm, file = "./results/flat/qtl_norm_pass_thresh", row.names = FA
 ###
 
 
-#same for NORM INT
-qtl_peaks_both_int$perm_thresh = NA
-perm = list.files("./results/Rdata/qtl_perms/")
+# #same for NORM INT
+# qtl_peaks_both_int$perm_thresh = NA
+# perm = list.files("./results/Rdata/qtl_perms/")
+# 
+# perm_files = perm[grep("norm_perms_INT_",perm)]
+# 
+# for(i in 1:length(perm_files)){
+#   
+#   load(paste0("./results/Rdata/qtl_perms/",perm_files[i]))
+#   
+#   perm_a = summary(norm_perm)$A[1]
+#   perm_x = summary(norm_perm)$X[1]
+#   
+#   pheno_name = perm_files[i]
+#   pheno_name = gsub(x = perm_files[i],pattern = "norm_perms_INT_",replacement = "")
+#   pheno_name = gsub(x = pheno_name,pattern = ".Rdata",replacement = "")
+#   
+#   pheno_rows = which(qtl_peaks_both_int$lodcolumn == pheno_name)
+#   
+#   for(i in 1:length(pheno_rows)){
+#     if(qtl_peaks_both_int$chr[pheno_rows[i]] == "X"){
+#       qtl_peaks_both_int$perm_thresh[[pheno_rows[i]]] = perm_x
+#     } else {qtl_peaks_both_int$perm_thresh[[pheno_rows[i]]] = perm_a}
+#   }
+# }
+# 
+# qtl_norm_INT = qtl_peaks_both_int[which(qtl_peaks_both_int$lod >= qtl_peaks_both_int$perm_thresh),]
+# write.csv(qtl_norm_INT, file = "./results/flat/qtl_norm_INT_pass_thresh", row.names = FALSE, quote = FALSE)
+# 
+# ###
 
-perm_files = perm[grep("norm_perms_INT_",perm)]
 
-for(i in 1:length(perm_files)){
-  
-  load(paste0("./results/Rdata/qtl_perms/",perm_files[i]))
-  
-  perm_a = summary(norm_perm)$A[1]
-  perm_x = summary(norm_perm)$X[1]
-  
-  pheno_name = perm_files[i]
-  pheno_name = gsub(x = perm_files[i],pattern = "norm_perms_INT_",replacement = "")
-  pheno_name = gsub(x = pheno_name,pattern = ".Rdata",replacement = "")
-  
-  pheno_rows = which(qtl_peaks_both_int$lodcolumn == pheno_name)
-  
-  for(i in 1:length(pheno_rows)){
-    if(qtl_peaks_both_int$chr[pheno_rows[i]] == "X"){
-      qtl_peaks_both_int$perm_thresh[[pheno_rows[i]]] = perm_x
-    } else {qtl_peaks_both_int$perm_thresh[[pheno_rows[i]]] = perm_a}
-  }
-}
-
-qtl_norm_INT = qtl_peaks_both_int[which(qtl_peaks_both_int$lod >= qtl_peaks_both_int$perm_thresh),]
-write.csv(qtl_norm_INT, file = "./results/flat/qtl_norm_INT_pass_thresh", row.names = FALSE, quote = FALSE)
-
-###
-
-#Do LODi = LODf-LODa. F is full model (additive + int), a is additive only
-
-full_qtl = merge(qtl_norm, qtl_norm_INT, by=c("lodcolumn","chr"))
-full_qtl$LODi = full_qtl$lod.y - full_qtl$lod.x
+#full_qtl = merge(qtl_norm, qtl_norm_INT, by=c("lodcolumn","chr"))
+#full_qtl$LODi = full_qtl$lod.y - full_qtl$lod.x
 
 # NOT USED
 # PLOTTING, ETC
@@ -334,6 +338,9 @@ full_qtl$LODi = full_qtl$lod.y - full_qtl$lod.x
 # por_coef = porosity_blup[por_mark,1:8]
 # 
 # cor(pMOI_coef, TMD_coef, method = "k")
+
+
+
 
 ###
 #make qtl_loci

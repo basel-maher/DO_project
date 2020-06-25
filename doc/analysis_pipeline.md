@@ -55,17 +55,13 @@
 9. QTL mapping / analysis
 
     * [src/map_qtl.R](../src/map_qtl.R)
-    * will also perform permutation analysis
-        * output: 
-		      * results/Rdata/qtl_perms/
-		      
+    * can also get qtl_loc from this script
+
 		* GWAS-QTL overlap
 		  * [src/GWAS_qtl_overlap](../src/GWAS_qtl_overlap.R)
         
     
-    -fix map_qtl
-    -qtl_loc output (merge_analysis or map_qtl)
-
+   
 10. eQTL mapping
     * [doc/rna_seq_pipeline.md](./rna_seq_pipeline.md)
 
@@ -82,7 +78,8 @@
     * make an eqtl specific cross file
         * [src/make_cross_eQTL.R](../src/make_cross_eQTL.R)
 
-    - calc eqtl perms
+    * eQTL permutations
+      * [src/calc_eqtl_perms.R](../src/calc_eqtl_perms.R)
     	* based on mapping local varying covariates, we chose to map local
             eqtl with sex and all 48 PEER covars.
         	* output in ./results/Rdata/eqtl_perms/  
@@ -98,14 +95,19 @@
         
  
 11. Merge Analysis 
-  * [src/merge_analysis_QTL.R](../src/merge_analysis_QTL.R)
-  * [src/merge_analysis_eQTL.R](../src/merge_analysis_eQTL.R)
-  * [src/merge_analysis_chr1.R](../src/merge_analysis_chr1.R)
+  * These two create the merge analysis objects:
+    * [src/merge_analysis_QTL.R](../src/merge_analysis_QTL.R)
+    * [src/merge_analysis_eQTL.R](../src/merge_analysis_eQTL.R)
+  * This performs actual analyses using the merge objects:
+  
+    * [src/merge_analysis_chr1.R](../src/merge_analysis_chr1.R)
+    #NEEDS SOME WORK/CLEAN UP
+  
 
-13. QSOX1 analysis
+12. QSOX1 analysis
   * [src/qsox1_analysis.R](../src/qsox1_analysis.R)
   
-12. Networks
+13. Networks
     
     * Make bone "superset" [src/make_bone_geneset.R](../src/make_bone_geneset.R)
 		* used code from https://www.r-bloggers.com/converting-mouse-to-human-gene-names-with-biomart-package/
@@ -149,26 +151,25 @@
 
 
 	* Bayesian networks learned with [src/learn_bn.R](../src/learn_bn.R)
-      *ADD SEX BASED AS WELL
       * This was run on Rivanna supercomputing cluster
-      * output in ./results/Rdata/networks/bn_4/
 
     * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R)
       * output:
       	* results/flat/key_driver_analysis.csv
     
-   * Annotate with coloc results from GTEx.
-      * ./src/annotate_KDA_GTEx.R
+   * Annotate with coloc results from GTEx
+      * [src/KDA_working.R](../src/annotate_KDA_GTEx.R)
     
 
-13. Single Cell RNA-seq
+14. Single Cell RNA-seq
     * Key Driver Analysis performed in [src/seurat_analysis.R](../src/seurat_analysis.R)
         
+15. IMPC data for Glt8d2
 
+    * [src/impc_glt8d2.R](../src/impc_glt8d2.R)
 
-
-#impc
-#mouse_human_syntenic regions
+#impc results/Haddox. used in make bone geneset
+#mouse_human_syntenic regions supplementary fig
 #plots for paper
-#replication POMP
+#coloc
 
