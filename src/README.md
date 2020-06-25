@@ -1,1 +1,1 @@
-munge_raw_pheno_data.R: takes data from /data/pheno_data and outputs /results/full_pheno_table.csv
+Go to [doc/analysis_pipeline.md](/doc/analysis_pipeline.md) for the analysis pipeline.
