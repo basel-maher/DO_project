@@ -58,8 +58,9 @@
     * will also perform permutation analysis
         * output: 
 		      * results/Rdata/qtl_perms/
-		
-		* [src/make_crossfile.R](../src/GWAS_qtl_overlap.R)
+		      
+		* GWAS-QTL overlap
+		  * [src/GWAS_qtl_overlap](../src/GWAS_qtl_overlap.R)
         
     
     -fix map_qtl
