@@ -30,31 +30,21 @@ rownames(covar) = rownames(cross_eqtl$covar)
 ##############
 #eQTL mapping - local perms
 
-name = colnames(cross_eqtl$pheno)[cols[num]]
+
 set.seed(8675309)
+
 
 #try 48 peer covars (all) and sex
 #done on supercomputing cluster
 
-perm = scan1perm(apr, cross_eqtl$pheno[,cols[num]],k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,11:58)],n_perm = 1000,perm_Xsp = TRUE,chr_lengths=chr_lengths(cross_eqtl$gmap),cores=2)
+for(num in cols){
+  name = colnames(cross_eqtl$pheno)[cols[num]]
+  perm = scan1perm(apr, cross_eqtl$pheno[,cols[num]],k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,11:58)],n_perm = 1000,perm_Xsp = TRUE,chr_lengths=chr_lengths(cross_eqtl$gmap),cores=2)
 
-save(perm,file = as.character(paste0("./results/Rdata/eqtl_perms/localeqtl_perm_",name,".Rdata")))
+  save(perm,file = as.character(paste0("./results/Rdata/eqtl_perms/localeqtl_perm_",name,".Rdata")))
+}
 ##
 
-
-# #eQTL mapping - distal perms
-# 
-# set.seed(8675309)
-# 
-# #use all 48 peer covars
-# for(num in cols){
-#   name = colnames(cross_eqtl$pheno)[num]
-#   
-#   perm = scan1perm(apr, cross_eqtl$pheno[,num],k_loco, Xcovar=Xcovar, addcovar = covar[,c(17:ncol(covar))],n_perm = 1000,perm_Xsp = TRUE,chr_lengths=chr_lengths(cross_eqtl$gmap),cores=20)
-#   
-#   save(perm,file = as.character(paste0("./results/Rdata/eqtl_perms/distaleqtl_perm_",name,".Rdata")))
-# }
-# ##
 
 #read the output and get a permutation value. put them into a dataframe
 perm_frame = as.data.frame(matrix(ncol = 3, nrow=50))
