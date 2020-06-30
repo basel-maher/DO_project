@@ -3,7 +3,6 @@ library(qtl2)
 load("./results/Rdata/cross_basic_cleaned.Rdata") #cross_basic
 load("./results/Rdata/full_pheno_table.Rdata") #pheno
 load("./results/Rdata/counts_vst_qnorm.Rdata") #normalize counts
-load("./results/Rdata/cross_eqtl.Rdata")#load cross object for QTL mapping
 geno = readRDS("./results/GIGAMUGA/geno.final_merged.RDS")
 
 #Make the cross file#
