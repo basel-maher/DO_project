@@ -15,17 +15,17 @@ print(num)
 ###
 
 resid = edata
-connect = geneModMemAnnot
+connect = geneModMemAnnot #sometimes called combat_annot
 
 clr = unique(connect$color)
 
 color_a = clr[num]
 print(color_a)
 
-mod_genes = connect[which(connect$color==color_a),"gene"]
-mod_genes_membership = connect[which(connect$gene %in% mod_genes),c("gene","gene_id",paste0("ME",color_a),"color")]
+mod_genes = connect[which(connect$color==color_a),"Gene.Name"]
+mod_genes_membership = connect[which(connect$Gene.Name %in% mod_genes),c("gene","Gene.Name",paste0("ME",color_a),"color")] #sometimes Gene.ID is gene_id
 mod_genes_membership = mod_genes_membership[which(mod_genes_membership$color == color_a),]
-mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$gene)])
+mod_genes_exp = as.data.frame(resid[,which(colnames(resid) %in% mod_genes_membership$Gene.Name)])
 
 bn = mmhc(mod_genes_exp)
 print("check")
