@@ -37,7 +37,7 @@ set.seed(8675309)
 #try 48 peer covars (all) and sex
 #done on supercomputing cluster
 
-for(num in cols){
+for(num in 1:length(cols)){
   name = colnames(cross_eqtl$pheno)[cols[num]]
   perm = scan1perm(apr, cross_eqtl$pheno[,cols[num]],k_loco, Xcovar=Xcovar, addcovar = covar[,c(2,11:58)],n_perm = 1000,perm_Xsp = TRUE,chr_lengths=chr_lengths(cross_eqtl$gmap),cores=2)
 
