@@ -111,6 +111,25 @@
 12. QSOX1 analysis
   * [src/qsox1_analysis.R](../src/qsox1_analysis.R)
   
+  
+13. IMPC Phenstat analysis
+  * This analysis was performed by Samuel Haddox (sh7qe@virginia.edu). The R script "IMPCgetDataTable.R" includes the commands to install and load the necessary packages and an example of how to find datasets with the "IMPC_DXA_004_001" parameter. The "IMPCgetDataTable.R" file also contains the getIMPCtable functions used to build a single master table, "DEXATable"", that contains all the necessary functions to retrieve the data for analysis with Phenstats. "DEXATable" is output as a comma separated values file "IMPC_DEXA_Table.csv", which is then input for the "IMPCPhenStats.R" script.
+  The “IMPCPhenStats.R” script iterates through the DEXATable line by line retrieving the
+dataset for each knockout mouse strain. PhenStats mixed model regression analysis is then
+carried out on datasets with enough samples and the appropriate controls. Results that could
+not be obtained either return “Sample N” error, if there are not enough samples for analysis, or
+“Not 2 Genotypes” error, if there are not 2 genotypes to test. Results or Errors are appended to
+the variable “ResultsTable”, which is also written to a csv file every 10 iterations to prevent loss
+of data when run on a personal computer. The “FinalResultsTable” variable is created by
+filtering the “ResultsTable” of lines with errors. The “FinalResultsTable” is then ordered by P
+value and significant results are subset into three seperate tables based on sexual dimorphism,
+“Not_Dimorphic”, “Female_Dimorphs”, and “Male_Dimorphs”.
+
+    *[src/IMPCgetDataTable.R](../src/IMPCgetDataTable.R)
+    *[src/IMPCPhenStats.R](../src/IMPCPhenStats.R)
+
+
+
 13. Networks
     
     * Make bone "superset" [src/make_bone_geneset.R](../src/make_bone_geneset.R)
@@ -138,7 +157,7 @@
       	* results/flat/key_driver_analysis.csv
     
    * Annotate with coloc results from GTEx
-      * [src/KDA_working.R](../src/annotate_KDA_GTEx.R)
+      * [src/annotate_KDA_GTEx.R](../src/annotate_KDA_GTEx.R)
     
 
 14. Single Cell RNA-seq

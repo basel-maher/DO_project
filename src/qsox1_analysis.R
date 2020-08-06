@@ -66,7 +66,6 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
 dev.off()
 
 ######
-#ADD SAMPLE COUNTS PER GENOTYPE
 ######
 #6F
 #
