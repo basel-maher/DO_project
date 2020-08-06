@@ -45,7 +45,6 @@ nominal_hum = convertMousetoHuman(nominal) #904
 
 ##munge GTEx v7 morris output files
 
-#files = list.files("~/Desktop/coloc_results_1mbp/")
 files = list.files("./results/flat/coloc/coloc_results_1mbp/")
 
 

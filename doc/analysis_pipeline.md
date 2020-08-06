@@ -58,7 +58,7 @@
     * can also get qtl_loc from this script
 
 		* GWAS-QTL overlap
-		  * [src/GWAS_qtl_overlap](../src/GWAS_qtl_overlap.R)
+		  * [src/GWAS_qtl_overlap.R](../src/GWAS_qtl_overlap.R)
         
     
    
@@ -131,7 +131,7 @@ value and significant results are subset into three seperate tables based on sex
 
 
 
-13. Networks
+14. Networks
     
     * Make bone "superset" [src/make_bone_geneset.R](../src/make_bone_geneset.R)
 		* used code from https://www.r-bloggers.com/converting-mouse-to-human-gene-names-with-biomart-package/
@@ -139,6 +139,7 @@ value and significant results are subset into three seperate tables based on sex
             * Use "bone" and "osteo* and "ossif*" as terms. stored in ./data/GO_term_bone.txt
         * Also from MGI
         	* human and mouse "osteoporosis" and "bone mineral density" and "osteoblast" and "osteoclast" and "osteocyte"
+        
   
   
     * Full WGCNA networks constructed in [src/WGCNA_working.R](../src/WGCNA_working.R)
@@ -154,21 +155,18 @@ value and significant results are subset into three seperate tables based on sex
       * This was run on Rivanna supercomputing cluster
 
     * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R)
-      * output:
-      	* results/flat/key_driver_analysis.csv
-    
+ 
    * Annotate with coloc results from GTEx
       * [src/annotate_KDA_GTEx.R](../src/annotate_KDA_GTEx.R)
     
 
-14. Single Cell RNA-seq
+15. Single Cell RNA-seq
     * Key Driver Analysis performed in [src/seurat_analysis.R](../src/seurat_analysis.R)
       
-15. IMPC data for Glt8d2
+16. IMPC data for Glt8d2
 
     * [src/impc_glt8d2.R](../src/impc_glt8d2.R)
 
-#impc results/Haddox. used in make bone geneset
 #mouse_human_syntenic regions supplementary fig
 #plots for paper
 #coloc
