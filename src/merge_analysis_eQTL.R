@@ -75,7 +75,7 @@ for(i in 1:nrow(local_eqtl)){
 #save(merge,file = "./results/Rdata/merge_local_eqtl.Rdata")
 
 
-#for each merge analysis, take the snps that are within 85% of the max LOD
+#for each merge analysis, take the snps that are within 15% of the max LOD
 merge_top = list()
 for(i in 1:length(merge)){
   print(i)

@@ -10,6 +10,8 @@ library(dplyr)
 
 set.seed(8675309)
 library(qtl2)
+library(dplyr)
+options(stringsAsFactors = FALSE)
 
 #load the geno probs
 load(file = "./results/Rdata/pr_basic_cleaned.Rdata")
@@ -122,3 +124,48 @@ names(merge_top) = names(merge)
 
 
 save(merge_top,file = "./results/Rdata/merge_top_QTL.Rdata")
+
+qtl_loc
+merge_top$ML_1$snp_id[grep(pattern = "missense", x = merge_top$ML_1$consequence)]
+
+
+pheno = qtl_loc[which(qtl_loc$locus == 1),'lodcolumn']
+chr = qtl_loc[which(qtl_loc$locus == 1),'chr']
+name = paste0(pheno,"_",chr)
+
+merge_top[[name[1]]]$snp_id[grep(pattern = "missense", x = merge_top[[name[1]]]$consequence)]
+
+
+
+#convert list to dataframe, and add pheno column name based on list element name
+merge_top_df = dplyr::bind_rows(merge_top, .id = "pheno")
+
+#add locus name
+qtl_loc$pheno =  paste0(qtl_loc$lodcolumn,"_",qtl_loc$chr)
+
+merge_top_df$loc = qtl_loc[match(merge_top_df$pheno, qtl_loc$pheno),"locus"]
+
+#df of missense variants
+missense = merge_top_df[grep(pattern = "missense", x = merge_top_df$consequence),]
+
+
+#print missense variants that are common for every phenotype in a locus
+for(loc in unique(missense$loc)){
+  
+  l = length(which(qtl_loc$locus==loc))
+  sub = missense[which(missense$loc == loc),]
+  
+  for(v in unique(sub$snp_id)){
+    
+   x = length(unique(sub[which(sub$snp_id == v),"pheno"]))
+   if(x == l){
+     print(paste0(v,"_",loc))
+   }
+  }
+  
+}
+
+
+
+
+
