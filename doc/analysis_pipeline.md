@@ -98,11 +98,15 @@
   * These two create the merge analysis objects:
     * [src/merge_analysis_QTL.R](../src/merge_analysis_QTL.R)
     * [src/merge_analysis_eQTL.R](../src/merge_analysis_eQTL.R)
-  * This performs actual analyses using the merge objects:
+    
+  * This colocalizes merge analysis qtl/eqtl and identifies common missense variants:
+  
+    * [src/merge_analysis_misc.R](../src/merge_analysis_misc.R)
+ 
+  * This performs actual analyses on CHR1 using the merge objects:
   
     * [src/merge_analysis_chr1.R](../src/merge_analysis_chr1.R)
-    #NEEDS SOME WORK/CLEAN UP
-  
+
 
 12. QSOX1 analysis
   * [src/qsox1_analysis.R](../src/qsox1_analysis.R)
@@ -120,35 +124,11 @@
     * Full WGCNA networks constructed in [src/WGCNA_working.R](../src/WGCNA_working.R)
     	* Gene ontology for WGCNA network modules also performed here
     
-    * outputs:
-    EDIT TO REFLECT NEW TRIM
-        * results/Rdata/networks/edata_full.Rdata
-        * results/Rdata/networks/wgcna_4.RDS
-        * results/Rdata/networks/moduleTraitPvalue_full_4.RData
-        * results/Rdata/networks/moduleTraitCor_full_4.RData
-        * results/Rdata/networks/geneModMemAnnot_power4.RData
-        * results/Rdata/networks/GO_sft4.RData
+
         
     * Sex-specific WGCNA networks constructed in [src/WGCNA_sex_specific.R](../src/WGCNA_sex_specific.R)
     * Gene ontology for sex-specific WGCNA network modules also performed here
     
-     * outputs:
-     EDIT TO REFLECT NEW TRIM
-        * results/Rdata/networks/edata_m.Rdata
-        * results/Rdata/networks/edata_f.Rdata
-        * results/Rdata/networks/wgcna_m_5.RDS
-        * results/Rdata/networks/wgcna_f_4.RDS
-        * results/Rdata/networks/geneModMemAnnot_m_power5.RData
-        * results/Rdata/networks/geneModMemAnnot_f_power4.RData
-        * results/Rdata/networks/moduleTraitPvalue_f.RData
-        * results/Rdata/networks/moduleTraitPvalue_m.RData
-        * results/Rdata/networks/moduleTraitCor_f.RData
-        * results/Rdata/networks/moduleTraitCor_m.RData
-        * results/Rdata/networks/GO_Females_sft4.RData
-		    * results/Rdata/networks/GO_Males_sft5.RData
-		    * results/Rdata/networks/edata_trim_m_5.RData
-		    * results/Rdata/networks/edata_trim_f_4.RData
-
 
 	* Bayesian networks learned with [src/learn_bn.R](../src/learn_bn.R)
       * This was run on Rivanna supercomputing cluster

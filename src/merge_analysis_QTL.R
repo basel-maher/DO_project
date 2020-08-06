@@ -125,17 +125,6 @@ names(merge_top) = names(merge)
 
 save(merge_top,file = "./results/Rdata/merge_top_QTL.Rdata")
 
-qtl_loc
-merge_top$ML_1$snp_id[grep(pattern = "missense", x = merge_top$ML_1$consequence)]
-
-
-pheno = qtl_loc[which(qtl_loc$locus == 1),'lodcolumn']
-chr = qtl_loc[which(qtl_loc$locus == 1),'chr']
-name = paste0(pheno,"_",chr)
-
-merge_top[[name[1]]]$snp_id[grep(pattern = "missense", x = merge_top[[name[1]]]$consequence)]
-
-
 
 #convert list to dataframe, and add pheno column name based on list element name
 merge_top_df = dplyr::bind_rows(merge_top, .id = "pheno")
