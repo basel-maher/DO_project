@@ -19,7 +19,7 @@ Folders are as follows:
 
         - /data/pheno_data/ contains phenotypic data files
 
-    - /doc/ contains docs. Refer to the [analysis_pipeline](/doc/analysis_pipeline.md) here.
+    - /doc/ contains docs. Refer to the [/doc/analysis_pipeline.md](analysis_pipeline) here.
 
     - /results/ contains output from the analyses described. A bit messy but:
 
