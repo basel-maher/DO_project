@@ -28,7 +28,7 @@ Folders are as follows:
 <li>/results/ contains output from the analyses described. A bit messy but:</li>
 <ul><br/>
 <li>/results/flat/ contains flat file outputs (.txt, .csv, etc).</li>
-<li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li><br/> 
+<li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li>
 <li>/results/Rdata contains .Rdata and .Rds output.</li>
 </ul>
 </ul>
