@@ -20,7 +20,7 @@ Folders are as follows:
 <ul>
 <li>/bin/ contains scripts that I got from other people</li><br/>
 <li>/data/contains raw data. For the most part, this is a read-only file (some exceptions).</li>
-<ul>
+<ul><br/>
 <li>/data/GIGAMUGA/ contains raw data pertaining to the GigaMUGA genotyping. Some writing has been done to this.</li>
 <li>/data/pheno_data/ contains phenotypic data files.</li>
 </ul><br/>      
