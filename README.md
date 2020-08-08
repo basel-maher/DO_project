@@ -2,8 +2,10 @@
 This project contains scripts used in our Diversity Outbred project, currently published as a **[preprint](https://www.biorxiv.org/content/10.1101/2020.06.24.169839v1)**.<br><br>
 Check out the data on our **[QTL viewer](http://qtlviewer.uvadcos.io)**. You can also download an RData file here which contains Mouse phenotypes and allele probabilities.<br><br>
 Sequencing data is available on GEO:<br>
-         **[RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708)**<br>
-         **[Single-cell RNA-seq](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152806)**<br>
+<ul>
+**[RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708)**<br>
+**[Single-cell RNA-seq](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152806)**<br>
+</ul>
 <br>Go to **[analysis_pipeline](/doc/analysis_pipeline.md)** for the analysis pipeline.<br>
 <br>Please contact **Basel Al-Barghouthi** (bma8ne AT virginia DOT edu) or **Charles Farber** (crf2s AT virginia DOT edu) with any questions, or for any data.<br>
 <br>Folders are as follows:
