@@ -13,8 +13,10 @@ Sequencing data is available on GEO:
 You may find the **[analysis pipeline](/doc/analysis_pipeline.md)** useful.
 
 Please contact **Basel Al-Barghouthi** (bma8ne AT virginia DOT edu) or **Charles Farber** (crf2s AT virginia DOT edu) with any questions, or for any data.
+ 
 ***
-<br>Folders contents:
+ 
+<br>Folders content:
 <ul>
 <li>/bin/ contains scripts that I got from other people</li><br>
 <li>/data/contains raw data. For the most part, this is a read-only file (some exceptions).</li>
