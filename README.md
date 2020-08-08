@@ -29,8 +29,8 @@ Folders are as follows:
 <ul><br/>
 <li>/results/flat/ contains flat file outputs (.txt, .csv, etc).</li>
 <li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li><br/> 
-</ul>
 <li>/results/Rdata contains .Rdata and .Rds output.</li>
+</ul>
 </ul>
 
 
