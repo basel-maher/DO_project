@@ -26,7 +26,7 @@ Folders are as follows:
 </ul><br/>      
 <li>/doc/ contains documents.</li><br/> 
 <li>/results/ contains output from the analyses described. A bit messy but:</li>
-<ul>  
+<ul><br/>
 <li>/results/flat/ contains flat file outputs (.txt, .csv, etc).</li>
 <li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li><br/> 
 </ul>
