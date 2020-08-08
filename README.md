@@ -25,7 +25,7 @@ Folders are as follows:
 <ul>   
 <li>/data/GIGAMUGA/ contains raw data pertaining to the GigaMUGA genotyping. Some writing has been done to this.</li>
 <li>/data/pheno_data/ contains phenotypic data files.</li>
-</ul>      
+</ul><br>      
 <li>/doc/ contains documents.</li>
 </ul>
 <li>/results/ contains output from the analyses described. A bit messy but:</li>
