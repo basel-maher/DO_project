@@ -3,7 +3,10 @@ This project contains scripts used in our Diversity Outbred project, currently p
 Check out the data on our **[QTL viewer](http://qtlviewer.uvadcos.io)**. You can also download an RData file here which contains Mouse phenotypes and allele probabilities.<br><br>
 Sequencing data is available on GEO:<br>
   * **[RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708)**
-  * **[Single-cell RNA-seq](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152806)**<br>
+  * **[Single-cell RNA-seq](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152806)**
+  
+  
+  
   
   
   
