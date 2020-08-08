@@ -19,11 +19,11 @@ Please contact Basel Al-Barghouthi (bma8ne AT virginia DOT edu) or Charles Farbe
 
 
 Folders are as follows:<br/>
-    - /bin/ contains scripts that I got from other people<br/>
-    - /data/contains raw data. For the most part, this is a read-only file (some exceptions).<br/>
-        - /data/GIGAMUGA/ contains raw data pertaining to the GigaMUGA genotyping. Some writing has been done to this.<br/>
-        - /data/pheno_data/ contains phenotypic data files.<br/>
-    - /doc/ contains documents.<br/>
+    - /bin/ contains scripts that I got from other people
+    - /data/contains raw data. For the most part, this is a read-only file (some exceptions).
+        - /data/GIGAMUGA/ contains raw data pertaining to the GigaMUGA genotyping. Some writing has been done to this.
+        - /data/pheno_data/ contains phenotypic data files.
+    - /doc/ contains documents.
     - /results/ contains output from the analyses described. A bit messy but:<br/>
         - /results/flat/ contains flat file outputs (.txt, .csv, etc).<br/>
         - /results/GIGAMUGA/ contains output pertaining to the genotyping.<br/>
