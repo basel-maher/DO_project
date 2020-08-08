@@ -9,7 +9,7 @@ Sequencing data is available on GEO:
 
   * **[RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708)**
   * **[Single-cell RNA-seq](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152806)**
-  
+ *** 
 Go to **[analysis_pipeline](/doc/analysis_pipeline.md)** for the analysis pipeline.<br>
 <br>Please contact **Basel Al-Barghouthi** (bma8ne AT virginia DOT edu) or **Charles Farber** (crf2s AT virginia DOT edu) with any questions, or for any data.<br>
 <br>Folders are as follows:
