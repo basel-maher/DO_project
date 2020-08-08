@@ -6,21 +6,19 @@ Sequencing data is available on GEO:
 <li> [RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708) </li>
 <li>[Single-cell RNA-seq](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152806)</li>
 </ul>
-Go to [analysis_pipeline](/doc/analysis_pipeline.md) for the analysis pipeline.
-Please contact Basel Al-Barghouthi (bma8ne AT virginia DOT edu) or Charles Farber (crf2s AT virginia DOT edu) with any questions, or for any data.
-<br>
-<br>
+Go to [analysis_pipeline](/doc/analysis_pipeline.md) for the analysis pipeline.<br>
+Please contact Basel Al-Barghouthi (bma8ne AT virginia DOT edu) or Charles Farber (crf2s AT virginia DOT edu) with any questions, or for any data.<br>
 Folders are as follows:
 <ul>
-<li>/bin/ contains scripts that I got from other people</li><br/>
+<li>/bin/ contains scripts that I got from other people</li><br>
 <li>/data/contains raw data. For the most part, this is a read-only file (some exceptions).</li>
-<ul><br/>
+<ul><br>
 <li>/data/GIGAMUGA/ contains raw data pertaining to the GigaMUGA genotyping. Some writing has been done to this.</li>
 <li>/data/pheno_data/ contains phenotypic data files.</li>
-</ul><br/>      
-<li>/doc/ contains documents.</li><br/> 
+</ul><br>      
+<li>/doc/ contains documents.</li><br> 
 <li>/results/ contains output from the analyses described. A bit messy but:</li>
-<ul><br/>
+<ul><br>
 <li>/results/flat/ contains flat file outputs (.txt, .csv, etc).</li>
 <li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li>
 <li>/results/Rdata contains .Rdata and .Rds output.</li>
