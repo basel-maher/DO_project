@@ -7,8 +7,7 @@ Check out the data on our [QTL viewer](http://qtlviewer.uvadcos.io). You can als
 
 
 Sequencing data is available on GEO:
-    - [RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708)
-    
+    - [RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708)<br/>
     - [Single-cell RNA-seq](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152806)
 
 
