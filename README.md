@@ -5,7 +5,7 @@ https://www.biorxiv.org/content/10.1101/2020.06.24.169839v1
 
 Please contact Basel Al-Barghouthi (bma8ne AT virginia DOT edu) or Charles Farber (crf2s AT virginia DOT edu) with any questions. 
 
-Go to [doc/analysis_pipeline.md](/doc/analysis_pipeline.md) for the analysis pipeline.
+Go to [analysis_pipeline](/doc/analysis_pipeline.md) for the analysis pipeline.
 
 
 
