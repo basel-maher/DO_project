@@ -26,7 +26,7 @@ Folders are as follows:
 <li>/data/pheno_data/ contains phenotypic data files.</li>
 </ul><br/>      
 <li>/doc/ contains documents.</li><br/> 
-</ul>
+<ul>
 <li>/results/ contains output from the analyses described. A bit messy but:</li>
 <li>/results/flat/ contains flat file outputs (.txt, .csv, etc).</li>
 <li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li><br/> 
