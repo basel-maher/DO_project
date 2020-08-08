@@ -16,7 +16,7 @@ Please contact **Basel Al-Barghouthi** (bma8ne AT virginia DOT edu) or **Charles
  
 ***
  
-<br>Folders content:
+<br>Folder contents:
 <ul>
 <li>/bin/ contains scripts that I got from other people</li><br>
 <li>/data/contains raw data. For the most part, this is a read-only file (some exceptions).</li>
