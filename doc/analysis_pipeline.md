@@ -1,4 +1,4 @@
-# DO_project pipeline
+# DO project pipeline
 
 1. Munge phenotypic files into one nice file.
 	* use [src/munge_raw_pheno_data.R](../src/munge_raw_pheno_data.R)
