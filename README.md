@@ -22,13 +22,14 @@ Folders are as follows:
 <ul>
 <li>/bin/ contains scripts that I got from other people</li><br/>
 <li>/data/contains raw data. For the most part, this is a read-only file (some exceptions).</li>
-<ul>   
+</ul>
+<ul>
 <li>/data/GIGAMUGA/ contains raw data pertaining to the GigaMUGA genotyping. Some writing has been done to this.</li>
 <li>/data/pheno_data/ contains phenotypic data files.</li>
 </ul><br/>      
 <li>/doc/ contains documents.</li><br/> 
-<ul>
 /results/ contains output from the analyses described. A bit messy but:
+<ul>  
 <li>/results/flat/ contains flat file outputs (.txt, .csv, etc).</li>
 <li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li><br/> 
 </ul>
