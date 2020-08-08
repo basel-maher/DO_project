@@ -17,7 +17,6 @@ Go to [analysis_pipeline](/doc/analysis_pipeline.md) for the analysis pipeline.
 Please contact Basel Al-Barghouthi (bma8ne AT virginia DOT edu) or Charles Farber (crf2s AT virginia DOT edu) with any questions, or for any data.
 
 
-
 Folders are as follows:
 <ul>
 <li>/bin/ contains scripts that I got from other people</li><br/>
@@ -25,13 +24,13 @@ Folders are as follows:
 <ul>   
 <li>/data/GIGAMUGA/ contains raw data pertaining to the GigaMUGA genotyping. Some writing has been done to this.</li>
 <li>/data/pheno_data/ contains phenotypic data files.</li>
-</ul><br>      
+</ul><br/>      
 <li>/doc/ contains documents.</li>
-</ul>
+</ul><br/> 
 <li>/results/ contains output from the analyses described. A bit messy but:</li>
 <li>/results/flat/ contains flat file outputs (.txt, .csv, etc).</li>
 <li>/results/GIGAMUGA/ contains output pertaining to the genotyping.</li>
-</ul>
+</ul><br/> 
 <li>/results/Rdata contains .Rdata and .Rds output.</li>
 </ul>
 
