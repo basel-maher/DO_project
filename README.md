@@ -1,8 +1,6 @@
 # Bone Strength in the Diversity Outbred
 This project contains scripts used in our Diversity Outbred project, currently published as a [preprint](https://www.biorxiv.org/content/10.1101/2020.06.24.169839v1).<br>
-<br>
 Check out the data on our [QTL viewer](http://qtlviewer.uvadcos.io). You can also download an RData file here which contains Mouse phenotypes and allele probabilities.<br>
-<br>
 Sequencing data is available on GEO:
 <ul>
 <li> [RNA-seq data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152708) </li>
