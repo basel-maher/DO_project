@@ -64,12 +64,18 @@ for(f in files){
 all_coloc_results = all_coloc_results[-1,]
 
 m = read.delim("./results/flat/coloc/morris_lead_snp_genes_1mbp.txt",header=T)
+m2 = m[,c(4,5)]
+m2 = unique(m2)
 
+dupes = names(which(table(m2$ensembl_id) >1))
+
+x = m2[which(m2$ensembl_id %in% dupes),]
 
 all_coloc_results$gene = NA
-for(i in 1:nrow(all_coloc_results)){
-  all_coloc_results$gene[i] = m[which(m$ensembl_id == all_coloc_results$X3[i]),"symbol"]
-}
+
+all_coloc_results$gene = apply(all_coloc_results,1,function(x) m2[which(m2$ensembl_id == all_coloc_results$X3),"symbol"])
+#m2 has duplicated ensembls
+
 all_coloc_results = all_coloc_results[,-3]
 
 colnames(all_coloc_results)= c("BMD","tissue","n","H0","H1","H2","H3","H4","gene")

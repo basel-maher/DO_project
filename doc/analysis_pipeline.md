@@ -155,6 +155,8 @@ value and significant results are subset into three seperate tables based on sex
       * This was run on Rivanna supercomputing cluster
 
     * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R)
+   
+    * Miscellaneous KDA analyses, such as converting to human homologs and Gene Ontology analyses in [src/KDA_analyses.R](../src/KDA_analyses.R)
  
    * Annotate with coloc results from GTEx
       * [src/annotate_KDA_GTEx.R](../src/annotate_KDA_GTEx.R)
