@@ -157,6 +157,8 @@ value and significant results are subset into three seperate tables based on sex
     * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R)
    
     * Miscellaneous KDA analyses, such as converting to human homologs and Gene Ontology analyses in [src/KDA_analyses.R](../src/KDA_analyses.R)
+    
+    * Convert KDA genes (BANs) to human homologs and prepare for coloc in [src/coloc_misc.R](../src/coloc_misc.R)
  
    * Annotate with coloc results from GTEx
       * [src/annotate_KDA_GTEx.R](../src/annotate_KDA_GTEx.R)
@@ -171,5 +173,5 @@ value and significant results are subset into three seperate tables based on sex
 
 #mouse_human_syntenic regions supplementary fig
 #plots for paper
-#coloc
+
 
