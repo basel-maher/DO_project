@@ -62,8 +62,8 @@
 4. Colocalization
 
   * Colocalize:
-    * [src/coloc_morris_v7.sh](../src/coloc_morris_v7.R)
-    * [src/coloc_estrada_v7.sh](../src/coloc_estrada_v7.R)
+    * [src/coloc_morris_v7.R](../src/coloc_morris_v7.R)
+    * [src/coloc_estrada_v7.R](../src/coloc_estrada_v7.R)
   
   * Get the results:
     * [src/get_coloc_results.R](../src/get_coloc_results.R)
