@@ -163,7 +163,7 @@ value and significant results are subset into three seperate tables based on sex
     
 15. eQTL-GWAS colocalization
 
-  * See [doc/coloc_pipeline.md](../doc/coloc_pipeline.md) first.
+  * Go to [doc/coloc_pipeline.md](../doc/coloc_pipeline.md).
 
 
 16. Single Cell RNA-seq
