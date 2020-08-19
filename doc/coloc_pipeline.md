@@ -59,7 +59,8 @@
   done < ./tissue_list_v7
   ```
 
-4. Colocalize
+4. Colocalization
+
   * Colocalize:
     * [src/coloc_morris_v7.sh](../src/coloc_morris_v7.sh)
     * [src/coloc_estrada_v7.sh](../src/coloc_estrada_v7.sh)
@@ -68,4 +69,5 @@
     * [src/get_coloc_results.R](../src/get_coloc_results.R)
 
 5. Miscellaneous analyses:
-  *[src/coloc_post.R](../src/coloc_post.R)
+
+  * [src/coloc_post.R](../src/coloc_post.R)
