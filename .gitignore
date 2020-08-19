@@ -2,6 +2,7 @@
 !~/Documents/projects/DO_project
 /data
 !/data/pheno_data
+!/data/GTEx_summary_v7.csv
 /results
 /plots
 
