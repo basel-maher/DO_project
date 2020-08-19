@@ -1,7 +1,6 @@
 options(stringsAsFactors = FALSE)
 library(topGO)
-library(biomaRt)
-library(org.Hs.eg.db)
+
 #kda_analyses#
 all = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4.csv", stringsAsFactors = F)
 all_f = read.csv("./results/flat/key_driver_analysis_FEMALES_sft4.csv", stringsAsFactors = F)
