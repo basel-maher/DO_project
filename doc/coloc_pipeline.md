@@ -8,7 +8,7 @@
   * Download all GTEx V7 SNP-gene associations for all 48 tissues.
     * From https://storage.googleapis.com/gtex_analysis_v7/single_tissue_eqtl_data/GTEx_Analysis_v7_eQTL_all_associations.tar.gz
     * Also download GTEx V7 lookup table to convert RSIDs to chr_pos_ref_alt_build format (https://storage.googleapis.com/gtex_analysis_v7/reference/GTEx_Analysis_2016-01-15_v7_WholeGenomeSeq_635Ind_PASS_AB02_GQ20_HETX_MISS15_PLINKQC.lookup_table.txt.gz)
-    * Also download sample counts by tissue summary. This data isn't available anymore for GTEx v7, but can be found here:
+    * Also download sample counts by tissue summary. This data isn't available anymore for GTEx v7, but can be found here: [data/GTEx_summary_v7.csv](../data/GTEx_summary_v7.csv)
     
   * Uncompress using gunzip
   
