@@ -1,4 +1,4 @@
-#GWAS-eQTL colocalization
+# GWAS-eQTL colocalization
 
 * Essentially, for each GWAS, we took the lead variants and identified all genes within +/- 1 Mbp of a variant. Then, we converted BAN genes to their human homologs using the MGI homolgy table. For each BAN within +/- 1 Mbp of a GWAS lead variant, we took all GTEx V7 variants within +/- 200 Kbp of the lead variant, and colocalized their eQTL p-values with the GWAS p-values. This was performed for "gwas" and "gwas". Much of this was performed on our high-performance computing servers.
 
