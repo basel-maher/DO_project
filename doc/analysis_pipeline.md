@@ -156,7 +156,7 @@ value and significant results are subset into three seperate tables based on sex
 
     * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R)
    
-    * *******Miscellaneous KDA analyses, such as converting to human homologs and Gene Ontology analyses in [src/KDA_analyses.R](../src/KDA_analyses.R)
+    * Miscellaneous KDA analyses, such as Gene Ontology analysis, can be found in [src/KDA_analyses.R](../src/KDA_analyses.R)
     
    * *********Annotate with coloc results from GTEx. This step is performed AFTER colocalization (see below)
       * [src/annotate_KDA_GTEx.R](../src/annotate_KDA_GTEx.R)

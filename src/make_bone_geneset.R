@@ -130,18 +130,18 @@ write.table(superduperset, "./results/flat/superduperset_sansGWAS.txt", sep = "\
 ###
 
 ###########Add IMPC genes that have a nominally significant (0.05), weight corrected genotype effect
-impc = read.delim("./data/IMPC_BMD_Results.csv",stringsAsFactors = FALSE, sep=",")
-impc = impc[which(impc$genotype_p_value <0.05),]
-impc = impc$Gene
-impc = unique(impc)
-
-superduperset = append(superduperset, impc)
-
-superduperset = na.omit(superduperset)
-
-superduperset = unique(superduperset)
-
-superduperset = superduperset[-grep("\\.", superduperset)]
-
-##
-write.table(superduperset,"./results/flat/superduperset_GO_MGI_IMPC.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
+# impc = read.delim("./data/IMPC_BMD_Results.csv",stringsAsFactors = FALSE, sep=",")
+# impc = impc[which(impc$genotype_p_value <0.05),]
+# impc = impc$Gene
+# impc = unique(impc)
+# 
+# superduperset = append(superduperset, impc)
+# 
+# superduperset = na.omit(superduperset)
+# 
+# superduperset = unique(superduperset)
+# 
+# superduperset = superduperset[-grep("\\.", superduperset)]
+# 
+# ##
+# write.table(superduperset,"./results/flat/superduperset_GO_MGI_IMPC.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)

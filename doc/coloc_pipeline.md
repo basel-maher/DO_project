@@ -34,7 +34,7 @@
 
   * This is performed in [src/coloc_pre.R](../src/coloc_pre.R), and uses the following data:
   
-    * MGI human-mouse homology table (http://www.informatics.jax.org/downloads/reports/HOM_MouseHumanSequence.rpt)
+    * MGI human-mouse homology table (http://www.informatics.jax.org/downloads/reports/HOM_MouseHumanSequence.rpt) (Mar-14-2020)
     * BANs from the KDA analyses ([src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R))
     * Morris et al. 2018 eBMD GWAS data (http://www.gefos.org/?q=content/data-release-2018)
     * Estrada et al. 2012 FNBMD and LSBMD GWAS data (http://www.gefos.org/?q=content/data-release-2012)
