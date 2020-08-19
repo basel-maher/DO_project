@@ -273,74 +273,74 @@ write.table(snp_gene_df[,c("RSID","snpid_19","chrom","chr2","BP","overlap_ens","
 
 
 
-
-
-
-
-
-
-aa = read.csv("./results/flat/coloc/all_coloc_greaterorover75", stringsAsFactors = FALSE)
-
-
-homologs_win_1 = unique(gene_pos$hgnc_symbol[overlaps@to])
-x = aa[which(aa$gene %in% tolower(homologs_win_1)),]
-
-
-x$gene = toupper(x$gene)
-
-z = as.data.frame(matrix(nrow=46, ncol=2))
-counter = 1
-for(i in sort(unique(x$gene))){
-  print(i)
-  sub = subset(x, gene==i)
-  p = paste0(sort(unique(sub$BMD)),collapse = ",")
-  print(p)
-  z[counter,] = c(i, p)
-  counter = counter+1
-}
-write.csv(z,file="~/Desktop/table1.csv")
-
-#permute. how many expected by chance?
-allGenes = c(all$gene, all_m$gene, all_f$gene)
-allGenes = unique(allGenes)
-
-#because some genes arent in both mouse an human for some reason, get only genes that have a human homolog
-allGenesx = allGenes[which(allGenes %in% homology$Symbol)]
-
-allGenesx = homology[which(homology$Symbol %in% allGenesx & homology$Common.Organism.Name == "mouse, laboratory"),"HomoloGene.ID"]
-
-allGenesx = homology[which(homology$HomoloGene.ID %in% allGenesx & homology$Common.Organism.Name == "human"),"HomoloGene.ID"]
-
-allGenesx = homology[which(homology$HomoloGene.ID %in% allGenesx & homology$Common.Organism.Name == "mouse, laboratory"),"Symbol"]
-
-
-
-i=0
-permx = c()
-while(i<1000){
-  g = sample(allGenesx,size = 904, replace = F)
-  gg  = convertMousetoHuman(g)
-
-  gene_pos = getBM(attributes = c("hgnc_symbol","chromosome_name", "start_position","end_position"),
-                   filters = "entrezgene_id",
-                   values = gg,
-                   mart = mart)
-  
-  gene_pos = gene_pos[-which(gene_pos$chromosome_name %in% c(1:22,"X")==FALSE),]
-  
-  gene_pos_grange = paste0("chr",gene_pos$chromosome_name, ":", gene_pos$start_position, "-", gene_pos$end_position)
-  gene_pos_grange = as(gene_pos_grange, "GRanges")
-  print(length(gene_pos_grange))
-  overlaps = GenomicRanges::findOverlaps(query = pos_human_grange, subject = gene_pos_grange)
-  
-  permx = append(permx,length(unique(overlaps@to)))
-  print(i)
-  i=i+1
-}
-
-quantile(perm,probs=0.95)
-save(perm, file="./results/Rdata/perm_kda_in_gwasloci.Rdata")
-
+# 
+# 
+# 
+# 
+# 
+# 
+# aa = read.csv("./results/flat/coloc/all_coloc_greaterorover75", stringsAsFactors = FALSE)
+# 
+# 
+# homologs_win_1 = unique(gene_pos$hgnc_symbol[overlaps@to])
+# x = aa[which(aa$gene %in% tolower(homologs_win_1)),]
+# 
+# 
+# x$gene = toupper(x$gene)
+# 
+# z = as.data.frame(matrix(nrow=46, ncol=2))
+# counter = 1
+# for(i in sort(unique(x$gene))){
+#   print(i)
+#   sub = subset(x, gene==i)
+#   p = paste0(sort(unique(sub$BMD)),collapse = ",")
+#   print(p)
+#   z[counter,] = c(i, p)
+#   counter = counter+1
+# }
+# write.csv(z,file="~/Desktop/table1.csv")
+# 
+# #permute. how many expected by chance?
+# allGenes = c(all$gene, all_m$gene, all_f$gene)
+# allGenes = unique(allGenes)
+# 
+# #because some genes arent in both mouse an human for some reason, get only genes that have a human homolog
+# allGenesx = allGenes[which(allGenes %in% homology$Symbol)]
+# 
+# allGenesx = homology[which(homology$Symbol %in% allGenesx & homology$Common.Organism.Name == "mouse, laboratory"),"HomoloGene.ID"]
+# 
+# allGenesx = homology[which(homology$HomoloGene.ID %in% allGenesx & homology$Common.Organism.Name == "human"),"HomoloGene.ID"]
+# 
+# allGenesx = homology[which(homology$HomoloGene.ID %in% allGenesx & homology$Common.Organism.Name == "mouse, laboratory"),"Symbol"]
+# 
+# 
+# 
+# i=0
+# permx = c()
+# while(i<1000){
+#   g = sample(allGenesx,size = 904, replace = F)
+#   gg  = convertMousetoHuman(g)
+# 
+#   gene_pos = getBM(attributes = c("hgnc_symbol","chromosome_name", "start_position","end_position"),
+#                    filters = "entrezgene_id",
+#                    values = gg,
+#                    mart = mart)
+#   
+#   gene_pos = gene_pos[-which(gene_pos$chromosome_name %in% c(1:22,"X")==FALSE),]
+#   
+#   gene_pos_grange = paste0("chr",gene_pos$chromosome_name, ":", gene_pos$start_position, "-", gene_pos$end_position)
+#   gene_pos_grange = as(gene_pos_grange, "GRanges")
+#   print(length(gene_pos_grange))
+#   overlaps = GenomicRanges::findOverlaps(query = pos_human_grange, subject = gene_pos_grange)
+#   
+#   permx = append(permx,length(unique(overlaps@to)))
+#   print(i)
+#   i=i+1
+# }
+# 
+# quantile(perm,probs=0.95)
+# save(perm, file="./results/Rdata/perm_kda_in_gwasloci.Rdata")
+# 
 
 
 
