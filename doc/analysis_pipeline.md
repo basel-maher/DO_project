@@ -156,18 +156,20 @@ value and significant results are subset into three seperate tables based on sex
 
     * Key Driver Analysis performed in [src/KDA_working.R](../src/KDA_working.R) and [src/KDA_sex_based.R](../src/KDA_sex_based.R)
    
-    * Miscellaneous KDA analyses, such as converting to human homologs and Gene Ontology analyses in [src/KDA_analyses.R](../src/KDA_analyses.R)
+    * *******Miscellaneous KDA analyses, such as converting to human homologs and Gene Ontology analyses in [src/KDA_analyses.R](../src/KDA_analyses.R)
     
-    * Convert KDA genes (BANs) to human homologs and prepare for coloc in [src/coloc_misc.R](../src/coloc_misc.R)
- 
-   * Annotate with coloc results from GTEx
+   * *********Annotate with coloc results from GTEx. This step is performed AFTER colocalization (see below)
       * [src/annotate_KDA_GTEx.R](../src/annotate_KDA_GTEx.R)
     
+15. eQTL-GWAS colocalization
 
-15. Single Cell RNA-seq
+  * See [doc/coloc_pipeline.md](../doc/coloc_pipeline.md) first.
+
+
+16. Single Cell RNA-seq
     * Key Driver Analysis performed in [src/seurat_analysis.R](../src/seurat_analysis.R)
       
-16. IMPC data for Glt8d2
+17. IMPC data for Glt8d2
 
     * [src/impc_glt8d2.R](../src/impc_glt8d2.R)
 
