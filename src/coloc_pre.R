@@ -58,7 +58,6 @@ BAN_human_grange = paste0("chr",gene_pos$chromosome_name, ":", gene_pos$start_po
 BAN_human_grange = as(BAN_human_grange, "GRanges")
 #900 BANs have human homologs
 
-
 ###################################################################
 ###################################################################
 ###################################################################
@@ -90,6 +89,8 @@ overlaps = GenomicRanges::findOverlaps(query = morris_pos, subject = BAN_human_g
 #541 BANs overlap morris eBMD loci
 homologs_win_1_morris = unique(gene_pos$hgnc_symbol[overlaps@to])
 homologs_win_1_ens_morris = unique(gene_pos$ensembl_gene_id[overlaps@to])
+
+write.table(homologs_win_1_morris, file = "./results/flat/homologs_within1mbp_morris.txt",quote = F,row.names = F,col.names = F)
 
 #format lead snps for colocalization  
 snp_gene_df = morris_lead_snps[overlaps@from,]
@@ -140,6 +141,8 @@ length(unique(overlaps@from))
 #78 BANs overlap estrada bmd loci
 homologs_win_1_estrada = unique(gene_pos$hgnc_symbol[overlaps@to])
 homologs_win_1_ens_estrada = unique(gene_pos$ensembl_gene_id[overlaps@to])
+
+write.table(homologs_win_1_estrada, file = "./results/flat/homologs_within1_estrada.txt",quote = F,row.names = F,col.names = F)
 
 #format lead snps for colocalization  
 snp_gene_df = estrada_lead_snps[overlaps@from,]
