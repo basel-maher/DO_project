@@ -1,25 +1,79 @@
 # Post-coloc analyses
 
-#homs = c(homologs_win_1_estrada, homologs_win_1_morris)
-#homs=(unique(homs))
+#How many BANs within 1 Mbp of lead snps?
+hom_morris = read.table("./results/flat/homologs_within1mbp_morris.txt")
+hom_estrada = read.table("./results/flat/homologs_within1_estrada.txt")
 
-#544 overall BANs overlap gwas loci
+homologs = c(hom_estrada$V1, hom_morris$V1)
+homologs = unique(homologs)
 
-##colocalizing eqtl
-#morris_coloc = read.table("~/Desktop/coloc_BAN_over75.txt")
-#estrada_coloc = read.table("~/Desktop/coloc_v7_all_results.txt")
-#estrada_coloc = estrada_coloc[which(as.numeric(estrada_coloc$H4) >= 0.75),]
+length(homologs)#544 genes
 
-#coloc = c(morris_coloc$gene,estrada_coloc$gene)
-#unique(coloc)
+##How many lead snps?
+estrada_lead_snps = read.table("./data/GEFOS/lead_snps_pos", header=F, stringsAsFactors = F)
+morris_lead_snps = read.csv("./data/Morrisetal2018.NatGen.SumStats/Morris_eBMD_conditionally_ind_snps.csv", header=T, stringsAsFactors = F)
 
+lead = c(estrada_lead_snps$V6, morris_lead_snps$RSID)
+lead = unique(lead)
+length(lead)#1161 unique lead snps
+
+
+#Of the 544 homologs within 1 mbp of a lead snp, how many have colocalizing eQTL?
+fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75.txt")
+ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75.txt")
+morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75.txt")
+
+coloc_genes = c(fn$gene, ls$gene, morris_coloc$gene)
+coloc_genes = unique(coloc_genes)
+length(coloc_genes)#51
+
+
+#How many are known regulators of bone biology?
+superset = read.table("./results/flat/superduperset_sansGWAS.txt")
 #MYPOP,PLEKHM1,ZNF609,GPR133,PTRF
+length(which(tolower(coloc_genes) %in% tolower(superset$V1)))
+#30 in superset. however, PTRF and GPR133 are also in superset as Cavin1 and Adgrd1, respectively. So 32 in superset, 8 from literature search, for 40 total.
+#11 genes not implicated in bone
 
-#plekhm1 in superset. so is ptrf as cavin1. so is gpr133 as adgrd1
 
-#q=32 #number of bone genes in coloc genes
-#k=51 #number of coloc genes
-#m=length(which(tolower(homs) %in% superset))#number bone genes in BAN homologs
-#n=length(which(tolower(homs) %in% superset == FALSE))   #number of non-bone genes in BAN homologs
+#based on overlap with bone list, are the colocalizing genes enriched in bone genes? Can do this relative to enrichment in genome or enrichment in BANs that were colocalized 
 
-phyper(q,m,n,k,lower.tail = F)
+#This analysis considers the BAN genes as the global set
+new_set = superset
+new_set[which(tolower(new_set$V1) == "cavin1"),1] = "ptrf"
+new_set[which(tolower(new_set$V1) == "adgrd1"),1] = "gpr133"
+
+allgenes = homologs
+
+a = length(which(tolower(coloc_genes) %in% tolower(new_set$V1))) # number of coloc genes that are also bone genes (32)
+b = length(which(tolower(coloc_genes) %in% tolower(new_set$V1) == F)) # number of coloc genes that are not bone genes (19, 51-a)
+c = length(which((tolower(allgenes) %in% tolower(new_set$V1)) & (tolower(allgenes) %in% tolower(coloc_genes) == FALSE)))#not coloc and bone genes (176)
+d = length(which((tolower(allgenes) %in% tolower(new_set$V1)==FALSE) & (tolower(allgenes) %in% tolower(coloc_genes) == FALSE)))#not coloc and not bone genes (493)
+
+#make contingency table
+mat = matrix(nrow=2,ncol=2)
+mat[1,] = c(a,c)
+mat[2,] = c(b,d)
+fisher.test(mat) #two sided
+
+
+
+#This analysis considers all genes in genome as the global set
+#23648 genes
+
+new_set = superset
+new_set[which(tolower(new_set$V1) == "cavin1"),1] = "ptrf"
+new_set[which(tolower(new_set$V1) == "adgrd1"),1] = "gpr133"
+
+allgenes = homologs
+
+a = length(which(tolower(coloc_genes) %in% tolower(new_set$V1))) # number of coloc genes that are also bone genes (32)
+b = length(which(tolower(coloc_genes) %in% tolower(new_set$V1) == F)) # number of coloc genes that are not bone genes (19, 51-a)
+c = length(which(tolower(new_set$V1) %in% tolower(coloc_genes) == FALSE))#not coloc and bone genes. For the genome it would equal number of bone genes that dont colocalize (1507)
+d = 23645 - (a+b+c)#not coloc and not bone genes (22087)
+
+#make contingency table
+mat = matrix(nrow=2,ncol=2)
+mat[1,] = c(a,c)
+mat[2,] = c(b,d)
+fisher.test(mat) #two sided
