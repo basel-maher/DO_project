@@ -158,7 +158,7 @@ value and significant results are subset into three seperate tables based on sex
    
     * Miscellaneous KDA analyses, such as Gene Ontology analysis, can be found in [src/KDA_analyses.R](../src/KDA_analyses.R)
     
-   * Annotate KDA (BAN) with coloc results from GTEx. This step is performed AFTER colocalization (see below)
+   * Annotate KDA (BAN) with coloc results from GTEx. This step is performed AFTER colocalization and isn't necessary. (see below)
       * [src/annotate_KDA_GTEx.R](../src/annotate_KDA_GTEx.R)
     
 15. eQTL-GWAS colocalization
