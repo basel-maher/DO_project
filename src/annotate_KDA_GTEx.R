@@ -53,7 +53,7 @@ write.csv(all_coloc_greaterorover75,file = "~/Documents/projects/DO_project/resu
 
 
 
-## N.B. GPR133 and PTRF are in nomina_hum as "Adgrd1" and "Cavin1", respectively
+## N.B. GPR133 and PTRF and ZNF609 are in nominal_hum as "Adgrd1" and "Cavin1" and "ZFP609", respectively
 ###
 all_coloc_greaterorover75[which(all_coloc_greaterorover75$gene == "GPR133"),"gene"] = "ADGRD1"
 all_coloc_greaterorover75[which(all_coloc_greaterorover75$gene == "PTRF"),"gene"] = "CAVIN1"

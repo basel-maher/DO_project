@@ -32,7 +32,7 @@ length(coloc_genes)#51
 superset = read.table("./results/flat/superduperset_sansGWAS.txt")
 #MYPOP,PLEKHM1,ZNF609,GPR133,PTRF
 length(which(tolower(coloc_genes) %in% tolower(superset$V1)))
-#30 in superset. however, PTRF and GPR133 are also in superset as Cavin1 and Adgrd1, respectively. So 32 in superset, 8 from literature search, for 40 total.
+#30 in superset. however, PTRF and GPR133 amd ZNF609 are also in superset as Cavin1 and Adgrd1 and Zfp609, respectively. So 32 in superset, 8 from literature search, for 40 total.
 #11 genes not implicated in bone
 
 
@@ -42,13 +42,14 @@ length(which(tolower(coloc_genes) %in% tolower(superset$V1)))
 new_set = superset
 new_set[which(tolower(new_set$V1) == "cavin1"),1] = "ptrf"
 new_set[which(tolower(new_set$V1) == "adgrd1"),1] = "gpr133"
+new_set[which(tolower(new_set$V1) == "zfp609"),1] = "znf609"
 
 allgenes = homologs
 
-a = length(which(tolower(coloc_genes) %in% tolower(new_set$V1))) # number of coloc genes that are also bone genes (32)
-b = length(which(tolower(coloc_genes) %in% tolower(new_set$V1) == F)) # number of coloc genes that are not bone genes (19, 51-a)
+a = length(which(tolower(coloc_genes) %in% tolower(new_set$V1))) # number of coloc genes that are also bone genes (33)
+b = length(which(tolower(coloc_genes) %in% tolower(new_set$V1) == F)) # number of coloc genes that are not bone genes (18, 51-a)
 c = length(which((tolower(allgenes) %in% tolower(new_set$V1)) & (tolower(allgenes) %in% tolower(coloc_genes) == FALSE)))#not coloc and bone genes (176)
-d = length(which((tolower(allgenes) %in% tolower(new_set$V1)==FALSE) & (tolower(allgenes) %in% tolower(coloc_genes) == FALSE)))#not coloc and not bone genes (493)
+d = length(which((tolower(allgenes) %in% tolower(new_set$V1)==FALSE) & (tolower(allgenes) %in% tolower(coloc_genes) == FALSE)))#not coloc and not bone genes (317)
 
 #make contingency table
 mat = matrix(nrow=2,ncol=2)
@@ -64,6 +65,8 @@ fisher.test(mat) #two sided
 new_set = superset
 new_set[which(tolower(new_set$V1) == "cavin1"),1] = "ptrf"
 new_set[which(tolower(new_set$V1) == "adgrd1"),1] = "gpr133"
+new_set[which(tolower(new_set$V1) == "zfp609"),1] = "znf609"
+
 
 allgenes = homologs
 
