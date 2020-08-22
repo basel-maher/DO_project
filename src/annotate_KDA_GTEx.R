@@ -57,6 +57,8 @@ write.csv(all_coloc_greaterorover75,file = "~/Documents/projects/DO_project/resu
 ###
 all_coloc_greaterorover75[which(all_coloc_greaterorover75$gene == "GPR133"),"gene"] = "ADGRD1"
 all_coloc_greaterorover75[which(all_coloc_greaterorover75$gene == "PTRF"),"gene"] = "CAVIN1"
+all_coloc_greaterorover75[which(tolower(all_coloc_greaterorover75$gene) == "ZNF609"),1] = "ZFP609"
+
 ###
 
 #annotate kda tables with coloc data
