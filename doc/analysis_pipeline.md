@@ -173,7 +173,5 @@ value and significant results are subset into three seperate tables based on sex
 
     * [src/impc_glt8d2.R](../src/impc_glt8d2.R)
 
-#mouse_human_syntenic regions supplementary fig
-#plots for paper
 
 
