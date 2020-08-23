@@ -92,11 +92,3 @@ summary(unlist(lapply(merge_top, function(x) nrow(x))))
 
 
 
-#identify trait QTL/eQTL pairs whose top merge analysis variants overlapped
-merge_top_eqtl = merge_top
-
-load("./results/Rdata/merge_top_QTL.Rdata")
-merge_top_QTL = merge_top
-
-
-
