@@ -87,30 +87,34 @@ pos_human = paste0(chroms_human,":",bp_human)
 
 
 # ####load in Estrada data
-# 
+fnbmd = read.table("./data/GEFOS/GEFOS2_FNBMD_POOLED_GC.txt", header=T, stringsAsFactors = F)
+fnbmd = fnbmd[which(fnbmd$P.value<=5e-8),]
+lsbmd = read.table("./data/GEFOS/GEFOS2_LSBMD_POOLED_GC.txt", header=T, stringsAsFactors = F)
+lsbmd = lsbmd[which(lsbmd$P.value<=5e-8),]
+
+gefos_snps = unique(c(fnbmd$MarkerName, lsbmd$MarkerName))
 # #get rsid pos
-# mart = useMart(biomart = "ENSEMBL_MART_SNP", host = "grch37.ensembl.org",path = "/biomart/martservice", dataset = "hsapiens_snp")
+ mart = useMart(biomart = "ENSEMBL_MART_SNP", host = "grch37.ensembl.org",path = "/biomart/martservice", dataset = "hsapiens_snp")
 # 
-# snps = getBM(attributes = c("refsnp_id", "chr_name","chrom_start"),
-#              filters = "snp_filter",
-#              values = gefos_snps,
-#              mart = mart)
+ snps = getBM(attributes = c("refsnp_id", "chr_name","chrom_start"),
+              filters = "snp_filter",
+              values = gefos_snps,
+              mart = mart)
 
 
-#snps$pos = paste0("chr",snps$chr_name, ":", snps$chrom_start)
+snps$pos = paste0("chr",snps$chr_name, ":", snps$chrom_start)
 
 
 
 
 ####merge with morris
-#pos_human = append(pos_human, snps$pos)
-#pos_human = unique(pos_human)
+pos_human = append(pos_human, snps$pos)
+pos_human = unique(pos_human)
 ####
 
 
 #GRanges
 pos_human_grange = as(pos_human, "GRanges")
-
 
 overlaps = GenomicRanges::findOverlaps(query = pos_human_grange, subject = lifted_mouse_loci)
 
@@ -120,9 +124,9 @@ overlaps_mouse = overlaps@to
 x = qtl_loc[overlaps_mouse,]
 
 overlaps_merged = cbind(x,morris[overlaps_human,])
-write.csv(overlaps_merged, file="./results/flat/gwas_qtl_overlaps_allIncNonSig.csv",quote = F,row.names = F)
+#write.csv(overlaps_merged, file="./results/flat/gwas_qtl_overlaps_allIncNonSig.csv",quote = F,row.names = F) EDIT, overlaps are no longer from morris only
 
-unique(overlaps_merged$locus)
+unique(x$locus)
 
 
 
@@ -183,3 +187,5 @@ quantile(sim_o,probs=0.95)
 
 x=ecdf(sim_o) 
 x(6)
+
+#overlap as in paper, then with reduced morris, then with all including estrada, then with all reduced
