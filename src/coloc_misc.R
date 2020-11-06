@@ -3,6 +3,7 @@
 options(stringsAsFactors = FALSE)
 library(biomaRt)
 library(org.Hs.eg.db)
+library(GenomicRanges)
 
 
 ###############################################FUCNTION TO CONVERT MOUSE GENES TO HUMAN HOMOLOGS#####################################

@@ -32,7 +32,7 @@ length(coloc_genes)#51
 superset = read.table("./results/flat/superduperset_sansGWAS.txt")
 #MYPOP,PLEKHM1,ZNF609,GPR133,PTRF
 length(which(tolower(coloc_genes) %in% tolower(superset$V1)))
-#30 in superset. however, PTRF and GPR133 amd ZNF609 are also in superset as Cavin1 and Adgrd1 and Zfp609, respectively. So 32 in superset, 8 from literature search, for 40 total.
+#30 in superset. however, PTRF and GPR133 amd ZNF609 are also in superset as Cavin1 and Adgrd1 and Zfp609, respectively. So 33 in superset, 8 from literature search, for 41 total.
 #11 genes not implicated in bone
 
 
@@ -55,7 +55,17 @@ d = length(which((tolower(allgenes) %in% tolower(new_set$V1)==FALSE) & (tolower(
 mat = matrix(nrow=2,ncol=2)
 mat[1,] = c(a,c)
 mat[2,] = c(b,d)
-fisher.test(mat) #two sided
+fisher.test(mat) #two sided (enrichment or depletion)
+fisher.test(mat,alternative = "g") #enrichment
+
+###same but with hypergeometric 
+
+q=33
+k=51
+m=209
+n=335
+
+phyper(q-1,m,n,k,lower.tail = F) #prob 33 or more bone genes drawn
 
 
 
@@ -80,3 +90,15 @@ mat = matrix(nrow=2,ncol=2)
 mat[1,] = c(a,c)
 mat[2,] = c(b,d)
 fisher.test(mat) #two sided
+fisher.test(mat,alternative = "g") #enrichment
+
+
+
+
+q=33
+k=51
+m=length(new_set$V1)
+n=23645-m
+
+phyper(q-1,m,n,k,lower.tail = F) #prob 33 or more bone genes drawn, genome-wide
+
