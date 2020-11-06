@@ -16,7 +16,4 @@ d2<-PhenList(t1, testGenotype=as.character(unique(t1$Genotype)[which(o1!='+/+')]
 d3<-testDataset(d2,depVariable='Value',method='MM',equation='withWeight', outputMessages = T,transformValues = T)
 
 d3@analysisResults$model.output.summary
-<<<<<<< HEAD
-summary(d3)
-=======
->>>>>>> 7a4cca31c80a92b3e57f523d696a6b8f4c24726b
+
