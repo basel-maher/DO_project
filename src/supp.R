@@ -452,6 +452,33 @@ local_eqtl$Start = local_eqtl$Start/1000000
 local_eqtl$End = local_eqtl$End/1000000
 
 
+require(data.table)
+MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
+MGI_markers = MGI_markers[-which(MGI_markers$Chr=="UN"),]
+MGI_markers$`Marker Synonyms (pipe-separated)` = gsub("\\|", " ", MGI_markers$`Marker Synonyms (pipe-separated)`)
+MGI_markers$name = tolower(MGI_markers$`Marker Symbol`)
+local_eqtl$name2 = tolower(sapply(strsplit(local_eqtl$Gene.Name, split = "_isoform"),"[",1))
+
+local_eqtl = merge(local_eqtl, MGI_markers, by.x="name2", by.y="name", all.x=T)
+
+idx = which(is.na(local_eqtl$`MGI Accession ID`))
+
+for(i in idx){
+  
+  zz = grep(x = MGI_markers$`Marker Synonyms (pipe-separated)`, pattern = paste0("\\b",local_eqtl$name2[i],"\\b"),ignore.case = T)
+  
+  if(length(zz) == 1){
+    local_eqtl$`MGI Accession ID`[i] = MGI_markers$`MGI Accession ID`[zz]
+    print(paste0(local_eqtl$name2[i], " ----- ", MGI_markers$`Marker Synonyms (pipe-separated)`[zz]))
+  }
+  
+}
+
+local_eqtl[which(is.na(local_eqtl$`MGI Accession ID`)),"name2"]
+local_eqtl[which(local_eqtl$name2 == "grasp"),"MGI Accession ID"] = "MGI:1860303"
+local_eqtl[which(local_eqtl$name2 == "marc2"),"MGI Accession ID"] = "MGI:1914497"
+local_eqtl[which(local_eqtl$name2 == "d930016d06rik"),"MGI Accession ID"] = "MGI:3040669"
+
 gtf = rtracklayer::import("results/flat/RNA-seq/mus_stringtie_merged.gtf")
 gtf = as.data.frame(gtf)
 gtf = gtf[,c("gene_name","ref_gene_id")]
@@ -462,15 +489,21 @@ gtf.merged = gtf %>%
   dplyr::group_by(gene_name) %>%
   dplyr::summarise(ref_gene_id = paste(ref_gene_id, collapse = ","))
 
-local_eqtl$name2 = sapply(strsplit(local_eqtl$Gene.Name, split = "_isoform"),"[",1)
+local_eqtl$alt_id = NA
+idx = which(is.na(local_eqtl$`MGI Accession ID`))
 
-local_eqtl = merge(local_eqtl, gtf.merged, by.x = "name2", by.y = "gene_name", all.x=T)
+for(i in idx){
+  
+  zz = which(tolower(gtf.merged$gene_name) == local_eqtl$name2[i])
+  
+  if(length(zz) == 1){
+    local_eqtl$alt_id[i] = gtf.merged$ref_gene_id[zz]
+    print(paste0(local_eqtl$name2[i], " ----- ", gtf.merged$gene_name[zz]))
+  }
+  
+}
 
-local_eqtl = local_eqtl[-c(1,2)]
-local_eqtl = local_eqtl[,c(1,12, 2:11)]
-colnames(local_eqtl)[2] = "Ensembl_ID"
-
-
+local_eqtl = local_eqtl[,c(3,14,26,4:13)]
 
 write.csv(local_eqtl, file = "~/Desktop/supp_tables/S11.csv", row.names = F)
 
