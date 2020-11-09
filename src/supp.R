@@ -523,17 +523,30 @@ ob.markers[which(ob.markers$gene =="Qsox1"),] # 11
 cluster1.markers <- FindMarkers(ob, ident.1 = 1, min.pct = 0.25,only.pos = T)
 S12 = cluster1.markers[which(cluster1.markers$p_val_adj <= 0.05),]
 
-mart = useMart("ensembl",dataset="mmusculus_gene_ensembl") #uses mus ensembl annotations
+S12$name = rownames(S12)
 
-out <- (getBM(attributes=c('mgi_id','external_gene_name'),
-              filters = 'external_gene_name', values = rownames(S12), mart = mart))
-S12$gene = rownames(S12)
-S12 = merge(S12, out, by.x="gene", by.y = "external_gene_name", all.x=T)
+require(data.table)
+MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
+MGI_markers = MGI_markers[-which(MGI_markers$Chr=="UN"),]
+MGI_markers$`Marker Synonyms (pipe-separated)` = gsub("\\|", " ", MGI_markers$`Marker Synonyms (pipe-separated)`)
+MGI_markers$name = tolower(MGI_markers$`Marker Symbol`)
+S12$name2 = tolower(sapply(strsplit(S12$name, split = "_isoform"),"[",1))
 
-S12[which(is.na(S12$mgi_id)),"mgi_id"] = c("MGI:1919311", "MGI:3642298", "MGI:3649931", "MGI:3606192", "MGI:1328326")
+S12 = merge(S12, MGI_markers, by.x="name2", by.y="name", all.x=T)
 
-S12 = S12[,c(1,7,2:6)]
-colnames(S12)[1:2] = c("Gene_Name", "MGI_ID")
+idx = which(is.na(S12$`MGI Accession ID`))
+
+for(i in idx){
+  
+  zz = grep(x = MGI_markers$`Marker Synonyms (pipe-separated)`, pattern = paste0("\\b",S12$name2[i],"\\b"),ignore.case = T)
+  
+  if(length(zz) == 1){
+    S12$`MGI Accession ID`[i] = MGI_markers$`MGI Accession ID`[zz]
+    print(paste0(S12$name2[i], " ----- ", MGI_markers$`Marker Synonyms (pipe-separated)`[zz]))
+  }
+  
+}
+
 write.csv(S12, file = "~/Desktop/supp_tables/S12.csv", row.names = T)
 
 
