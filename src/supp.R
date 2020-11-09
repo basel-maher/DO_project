@@ -43,15 +43,19 @@ pheno_combined = pheno_combined[,-c(1:9,54:57)]
 pheno_combined=pheno_combined[,c(1,2,45,3:10,46:49, 11:26, 50,51,41:44,27:40,52:55)]
 #pearson cor . adjusted for multiple comparisons (Holm)
 x = psych::corr.test(pheno_combined)
-
+xs = psych::corr.test(pheno_combined, method = "s")
 #p vals
 p = x$p[,"bending_max_load"]
+ps = xs$p[,"bending_max_load"]
 #correlation
 r = x$r[,"bending_max_load"]
+rs = xs$r[,"bending_max_load"]
 
 #S.E.
 se = x$se[,"bending_max_load"]
-table = cbind(r,p, se)
+ses = xs$se[,"bending_max_load"]
+
+table = cbind(rs,ps,ses)
 
 
 write.csv(table, file = "~/Desktop/supp_tables/S2.csv")
@@ -66,7 +70,14 @@ for( i in 1:length(table)){
   table[i] = paste0(signif(as.numeric(table[i],3)), "(", signif(as.numeric(p[i],3)), ")")
 }
 
-write.csv(table, file = "~/Desktop/supp_tables/S3.csv")
+table2 = xs$r
+p = xs$p
+
+for( i in 1:length(table2)){
+  table2[i] = paste0(signif(as.numeric(table2[i],3)), "(", signif(as.numeric(p[i],3)), ")")
+}
+
+write.csv(table2, file = "~/Desktop/supp_tables/S3.csv")
 
 
 #S4
