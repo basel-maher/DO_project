@@ -102,6 +102,31 @@ S4 = merge(S4, male,by="Gene.Name", all=T)
 
 S4 = S4[,c(1,2,42,88, 3:41, 43:87,89:128)]
 
+require(data.table)
+MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
+MGI_markers = MGI_markers[-which(MGI_markers$Chr=="UN"),]
+MGI_markers$`Marker Synonyms (pipe-separated)` = gsub("\\|", " ", MGI_markers$`Marker Synonyms (pipe-separated)`)
+MGI_markers$name = tolower(MGI_markers$`Marker Symbol`)
+S4$name2 = tolower(sapply(strsplit(S4$Gene.Name, split = "_isoform"),"[",1))
+
+S4 = merge(S4, MGI_markers, by.x="name2", by.y="name", all.x=T)
+
+idx = which(is.na(S4$`MGI Accession ID`))
+
+for(i in idx){
+  
+  zz = grep(x = MGI_markers$`Marker Synonyms (pipe-separated)`, pattern = paste0("\\b",S4$name2[i],"\\b"),ignore.case = T)
+  
+  if(length(zz) == 1){
+    S4$`MGI Accession ID`[i] = MGI_markers$`MGI Accession ID`[zz]
+    print(paste0(S4$name2[i], " ----- ", MGI_markers$`Marker Synonyms (pipe-separated)`[zz]))
+  }
+  
+}
+S4[which(is.na(S4$`MGI Accession ID`)),"name2"]
+S4[which(S4$name2 == "grasp"),"MGI Accession ID"] = "MGI:1860303"
+S4[which(S4$name2 == "marc2"),"MGI Accession ID"] = "MGI:1914497"
+
 gtf = rtracklayer::import("results/flat/RNA-seq/mus_stringtie_merged.gtf")
 gtf = as.data.frame(gtf)
 gtf = gtf[,c("gene_name","ref_gene_id")]
@@ -112,20 +137,21 @@ gtf.merged = gtf %>%
   dplyr::group_by(gene_name) %>%
   dplyr::summarise(ref_gene_id = paste(ref_gene_id, collapse = ","))
 
+S4$alt_id = NA
+idx = which(is.na(S4$`MGI Accession ID`))
 
-S4$name2 = sapply(strsplit(S4$Gene.Name, split = "_isoform"),"[",1)
+for(i in idx){
+  
+  zz = which(tolower(gtf.merged$gene_name) == S4$name2[i])
+  
+  if(length(zz) == 1){
+    S4$alt_id[i] = gtf.merged$ref_gene_id[zz]
+    print(paste0(S4$name2[i], " ----- ", gtf.merged$gene_name[zz]))
+  }
+  
+}
 
-S4 = merge(S4, gtf.merged, by.x = "name2", by.y = "gene_name")
-S4 = S4[-1]
-S4 = S4[,c(1,129, 2:128)]
-colnames(S4)[2] = "Ensembl_ID"
-
-mart = useMart("ensembl",dataset="mmusculus_gene_ensembl") #uses mus ensembl annotations
-
-out <- (getBM(attributes=c('mgi_id','external_gene_name',"external_synonym"),
-              filters = 'external_gene_name', values = S4$Gene.Name, mart = mart))
-
-
+S4 = S4[,c(2,130,142,3:129)]
 write.csv(S4, file = "~/Desktop/supp_tables/S4.csv", row.names = F)
 
 
@@ -204,39 +230,34 @@ write.csv(networks, file = "~/Desktop/supp_tables/S5.csv", row.names = F)
 
 #S6
 #these are mouse genes
-library(Hmisc)
 superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
 
-superset = superset[,1]
+#superset = superset[,1]
 #superset = capitalize(superset)
 
-mart = useMart("ensembl",dataset="mmusculus_gene_ensembl") #uses mus ensembl annotations
+require(data.table)
+MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
+MGI_markers = MGI_markers[-which(MGI_markers$Chr=="UN"),]
+MGI_markers$`Marker Synonyms (pipe-separated)` = gsub("\\|", " ", MGI_markers$`Marker Synonyms (pipe-separated)`)
+MGI_markers$name = tolower(MGI_markers$`Marker Symbol`)
 
-out <- (getBM(attributes=c('mgi_id','external_gene_name'),
-                            filters = 'external_gene_name', values = superset, mart = mart))
+superset = merge(superset, MGI_markers, by.x="V1", by.y="name", all.x=T)
 
-out$external_gene_name = tolower(out$external_gene_name)
-superset = as.data.frame(superset)
-superset = merge(superset, out, by.x = "superset", by.y="external_gene_name", all.x=T)
+which(duplicated(superset$V1)) #"T" duplicated. The correct one is MGI:98472 (from make_bone_geneset GO annotations)
+superset = superset[-1356,]
 
-mgi = read.delim("./data/MGIhdpQuery_markers_20190728_224719.txt",stringsAsFactors = FALSE)
-mgi_mouse = mgi[which(mgi$Organism=="mouse"),]
-mgi_mouse$Gene.Symbol = tolower(mgi_mouse$Gene.Symbol)
+zz = which(is.na(superset$`MGI Accession ID`) == FALSE)
 
-superset= merge(superset, mgi_mouse, by.x="superset", by.y="Gene.Symbol", all.x=T,)
+superset$MGI_NAME[zz] = superset$`Marker Symbol`[zz]
 
-superset[which(is.na(superset$mgi_id)),"mgi_id"] = superset[which(is.na(superset$mgi_id)),"ID"]
+zz = which(is.na(superset$`MGI Accession ID`))
+require(Hmisc)
+superset$MGI_NAME[zz] = capitalize(superset$V1[zz])
 
-superset[1052,"mgi_id"] = 'MGI:1195971' #pira1
-superset[1054,"mgi_id"] = 'MGI:1195974'  #pira6
+superset[which(is.na(superset$`MGI Accession ID`)),"MGI Accession ID"] = c("MGI:2140364","MGI:3575190", "MGI:3575247", "MGI:3575248", "MGI:5573174","MGI:1915720","MGI:3819962", "MGI:5633762","MGI:3812132")
 
-which(duplicated(superset$superset)) #ctla4 duplicated but no other entries for it
-superset = superset[-335,]
+superset=superset[,c(14,2)]
 
-superset = superset[,c(1,2)]
-colnames(superset) = c("Feature","MGI_ID")
-superset$Feature = capitalize(superset$Feature)
-##CHECK RIKEN GENE NOMENCLATURE CAPITALIZATION
 write.csv(superset, file = "~/Desktop/supp_tables/S6.csv", row.names = F)
 
 
@@ -274,6 +295,32 @@ S7 = merge(S7, male, by="gene", all=T)
 S7 = S7[,c(1,2,7,12,3:6,8:11,13:16)]
 colnames(S7) = c("gene","module_C","module_F","module_M","num_neib_C","num_bone_neib_C","nominal_pval_C", "FDR_pval_C", "num_neib_F","num_bone_neib_F","nominal_pval_F","FDR_pval_F","num_neib_M","num_bone_neib_M","nominal_pval_M","FDR_pval_M")
 
+require(data.table)
+MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
+MGI_markers = MGI_markers[-which(MGI_markers$Chr=="UN"),]
+MGI_markers$`Marker Synonyms (pipe-separated)` = gsub("\\|", " ", MGI_markers$`Marker Synonyms (pipe-separated)`)
+MGI_markers$name = tolower(MGI_markers$`Marker Symbol`)
+S7$name2 = tolower(sapply(strsplit(S7$gene, split = "_isoform"),"[",1))
+
+S7 = merge(S7, MGI_markers, by.x="name2", by.y="name", all.x=T)
+
+idx = which(is.na(S7$`MGI Accession ID`))
+
+for(i in idx){
+  
+  zz = grep(x = MGI_markers$`Marker Synonyms (pipe-separated)`, pattern = paste0("\\b",S7$name2[i],"\\b"),ignore.case = T)
+  
+  if(length(zz) == 1){
+    S7$`MGI Accession ID`[i] = MGI_markers$`MGI Accession ID`[zz]
+    print(paste0(S7$name2[i], " ----- ", MGI_markers$`Marker Synonyms (pipe-separated)`[zz]))
+  }
+  
+}
+
+S7[which(is.na(S7$`MGI Accession ID`)),"name2"]
+S7[which(S7$name2 == "grasp"),"MGI Accession ID"] = "MGI:1860303"
+S7[which(S7$name2 == "marc2"),"MGI Accession ID"] = "MGI:1914497"
+
 gtf = rtracklayer::import("results/flat/RNA-seq/mus_stringtie_merged.gtf")
 gtf = as.data.frame(gtf)
 gtf = gtf[,c("gene_name","ref_gene_id")]
@@ -284,16 +331,22 @@ gtf.merged = gtf %>%
   dplyr::group_by(gene_name) %>%
   dplyr::summarise(ref_gene_id = paste(ref_gene_id, collapse = ","))
 
+S7$alt_id = NA
+idx = which(is.na(S7$`MGI Accession ID`))
 
-S7$name2 = sapply(strsplit(S7$gene, split = "_isoform"),"[",1)
+for(i in idx){
+  
+  zz = which(tolower(gtf.merged$gene_name) == S7$name2[i])
+  
+  if(length(zz) == 1){
+    S7$alt_id[i] = gtf.merged$ref_gene_id[zz]
+    print(paste0(S7$name2[i], " ----- ", gtf.merged$gene_name[zz]))
+  }
+  
+}
 
-S7 = merge(S7, gtf.merged, by.x = "name2", by.y = "gene_name", all.x=T)
 
-S7 = S7[-1]
-S7 = S7[,c(1,17, 2:16)]
-colnames(S7)[2] = "Ensembl_ID"
-
-which(is.na(S7$Ensembl_ID))
+S7 = S7[,c(2,18,30,3:17)]
 
 write.csv(S7, file = "~/Desktop/supp_tables/S7.csv", row.names = F)
 
