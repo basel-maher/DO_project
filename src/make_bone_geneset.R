@@ -65,7 +65,7 @@ for(i in terms){
 }
 
 #same for human
-ensembl = useMart("ensembl",dataset="hsapiens_gene_ensembl") #uses mus ensembl annotations
+ensembl = useMart("ensembl",dataset="hsapiens_gene_ensembl") #uses human ensembl annotations
 
 genes_hum = as.data.frame(matrix(ncol=3))
 no_annot=c()
