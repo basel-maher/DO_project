@@ -1,6 +1,24 @@
 library(rtracklayer)
 ##supp tables
 
+
+####NEW SUPP TABLE WITH ALL MOUSE PHENOTYPIC DATA - RAW
+load(file = "./results/Rdata/cross_basic_cleaned.Rdata")
+#x = colnames(pheno_combined) from S2 below
+
+pheno_combined = as.data.frame(cross_basic$pheno)
+rownames(pheno_combined) = pheno_combined$Mouse.ID
+
+pheno_combined = pheno_combined[,x]
+pheno_combined$Mouse.ID = rownames(pheno_combined)
+pheno_combined = pheno_combined[,c(56,1:55)]
+
+covar = cross_basic$covar
+covar$Mouse.ID = rownames(covar)
+
+S0 = merge(covar, pheno_combined, by="Mouse.ID")
+S0 = S0[order(as.numeric(S0$Mouse.ID)),]
+
 #S1
 #from est_herit
 
@@ -9,7 +27,6 @@ library(rtracklayer)
 #Holm-Bonferroni correlations with femoral strength
 library(psych)
 set.seed(8675309)
-#lasso regression to find best predictors of max load
 load(file = "./results/Rdata/cross_basic_cleaned.Rdata")
 
 
