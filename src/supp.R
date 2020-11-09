@@ -1,3 +1,4 @@
+library(rtracklayer)
 ##supp tables
 
 #S1
@@ -100,6 +101,31 @@ S4 = merge(S4, male,by="Gene.Name", all=T)
 
 
 S4 = S4[,c(1,2,42,88, 3:41, 43:87,89:128)]
+
+gtf = rtracklayer::import("results/flat/RNA-seq/mus_stringtie_merged.gtf")
+gtf = as.data.frame(gtf)
+gtf = gtf[,c("gene_name","ref_gene_id")]
+gtf = as.data.frame(unique(gtf))
+gtf = gtf[-which(is.na(gtf$ref_gene_id)),]
+require(dplyr)
+gtf.merged = gtf %>%
+  dplyr::group_by(gene_name) %>%
+  dplyr::summarise(ref_gene_id = paste(ref_gene_id, collapse = ","))
+
+
+S4$name2 = sapply(strsplit(S4$Gene.Name, split = "_isoform"),"[",1)
+
+S4 = merge(S4, gtf.merged, by.x = "name2", by.y = "gene_name")
+S4 = S4[-1]
+S4 = S4[,c(1,129, 2:128)]
+colnames(S4)[2] = "Ensembl_ID"
+
+mart = useMart("ensembl",dataset="mmusculus_gene_ensembl") #uses mus ensembl annotations
+
+out <- (getBM(attributes=c('mgi_id','external_gene_name',"external_synonym"),
+              filters = 'external_gene_name', values = S4$Gene.Name, mart = mart))
+
+
 write.csv(S4, file = "~/Desktop/supp_tables/S4.csv", row.names = F)
 
 
@@ -177,11 +203,40 @@ write.csv(networks, file = "~/Desktop/supp_tables/S5.csv", row.names = F)
 
 
 #S6
+#these are mouse genes
 library(Hmisc)
 superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
 
 superset = superset[,1]
-superset = capitalize(superset)
+#superset = capitalize(superset)
+
+mart = useMart("ensembl",dataset="mmusculus_gene_ensembl") #uses mus ensembl annotations
+
+out <- (getBM(attributes=c('mgi_id','external_gene_name'),
+                            filters = 'external_gene_name', values = superset, mart = mart))
+
+out$external_gene_name = tolower(out$external_gene_name)
+superset = as.data.frame(superset)
+superset = merge(superset, out, by.x = "superset", by.y="external_gene_name", all.x=T)
+
+mgi = read.delim("./data/MGIhdpQuery_markers_20190728_224719.txt",stringsAsFactors = FALSE)
+mgi_mouse = mgi[which(mgi$Organism=="mouse"),]
+mgi_mouse$Gene.Symbol = tolower(mgi_mouse$Gene.Symbol)
+
+superset= merge(superset, mgi_mouse, by.x="superset", by.y="Gene.Symbol", all.x=T,)
+
+superset[which(is.na(superset$mgi_id)),"mgi_id"] = superset[which(is.na(superset$mgi_id)),"ID"]
+
+superset[1052,"mgi_id"] = 'MGI:1195971' #pira1
+superset[1054,"mgi_id"] = 'MGI:1195974'  #pira6
+
+which(duplicated(superset$superset)) #ctla4 duplicated but no other entries for it
+superset = superset[-335,]
+
+superset = superset[,c(1,2)]
+colnames(superset) = c("Feature","MGI_ID")
+superset$Feature = capitalize(superset$Feature)
+##CHECK RIKEN GENE NOMENCLATURE CAPITALIZATION
 write.csv(superset, file = "~/Desktop/supp_tables/S6.csv", row.names = F)
 
 
@@ -218,6 +273,27 @@ S7 = merge(S7, male, by="gene", all=T)
 
 S7 = S7[,c(1,2,7,12,3:6,8:11,13:16)]
 colnames(S7) = c("gene","module_C","module_F","module_M","num_neib_C","num_bone_neib_C","nominal_pval_C", "FDR_pval_C", "num_neib_F","num_bone_neib_F","nominal_pval_F","FDR_pval_F","num_neib_M","num_bone_neib_M","nominal_pval_M","FDR_pval_M")
+
+gtf = rtracklayer::import("results/flat/RNA-seq/mus_stringtie_merged.gtf")
+gtf = as.data.frame(gtf)
+gtf = gtf[,c("gene_name","ref_gene_id")]
+gtf = as.data.frame(unique(gtf))
+gtf = gtf[-which(is.na(gtf$ref_gene_id)),]
+require(dplyr)
+gtf.merged = gtf %>%
+  dplyr::group_by(gene_name) %>%
+  dplyr::summarise(ref_gene_id = paste(ref_gene_id, collapse = ","))
+
+
+S7$name2 = sapply(strsplit(S7$gene, split = "_isoform"),"[",1)
+
+S7 = merge(S7, gtf.merged, by.x = "name2", by.y = "gene_name", all.x=T)
+
+S7 = S7[-1]
+S7 = S7[,c(1,17, 2:16)]
+colnames(S7)[2] = "Ensembl_ID"
+
+which(is.na(S7$Ensembl_ID))
 
 write.csv(S7, file = "~/Desktop/supp_tables/S7.csv", row.names = F)
 
@@ -322,11 +398,32 @@ head(local_eqtl)
 local_eqtl$Start = local_eqtl$Start/1000000
 local_eqtl$End = local_eqtl$End/1000000
 
+
+gtf = rtracklayer::import("results/flat/RNA-seq/mus_stringtie_merged.gtf")
+gtf = as.data.frame(gtf)
+gtf = gtf[,c("gene_name","ref_gene_id")]
+gtf = as.data.frame(unique(gtf))
+gtf = gtf[-which(is.na(gtf$ref_gene_id)),]
+require(dplyr)
+gtf.merged = gtf %>%
+  dplyr::group_by(gene_name) %>%
+  dplyr::summarise(ref_gene_id = paste(ref_gene_id, collapse = ","))
+
+local_eqtl$name2 = sapply(strsplit(local_eqtl$Gene.Name, split = "_isoform"),"[",1)
+
+local_eqtl = merge(local_eqtl, gtf.merged, by.x = "name2", by.y = "gene_name", all.x=T)
+
+local_eqtl = local_eqtl[-c(1,2)]
+local_eqtl = local_eqtl[,c(1,12, 2:11)]
+colnames(local_eqtl)[2] = "Ensembl_ID"
+
+
+
 write.csv(local_eqtl, file = "~/Desktop/supp_tables/S11.csv", row.names = F)
 
 #S12
 #qsox1 cluster
-
+library(Seurat)
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
 
 
@@ -340,6 +437,17 @@ ob.markers[which(ob.markers$gene =="Qsox1"),] # 11
 cluster1.markers <- FindMarkers(ob, ident.1 = 1, min.pct = 0.25,only.pos = T)
 S12 = cluster1.markers[which(cluster1.markers$p_val_adj <= 0.05),]
 
+mart = useMart("ensembl",dataset="mmusculus_gene_ensembl") #uses mus ensembl annotations
+
+out <- (getBM(attributes=c('mgi_id','external_gene_name'),
+              filters = 'external_gene_name', values = rownames(S12), mart = mart))
+S12$gene = rownames(S12)
+S12 = merge(S12, out, by.x="gene", by.y = "external_gene_name", all.x=T)
+
+S12[which(is.na(S12$mgi_id)),"mgi_id"] = c("MGI:1919311", "MGI:3642298", "MGI:3649931", "MGI:3606192", "MGI:1328326")
+
+S12 = S12[,c(1,7,2:6)]
+colnames(S12)[1:2] = c("Gene_Name", "MGI_ID")
 write.csv(S12, file = "~/Desktop/supp_tables/S12.csv", row.names = T)
 
 
