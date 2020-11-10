@@ -38,13 +38,13 @@ x = myfread_fr("./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi
 x2 = myfread_fr("./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20180408_FinalReport.txt")
 x3 = myfread_fr("./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20181213_FinalReport.txt")
 x4 = myfread_fr("./data/GIGAMUGA/FinalReport_files/20190228_FinalReport_FIXED.txt")
-x5 = myfread_fr("./data/GIGAMUGA/FinalReport_files/Univ_of_Virginia_Al-Barghouthi_MURGIGV01_20200106_FinalReport.txt")
 
-merged = rbind(x,x2,x3,x4,x5)
+
+merged = rbind(x,x2,x3,x4)
 
 write.table(x = merged, file = "./data/GIGAMUGA/merged/Merged_FinalReport.txt", quote = FALSE,row.names = FALSE,sep = "\t")
 
-rm(x,x2,x3,x4,x5,merged)
+rm(x,x2,x3,x4,merged)
 ###
 #ADD THIS HEADER TO THE FILE MANUALLY!! without hashes
 

@@ -3,7 +3,7 @@ library(qtl2)
 load("./results/Rdata/cross_basic_cleaned.Rdata") #cross_basic
 load("./results/Rdata/full_pheno_table.Rdata") #pheno
 load("./results/Rdata/counts_vst_qnorm.Rdata") #normalize counts
-geno = readRDS("./results/GIGAMUGA/geno.final_merged.RDS")
+#geno = readRDS("./results/GIGAMUGA/geno.final_merged.RDS")
 
 #Make the cross file#
 
