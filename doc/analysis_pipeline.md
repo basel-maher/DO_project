@@ -20,6 +20,7 @@
 3. Convert Geneseek FinalReports files to a format r/qtl2 understands. This encodes the DO genotypes.
 
     * From https://kbroman.org/qtl2/pages/prep_do_data.html
+    * relevant data files found at https://doi.org/10.6084/m9.figshare.5404759.v2
     * use [src/geneseek2qtl2_mod.R](../src/geneseek2qtl2_mod.R)
     * output is in results/GIGAMUGA/qtl_batches1-4
 
