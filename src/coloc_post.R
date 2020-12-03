@@ -1,8 +1,8 @@
 # Post-coloc analyses
 
 #How many BANs within 1 Mbp of lead snps?
-hom_morris = read.table("./results/flat/homologs_within1mbp_morris.txt")
-hom_estrada = read.table("./results/flat/homologs_within1_estrada.txt")
+hom_morris = read.table("./results/flat/homologs_within1mbp_morris_TEST.txt")
+hom_estrada = read.table("./results/flat/homologs_within1_estrada_TEST.txt")
 
 homologs = c(hom_estrada$V1, hom_morris$V1)
 homologs = unique(homologs)
@@ -30,6 +30,8 @@ length(coloc_genes)#51
 
 #How many are known regulators of bone biology?
 superset = read.table("./results/flat/superduperset_sansGWAS.txt")
+superset = read.table("./results/flat/superset_in_networks.txt")
+
 #MYPOP,PLEKHM1,ZNF609,GPR133,PTRF
 length(which(tolower(coloc_genes) %in% tolower(superset$V1)))
 #30 in superset. however, PTRF and GPR133 amd ZNF609 are also in superset as Cavin1 and Adgrd1 and Zfp609, respectively. So 33 in superset, 8 from literature search, for 41 total.
@@ -60,11 +62,11 @@ fisher.test(mat,alternative = "g") #enrichment
 
 ###same but with hypergeometric 
 
-q=33
-k=51
-m=209
-n=335
-
+q=33#40
+k=51#72
+m=209#260
+n=335#478
+#m+n = 738
 phyper(q-1,m,n,k,lower.tail = F) #prob 33 or more bone genes drawn
 
 
