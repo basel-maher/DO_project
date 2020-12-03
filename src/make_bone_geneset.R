@@ -1,4 +1,5 @@
 library(tidyverse)
+library(biomaRt)
 ###
 
 #convert human to mouse
@@ -145,3 +146,45 @@ write.table(superduperset, "./results/flat/superduperset_sansGWAS.txt", sep = "\
 # 
 # ##
 # write.table(superduperset,"./results/flat/superduperset_GO_MGI_IMPC.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
+
+
+
+
+
+##using the RNA-seq counts (will be used in WGCNA scripts), get the "bone genes" in the superset that are expressed in our samples AFTER filtration. So basically only use the "known bone genes" 
+#that were used in the networks analysis
+
+superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
+
+superset = superset[,1]
+
+# read in the RNA-seq processed counts file
+counts = read.csv("./results/flat/RNA-seq/genes_over_6reads_in_morethan_38samps_tpm_over0.1_38samps_COUNTS.csv", stringsAsFactors = FALSE,row.names = 1,check.names = FALSE)
+
+
+#
+annot_file = read.csv("~/Documents/projects/DO_project/results/flat/annot_file.csv")
+annot_file = annot_file[,c(1,2)]
+
+counts = counts[which(rownames(counts) %in% annot_file$Gene.ID),]
+#
+
+#find and remove features that have fewer than 10 reads in more than 90% (173) of samples 
+x=c()
+for(i in 1:nrow(counts)){
+  if(sum(counts[i,]<10)>=173){
+    print(i)
+    x = append(x,i)
+  }
+}
+
+#311 genes removed
+counts = counts[-x,]
+
+
+x = rownames(counts)
+x = annot_file[which(annot_file$Gene.ID %in% x),"Gene.Name"]
+
+superset_in_networks = unique(superset[which(tolower(superset) %in% tolower(x))])
+
+write.table(superset_in_networks, "./results/flat/superset_in_networks.txt", sep = "\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
