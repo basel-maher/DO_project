@@ -45,8 +45,7 @@
   * Script for getting the relevant variants from GTEx for eBMD GWAS: [src/get_200k_morris.sh](../src/get_200k_morris.sh). This was run using a SLURM job array. Needs to be run for each of the GTEx tissues (i=1-48)
   
   * Convert RSIDs for the Estrada GWAS and the lead SNPs to GTEx format (chr_pos_ref_alt_build) using the GTEx lookup table (from step 1 above).
-    * This was done in R using merge(), to merge by RSID.
-    * Output files are named lead_merged, lsbmd_merged and fnbmd_merged.
+    * Also done in [src/coloc_pre.R](../src/coloc_pre.R
   
   * Script for getting the relevant variants from GTEx for Estrada FN/LSBMD GWAS: [src/get_200k_estrada.sh](../src/get_200k_estrada.sh)
   

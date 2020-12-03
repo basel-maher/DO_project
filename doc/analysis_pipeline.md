@@ -168,7 +168,7 @@ value and significant results are subset into three seperate tables based on sex
 
 
 16. Single Cell RNA-seq
-    * Key Driver Analysis performed in [src/seurat_analysis.R](../src/seurat_analysis.R)
+    * scRNA-seq analysis performed in [src/seurat_analysis.R](../src/seurat_analysis.R)
       
 17. IMPC data for Glt8d2
 
