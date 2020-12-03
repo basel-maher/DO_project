@@ -1,18 +1,20 @@
 #remove NAs and merge all coloc_all results
 
 #morris eBMD GWAS data
-coloc_results_files =list.files(path= "~/Documents/projects//DO_project/results/flat/coloc/coloc_results_morris/", pattern = "coloc_results*")
-
+#coloc_results_files =list.files(path= "~/Documents/projects//DO_project/results/flat/coloc/coloc_results_morris/", pattern = "coloc_results*")
+coloc_results_files =list.files(path= "~/Desktop/coloc_BAN_results/", pattern = "coloc_results*")
 coloc_7_all_results = data.frame()
 for (i in coloc_results_files){
-  result = read.delim(paste("~/Documents/projects//DO_project/results/flat/coloc/coloc_results_morris/",i,sep = ""),as.is = TRUE,stringsAsFactors = FALSE,header = FALSE,sep=" ")
+  #result = read.delim(paste("~/Documents/projects//DO_project/results/flat/coloc/coloc_results_morris/",i,sep = ""),as.is = TRUE,stringsAsFactors = FALSE,header = FALSE,sep=" ")
+  result = read.delim(paste("~/Desktop/coloc_BAN_results/",i,sep = ""),as.is = TRUE,stringsAsFactors = FALSE,header = FALSE,sep=" ")
   result = result[-1,]
   result = result[which(is.na(result$V2)==FALSE),]
   coloc_7_all_results=rbind(coloc_7_all_results,result)
 }
 
 coloc_7_all_results = coloc_7_all_results[,-c(1)]
-gene_list = read.table("~/Documents/projects//DO_project/results/flat/coloc/morris_lead_BAN_overlaps.txt")
+#gene_list = read.table("~/Documents/projects//DO_project/results/flat/coloc/morris_lead_BAN_overlaps.txt")
+gene_list = read.table("~/Desktop/morris_lead_BAN_overlaps.txt")
 gene_list = gene_list[,c(6,7)]
 gene_list = unique(gene_list)
 
@@ -27,25 +29,31 @@ write.table(coloc_7_all_results,"~/Documents/projects/DO_project/results/flat/co
 
 coloc_7_all_results_over75 = coloc_7_all_results[which(coloc_7_all_results$H4 >=0.75),] 
 
+morris_ovr75  = coloc_7_all_results_over75
 write.table(coloc_7_all_results_over75,"~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75.txt",sep = "\t",quote = FALSE)
 
 
 ####repeat analysis for estrada GWAS
 
 
-coloc_results_files =list.files(path= "~/Documents/projects//DO_project/results/flat/coloc/coloc_results_estrada/", pattern = "coloc_results*")
+#coloc_results_files =list.files(path= "~/Documents/projects//DO_project/results/flat/coloc/coloc_results_estrada/", pattern = "coloc_results*")
+coloc_results_files =list.files(path= "~/Desktop/coloc_results/", pattern = "coloc_results*")
 
 coloc_7_all_results = data.frame()
 for (i in coloc_results_files){
-  result = read.delim(paste("~/Documents/projects//DO_project/results/flat/coloc/coloc_results_estrada/",i,sep = ""),as.is = TRUE,stringsAsFactors = FALSE,header = FALSE,sep=" ")
+  #result = read.delim(paste("~/Documents/projects//DO_project/results/flat/coloc/coloc_results_estrada/",i,sep = ""),as.is = TRUE,stringsAsFactors = FALSE,header = FALSE,sep=" ")
+  result = read.delim(paste("~/Desktop/coloc_results/",i,sep = ""),as.is = TRUE,stringsAsFactors = FALSE,header = FALSE,sep=" ")
   result = result[-1,]
   result = result[which(is.na(result$V2)==FALSE),]
   coloc_7_all_results=rbind(coloc_7_all_results,result)
 }
 
 coloc_7_all_results = coloc_7_all_results[,-c(1)]
-gene_list = read.table("~/Documents/projects//DO_project/results/flat/coloc/estrada_lead_BAN_overlaps.txt")
-gene_list = gene_list[,c(6,7)]
+#gene_list = read.table("~/Documents/projects//DO_project/results/flat/coloc/estrada_lead_BAN_overlaps.txt")
+gene_list = read.table("~/Desktop/estrada_lead_BAN_overlaps.txt")
+
+#gene_list = gene_list[,c(6,7)]
+gene_list = gene_list[,c(5,6)]
 gene_list = unique(gene_list)
 
 
@@ -59,6 +67,9 @@ write.table(coloc_7_all_results,"~/Documents/projects/DO_project/results/flat/co
 
 coloc_7_all_results_over75 = coloc_7_all_results[which(coloc_7_all_results$H4 >=0.75),] 
 
+estrada_ovr75  = coloc_7_all_results_over75
+
+
 fn = coloc_7_all_results_over75[which(coloc_7_all_results_over75$pheno=="FNBMD"),]
 ls = coloc_7_all_results_over75[which(coloc_7_all_results_over75$pheno=="LSBMD"),]
 
@@ -66,4 +77,5 @@ write.table(fn,"~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBM
 write.table(ls,"~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75.txt",sep = "\t",quote = FALSE)
 
 
-
+coloc_ovr_75 = rbind(estrada_ovr75, morris_ovr75)
+unique(coloc_ovr_75$gene)
