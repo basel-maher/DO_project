@@ -104,8 +104,9 @@ gefos_snps = unique(c(fnbmd$MarkerName, lsbmd$MarkerName))
 
 snps$pos = paste0("chr",snps$chr_name, ":", snps$chrom_start)
 
-
-
+#add this, missing from biomaRt output.
+x = c("rs10872674", "6", "151872448", "chr6:151872448")
+snps = rbind(snps, x)
 
 ####merge with morris
 pos_human = append(pos_human, snps$pos)
@@ -188,4 +189,3 @@ quantile(sim_o,probs=0.95)
 x=ecdf(sim_o) 
 x(6)
 
-#overlap as in paper, then with reduced morris, then with all including estrada, then with all reduced
