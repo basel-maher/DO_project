@@ -208,16 +208,16 @@ ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
 save(ob, file = "./results/Rdata/seurat_ob.Rdata")
 
 
-#First, Rasd1 markers. (Cluster 10)
-
-ob.markers[which(ob.markers$gene =="Rasd1"),] # 10
-FeaturePlot(ob, features = "Rasd1", sort.cell = T, pt.size = 1)
-
-#output the top 30 cluster 10 genes
-
-cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,)
-
-head(cluster10.markers, 30)
+# #First, Rasd1 markers. (Cluster 10)
+# 
+# ob.markers[which(ob.markers$gene =="Rasd1"),] # 10
+# FeaturePlot(ob, features = "Rasd1", sort.cell = T, pt.size = 1)
+# 
+# #output the top 30 cluster 10 genes
+# 
+# cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,)
+# 
+# head(cluster10.markers, 30)
 
 
 
