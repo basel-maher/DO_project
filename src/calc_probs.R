@@ -6,7 +6,7 @@ library(qtl2)
 
 #load("./results/Rdata/cross_basic.Rdata")
 
-#This second one was generated after further QC using Broman et al. (Cite) 
+#This second one was generated after further QC using Broman et al. 
 
 load("./results/Rdata/cross_basic_cleaned.Rdata")
 
