@@ -59,7 +59,7 @@ pheno_combined = pheno_combined[,-c(1:9,54:57)]
 
 pheno_combined=pheno_combined[,c(1,2,45,3:10,46:49, 11:26, 50,51,41:44,27:40,52:55)]
 #pearson cor . adjusted for multiple comparisons (Holm)
-x = psych::corr.test(pheno_combined)
+x = psych::corr.test(pheno_combined,method = "p")
 xs = psych::corr.test(pheno_combined, method = "s")
 #p vals
 p = x$p[,"bending_max_load"]
@@ -284,6 +284,11 @@ superset$MGI_NAME[zz] = capitalize(superset$V1[zz])
 
 superset[which(is.na(superset$`MGI Accession ID`)),"MGI Accession ID"] = c("MGI:2140364","MGI:3575190", "MGI:3575247", "MGI:3575248", "MGI:5573174","MGI:1915720","MGI:3819962", "MGI:5633762","MGI:3812132")
 
+superset[which(superset$MGI_NAME == "Adprhl2"),"Feature Type"] = "protein coding gene"
+superset[which(superset$MGI_NAME == "Impad1"),"Feature Type"] = "protein coding gene"
+superset[which(superset$MGI_NAME %in% c("Hlb324b",  "Hlb328",   "Hlb330",   "Hydro",   "M1665asr", "Rdns","Shsn")),"Feature Type"] = "heritable phenotypic marker"
+
+superset_pruned = superset[which(superset$`Feature Type` %in% c("complex/cluster/region","heritable phenotypic marker","QTL","unclassified other genome feature")==FALSE),14]
 superset=superset[,c(14,2)]
 
 write.csv(superset, file = "~/Desktop/supp_tables/S6.csv", row.names = F)
