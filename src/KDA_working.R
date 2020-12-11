@@ -19,19 +19,16 @@ annot_file = annot_file[,c(1,2)]
 
 
 
-#load("./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
 
 load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
 
 
 #bone gene superset
-superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
+superset = read.delim("./results/flat/superset_in_networks.txt", stringsAsFactors = FALSE, header = FALSE)
 
 superset = superset[,1]
 
-superset_in_networks = read.delim("./results/flat/superset_in_networks.txt", stringsAsFactors = FALSE, header = FALSE)
 
-superset_in_networks = superset_in_networks[,1]
 
 #BNs learned on high performance computing cluster
 bns = list.files("./results/Rdata/networks/bn_4/")
@@ -159,16 +156,7 @@ for(i in 1:nrow(all)){
 
 }
 
-#579 sig at 0.05 nominal
 
-#try with genes that are expressed in dataset, after pruning. basically genes that are going into the network analysis
-#counts from WGCNA pipeline after removal of lowly expressed genes. 1291 genes
-for(i in 1:nrow(all)){
-  all$hyper[i] = phyper(q=all$num_bone_neib[i]-1, m=length(superset_in_networks), n = nrow(zhang) - length(superset_in_networks), k=all$num_neib[i], lower.tail = FALSE)
-  
-}
-
-#856 sig at 0.05 nominal
 # FDR correction
 all$hyper_bonf = NA
 
@@ -184,5 +172,5 @@ all$hyper_bonf = p.adjust(all$hyper, method="fdr")
 
 #sig = zhang[which(zhang$color %in% sig_mod),]
 
-write.csv(all, file="./results/flat/key_driver_analysis_sexcombined_sft4.csv",quote = F,row.names = F)
+write.csv(all, file="./results/flat/key_driver_analysis_sexcombined_sft4_REV.csv",quote = F,row.names = F)
 
