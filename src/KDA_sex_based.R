@@ -315,13 +315,7 @@ for(i in 1:nrow(all)){
   
 }
 
-#try with genes that are expressed in dataset, after pruning. basically genes that are going into the network analysis
-#counts from WGCNA pipeline after removal of lowly expressed genes. 1291 genes
-#for(i in 1:nrow(all)){
-#  all$hyper[i] = phyper(q=all$num_bone_neib[i]-1, m=length(superset_in_networks), n = nrow(zhang) - length(superset_in_networks), k=all$num_neib[i], lower.tail = FALSE)
-  
-#}
-#509
+
 # FDR correction
 all$hyper_bonf = NA
 
