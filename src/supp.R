@@ -4,20 +4,25 @@ library(rtracklayer)
 
 ####NEW SUPP TABLE WITH ALL MOUSE PHENOTYPIC DATA - RAW
 load(file = "./results/Rdata/cross_basic_cleaned.Rdata")
-#x = colnames(pheno_combined) from S2 below
+x = colnames(pheno_combined) #from S2 below (Holm-Bonf cor table)
 
 pheno_combined = as.data.frame(cross_basic$pheno)
 rownames(pheno_combined) = pheno_combined$Mouse.ID
 
 pheno_combined = pheno_combined[,x]
 pheno_combined$Mouse.ID = rownames(pheno_combined)
-pheno_combined = pheno_combined[,c(56,1:55)]
+pheno_combined = pheno_combined[,c(56,1:55)] # mouse ID first
 
 covar = cross_basic$covar
 covar$Mouse.ID = rownames(covar)
 
 S0 = merge(covar, pheno_combined, by="Mouse.ID")
 S0 = S0[order(as.numeric(S0$Mouse.ID)),]
+
+S0 = S0[,-c(8:17)]
+
+
+write.csv(S0, file = "~/Desktop/nat_com_revs/supp/S2_rev.csv")
 
 #S1
 #from est_herit
@@ -75,7 +80,7 @@ ses = xs$se[,"bending_max_load"]
 table = cbind(rs,ps,ses)
 
 
-write.csv(table, file = "~/Desktop/supp_tables/S2.csv")
+write.csv(table, file = "~/Desktop/nat_com_revs/supp/S3_rev.csv")
 
 
 
@@ -94,7 +99,7 @@ for( i in 1:length(table2)){
   table2[i] = paste0(signif(as.numeric(table2[i],3)), "(", signif(as.numeric(p[i],3)), ")")
 }
 
-write.csv(table2, file = "~/Desktop/supp_tables/S3.csv")
+write.csv(table2, file = "~/Desktop/nat_com_revs/supp/S4_rev.csv")
 
 
 #S4
@@ -180,7 +185,7 @@ for(i in idx){
 }
 
 S4 = S4[,c(2,130,142,3:129)]
-write.csv(S4, file = "~/Desktop/supp_tables/S4.csv", row.names = F)
+write.csv(S4, file = "~/Desktop/nat_com_revs/supp/S5_rev.csv", row.names = F)
 
 
 
@@ -253,12 +258,12 @@ for (i in 1:length(network_GO)){
 
 networks = networks[,c(1:248)]
 
-write.csv(networks, file = "~/Desktop/supp_tables/S5.csv", row.names = F)
+write.csv(networks, file = "~/Desktop/nat_com_revs/supp/S6_rev.csv", row.names = F)
 
 
 #S6
 #these are mouse genes
-superset = read.delim("./results/flat/superduperset_sansGWAS.txt", stringsAsFactors = FALSE, header = FALSE)
+superset = read.delim("./results/flat/superset_in_networks.txt", stringsAsFactors = FALSE, header = FALSE)
 
 #superset = superset[,1]
 #superset = capitalize(superset)
@@ -271,8 +276,8 @@ MGI_markers$name = tolower(MGI_markers$`Marker Symbol`)
 
 superset = merge(superset, MGI_markers, by.x="V1", by.y="name", all.x=T)
 
-which(duplicated(superset$V1)) #"T" duplicated. The correct one is MGI:98472 (from make_bone_geneset GO annotations)
-superset = superset[-1356,]
+#which(duplicated(superset$V1)) ##no dups anymore
+#superset = superset[-1356,]
 
 zz = which(is.na(superset$`MGI Accession ID`) == FALSE)
 
@@ -282,16 +287,18 @@ zz = which(is.na(superset$`MGI Accession ID`))
 require(Hmisc)
 superset$MGI_NAME[zz] = capitalize(superset$V1[zz])
 
-superset[which(is.na(superset$`MGI Accession ID`)),"MGI Accession ID"] = c("MGI:2140364","MGI:3575190", "MGI:3575247", "MGI:3575248", "MGI:5573174","MGI:1915720","MGI:3819962", "MGI:5633762","MGI:3812132")
+#superset[which(is.na(superset$`MGI Accession ID`)),"MGI Accession ID"] = c("MGI:2140364","MGI:3575190", "MGI:3575247", "MGI:3575248", "MGI:5573174","MGI:1915720","MGI:3819962", "MGI:5633762","MGI:3812132")
 
-superset[which(superset$MGI_NAME == "Adprhl2"),"Feature Type"] = "protein coding gene"
-superset[which(superset$MGI_NAME == "Impad1"),"Feature Type"] = "protein coding gene"
-superset[which(superset$MGI_NAME %in% c("Hlb324b",  "Hlb328",   "Hlb330",   "Hydro",   "M1665asr", "Rdns","Shsn")),"Feature Type"] = "heritable phenotypic marker"
+#superset[which(superset$MGI_NAME == "Adprhl2"),"Feature Type"] = "protein coding gene"
+superset[which(superset$MGI_NAME == "Adprhl2"),] = c("adprhl2","MGI:2140364","4","60.36","126316351","126321703","-","Adprs","O", "ADP-ribosylserine hydrolase","Gene","protein coding gene","Adprhl2 Arh3","Adprhl2")
+#superset[which(superset$MGI_NAME == "Impad1"),"Feature Type"] = "protein coding gene"
+superset[which(superset$MGI_NAME == "Impad1"),] = c("impad1","MGI:1915720","4","2.56","4762484","4793306","-","Bpnt2","O","3'(2'), 5'-bisphosphate nucleotidase 2","Gene","protein coding gene","gPAPP 1110001C20Rik Jaws Impad1","Impad1")
+#superset[which(superset$MGI_NAME %in% c("Hlb324b",  "Hlb328",   "Hlb330",   "Hydro",   "M1665asr", "Rdns","Shsn")),"Feature Type"] = "heritable phenotypic marker"
 
-superset_pruned = superset[which(superset$`Feature Type` %in% c("complex/cluster/region","heritable phenotypic marker","QTL","unclassified other genome feature")==FALSE),14]
+#superset_pruned = superset[which(superset$`Feature Type` %in% c("complex/cluster/region","heritable phenotypic marker","QTL","unclassified other genome feature")==FALSE),14]
 superset=superset[,c(14,2)]
 
-write.csv(superset, file = "~/Desktop/supp_tables/S6.csv", row.names = F)
+write.csv(superset, file = "~/Desktop/nat_com_revs/supp/S7_rev.csv", row.names = F)
 
 
 
@@ -304,20 +311,20 @@ write.csv(superset, file = "~/Desktop/supp_tables/S6.csv", row.names = F)
 
 
 #S7
-full = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4.csv", stringsAsFactors = F)
+full = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4_REV.csv", stringsAsFactors = F)
 full = full[,c(1:4,16,17)]
 
 colnames(full)[2:ncol(full)] = paste0(colnames(full)[2:ncol(full)], "_C")
 
 
 
-female = read.csv("./results/flat/key_driver_analysis_FEMALES_sft4.csv", stringsAsFactors = F)
+female = read.csv("./results/flat/key_driver_analysis_FEMALES_sft4_REV.csv", stringsAsFactors = F)
 female = female[,c(1:4,17,18)]
 
 colnames(female)[2:ncol(female)] = paste0(colnames(female)[2:ncol(female)], "_F")
 
 
-male = read.csv("./results/flat/key_driver_analysis_MALES_sft5.csv", stringsAsFactors = F)
+male = read.csv("./results/flat/key_driver_analysis_MALES_sft5_REV.csv", stringsAsFactors = F)
 male = male[,c(1:4,17,18)]
 
 colnames(male)[2:ncol(male)] = paste0(colnames(male)[2:ncol(male)], "_M")
@@ -381,11 +388,19 @@ for(i in idx){
 
 S7 = S7[,c(2,18,30,3:17)]
 
-write.csv(S7, file = "~/Desktop/supp_tables/S7.csv", row.names = F)
-
+write.csv(S7, file = "~/Desktop/nat_com_revs/supp/S8_rev.csv", row.names = F)
 
 
 #S8 correlation between modules and bone phenotypes
+load(file = "./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
+load(file = "./results/Rdata/networks/moduleTraitCor_full_4.RData")
+
+load(file = "./results/Rdata/networks/moduleTraitPvalue_m.RData")
+load(file = "./results/Rdata/networks/moduleTraitCor_m.RData")
+
+load(file = "./results/Rdata/networks/moduleTraitPvalue_f.RData")
+load(file = "./results/Rdata/networks/moduleTraitCor_f.RData")
+
 rows = match(colnames(pheno_combined), colnames(moduleTraitCor))
 
 cor = t(moduleTraitCor)[rows,]
@@ -426,8 +441,7 @@ colnames(m) = paste0(colnames(m), "_M")
 
 S8 = cbind(c,f,m)
 
-write.csv(S8, file = "~/Desktop/supp_tables/S8.csv", row.names = T)
-
+write.csv(S8, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = F)
 
 
 
