@@ -475,8 +475,7 @@ human$region = paste0(human$V1,":", human$V2, "-", human$V3)
 S9 = cbind(mouse$region, human$region)
 
 colnames(S9) = c("mouse loci", "syntenic human loci")
-write.csv(S9, file = "~/Desktop/supp_tables/S9.csv", row.names = F)
-
+write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S10_rev.csv", row.names = F)
 
 
 
@@ -552,8 +551,7 @@ for(i in idx){
 
 local_eqtl = local_eqtl[,c(3,14,26,4:13)]
 
-write.csv(local_eqtl, file = "~/Desktop/supp_tables/S11.csv", row.names = F)
-
+write.csv(local_eqtl, file = "~/Desktop/nat_com_revs/supp/S12_rev.csv", row.names = F)
 #S12
 #qsox1 cluster
 library(Seurat)
@@ -594,7 +592,7 @@ for(i in idx){
   
 }
 
-write.csv(S12, file = "~/Desktop/supp_tables/S12.csv", row.names = T)
+write.csv(S12, file = "~/Desktop/nat_com_revs/supp/S13_rev.csv", row.names = F)
 
 
 
