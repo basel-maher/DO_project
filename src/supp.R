@@ -441,12 +441,19 @@ colnames(m) = paste0(colnames(m), "_M")
 
 S8 = cbind(c,f,m)
 
-write.csv(S8, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = F)
+write.csv(S8, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = T)
 
 
+##NEW S9(, ALL SIGNIFICANT COLOCS)
 
+fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV.txt")
+ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV.txt")
+morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV.txt")
 
+S9 = rbind(morris_coloc, fn, ls)
+S9 = S9[which(S9$H4 >= 0.75),]
 
+write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = F)
 #S9
 
 qtl_loc = read.csv("./results/flat/qtl_loc", stringsAsFactors = FALSE)
