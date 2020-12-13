@@ -1,7 +1,10 @@
 library(rtracklayer)
 ##supp tables
 
+#S1
+#from est_herit
 
+#S2 in rev1
 ####NEW SUPP TABLE WITH ALL MOUSE PHENOTYPIC DATA - RAW
 load(file = "./results/Rdata/cross_basic_cleaned.Rdata")
 x = colnames(pheno_combined) #from S2 below (Holm-Bonf cor table)
@@ -24,11 +27,9 @@ S0 = S0[,-c(8:17)]
 
 write.csv(S0, file = "~/Desktop/nat_com_revs/supp/S2_rev.csv")
 
-#S1
-#from est_herit
 
 
-#S2
+#S3
 #Holm-Bonferroni correlations with femoral strength
 library(psych)
 set.seed(8675309)
@@ -84,7 +85,7 @@ write.csv(table, file = "~/Desktop/nat_com_revs/supp/S3_rev.csv")
 
 
 
-#S3
+#S4
 table = x$r
 p = x$p
 
@@ -102,7 +103,7 @@ for( i in 1:length(table2)){
 write.csv(table2, file = "~/Desktop/nat_com_revs/supp/S4_rev.csv")
 
 
-#S4
+#S5
 
 load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
 load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")
@@ -190,7 +191,7 @@ write.csv(S4, file = "~/Desktop/nat_com_revs/supp/S5_rev.csv", row.names = F)
 
 
 
-#S5 - top 100 GO terms for each network, sorted by pval
+#S6 - top 100 GO terms for each network, sorted by pval
 load("./results/Rdata/networks/GO_sft4.RData")
 
 networks = as.data.frame(matrix(nrow=100, ncol = 10000))
@@ -261,7 +262,7 @@ networks = networks[,c(1:248)]
 write.csv(networks, file = "~/Desktop/nat_com_revs/supp/S6_rev.csv", row.names = F)
 
 
-#S6
+#S7
 #these are mouse genes
 superset = read.delim("./results/flat/superset_in_networks.txt", stringsAsFactors = FALSE, header = FALSE)
 
@@ -310,7 +311,7 @@ write.csv(superset, file = "~/Desktop/nat_com_revs/supp/S7_rev.csv", row.names =
 # merge(full_net, female_net, male_net, )
 
 
-#S7
+#S8
 full = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4_REV.csv", stringsAsFactors = F)
 full = full[,c(1:4,16,17)]
 
@@ -391,7 +392,19 @@ S7 = S7[,c(2,18,30,3:17)]
 write.csv(S7, file = "~/Desktop/nat_com_revs/supp/S8_rev.csv", row.names = F)
 
 
-#S8 correlation between modules and bone phenotypes
+#S9
+fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV.txt")
+ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV.txt")
+morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV.txt")
+
+S9 = rbind(morris_coloc, fn, ls)
+S9 = S9[which(S9$H4 >= 0.75),]
+
+S9[which(S9$pheno == "BMD"),"pheno"] = "eBMD"
+write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = F)
+
+
+#S10 correlation between modules and bone phenotypes
 load(file = "./results/Rdata/networks/moduleTraitPvalue_full_4.RData")
 load(file = "./results/Rdata/networks/moduleTraitCor_full_4.RData")
 
@@ -441,20 +454,10 @@ colnames(m) = paste0(colnames(m), "_M")
 
 S8 = cbind(c,f,m)
 
-write.csv(S8, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = T)
+write.csv(S8, file = "~/Desktop/nat_com_revs/supp/S10_rev.csv", row.names = T)
 
 
-##NEW S9(, ALL SIGNIFICANT COLOCS)
-
-fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV.txt")
-ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV.txt")
-morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV.txt")
-
-S9 = rbind(morris_coloc, fn, ls)
-S9 = S9[which(S9$H4 >= 0.75),]
-
-write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = F)
-#S9
+#11
 
 qtl_loc = read.csv("./results/flat/qtl_loc", stringsAsFactors = FALSE)
 
@@ -482,19 +485,20 @@ human$region = paste0(human$V1,":", human$V2, "-", human$V3)
 S9 = cbind(mouse$region, human$region)
 
 colnames(S9) = c("mouse loci", "syntenic human loci")
-write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S10_rev.csv", row.names = F)
+write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S11_rev.csv", row.names = F)
 
 
 
 
 
 
-#S10
+#S12
 #SIFT annotations
+sift = read.table("~/Desktop/nat_com_revs/supp/VEP_output_050320.txt", header=T)
+write.csv(sift, file = "~/Desktop/nat_com_revs/supp/S12_rev.csv", row.names = F, quote=T)
 
 
-
-#S11
+#S13
 #all local eqtl
 
 load("./results/Rdata/local_eqtl.Rdata")
@@ -558,8 +562,11 @@ for(i in idx){
 
 local_eqtl = local_eqtl[,c(3,14,26,4:13)]
 
-write.csv(local_eqtl, file = "~/Desktop/nat_com_revs/supp/S12_rev.csv", row.names = F)
-#S12
+write.csv(local_eqtl, file = "~/Desktop/nat_com_revs/supp/S13_rev.csv", row.names = F)
+
+
+
+#S14
 #qsox1 cluster
 library(Seurat)
 load("./results/Rdata/seurat_ob.Rdata") #loads as "ob
@@ -599,7 +606,7 @@ for(i in idx){
   
 }
 
-write.csv(S12, file = "~/Desktop/nat_com_revs/supp/S13_rev.csv", row.names = F)
+write.csv(S12, file = "~/Desktop/nat_com_revs/supp/S14_rev.csv", row.names = F)
 
 
 
