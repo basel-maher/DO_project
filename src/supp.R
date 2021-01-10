@@ -65,18 +65,18 @@ pheno_combined = pheno_combined[,-c(1:9,54:57)]
 
 pheno_combined=pheno_combined[,c(1,2,45,3:10,46:49, 11:26, 50,51,41:44,27:40,52:55)]
 #pearson cor . adjusted for multiple comparisons (Holm)
-x = psych::corr.test(pheno_combined,method = "p")
-xs = psych::corr.test(pheno_combined, method = "s")
+#x = psych::corr.test(pheno_combined,method = "p")
+xs = psych::corr.test(pheno_combined, method = "s", use="p")
 #p vals
-p = x$p[,"bending_max_load"]
-ps = xs$p[,"bending_max_load"]
+#p = x$p[,"bending_max_load"]
+ps = signif(xs$p[,"bending_max_load"],3)
 #correlation
-r = x$r[,"bending_max_load"]
-rs = xs$r[,"bending_max_load"]
+#r = x$r[,"bending_max_load"]
+rs = signif(xs$r[,"bending_max_load"],3)
 
 #S.E.
-se = x$se[,"bending_max_load"]
-ses = xs$se[,"bending_max_load"]
+#se = x$se[,"bending_max_load"]
+ses = signif(xs$se[,"bending_max_load"],3)
 
 table = cbind(rs,ps,ses)
 
@@ -86,18 +86,18 @@ write.csv(table, file = "~/Desktop/nat_com_revs/supp/S3_rev.csv")
 
 
 #S4
-table = x$r
-p = x$p
+#table = x$r
+#p = x$p
 
-for( i in 1:length(table)){
-  table[i] = paste0(signif(as.numeric(table[i],3)), "(", signif(as.numeric(p[i],3)), ")")
-}
+#for( i in 1:length(table)){
+#  table[i] = paste0(signif(as.numeric(table[i],3)), "(", signif(as.numeric(p[i],3)), ")")
+#}
 
 table2 = xs$r
 p = xs$p
 
 for( i in 1:length(table2)){
-  table2[i] = paste0(signif(as.numeric(table2[i],3)), "(", signif(as.numeric(p[i],3)), ")")
+  table2[i] = paste0(signif(as.numeric(table2[i]),3), " (", signif(as.numeric(p[i]),3), ")")
 }
 
 write.csv(table2, file = "~/Desktop/nat_com_revs/supp/S4_rev.csv")
@@ -186,6 +186,9 @@ for(i in idx){
 }
 
 S4 = S4[,c(2,130,142,3:129)]
+
+S4[,7:ncol(S4)] = signif(S4[,7:ncol(S4)],3)
+
 write.csv(S4, file = "~/Desktop/nat_com_revs/supp/S5_rev.csv", row.names = F)
 
 
@@ -389,6 +392,23 @@ for(i in idx){
 
 S7 = S7[,c(2,18,30,3:17)]
 
+
+#get BANs and add BAN column
+all = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4_REV.csv", stringsAsFactors = F)
+all_f = read.csv("./results/flat/key_driver_analysis_FEMALES_sft4_REV.csv", stringsAsFactors = F)
+all_m = read.csv("./results/flat/key_driver_analysis_MALES_sft5_REV.csv", stringsAsFactors = F)
+
+BANs = c(all[which(all$hyper<=0.05), "gene"], all_m[which(all_m$hyper<=0.05), "gene"], all_f[which(all_f$hyper<=0.05), "gene"])
+BANs = unique(BANs)
+
+
+
+idx = which(S7$gene %in% BANs)
+S7$BAN = "NO"
+S7$BAN[idx] = "YES"
+
+S7[,c("nominal_pval_C","FDR_pval_C","nominal_pval_F","FDR_pval_F","nominal_pval_M","FDR_pval_M")] = signif(S7[,c("nominal_pval_C","FDR_pval_C","nominal_pval_F","FDR_pval_F","nominal_pval_M","FDR_pval_M")],3)
+
 write.csv(S7, file = "~/Desktop/nat_com_revs/supp/S8_rev.csv", row.names = F)
 
 
@@ -401,6 +421,9 @@ S9 = rbind(morris_coloc, fn, ls)
 S9 = S9[which(S9$H4 >= 0.75),]
 
 S9[which(S9$pheno == "BMD"),"pheno"] = "eBMD"
+
+S9[,c("H0","H1","H2","H3","H4")] = signif(S9[,c("H0","H1","H2","H3","H4")],3)
+
 write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = F)
 
 
@@ -417,7 +440,9 @@ load(file = "./results/Rdata/networks/moduleTraitCor_f.RData")
 rows = match(colnames(pheno_combined), colnames(moduleTraitCor))
 
 cor = t(moduleTraitCor)[rows,]
+cor = signif(cor,3)
 pval = t(moduleTraitPvalue)[rows,]
+pval = signif(pval,3)
 
 c = cor
 for(i in 1:length(c)){
@@ -429,7 +454,9 @@ colnames(c) = paste0(colnames(c), "_C")
 
 
 cor_F = t(moduleTraitCor_f)[rows,]
+cor_F = signif(cor_F,3)
 pval_F = t(moduleTraitPvalue_f)[rows,]
+pval_F = signif(pval_F,3)
 
 f= cor_F
 for(i in 1:length(f)){
@@ -442,7 +469,9 @@ colnames(f) = paste0(colnames(f), "_F")
 
 
 cor_M = t(moduleTraitCor_m)[rows,]
+cor_M = signif(cor_M,3)
 pval_M = t(moduleTraitPvalue_m)[rows,]
+pval_M = signif(pval_M,3)
 
 m= cor_M
 for(i in 1:length(m)){
@@ -453,6 +482,8 @@ colnames(m) = sapply(strsplit(colnames(m), 'ME'), "[",2)
 colnames(m) = paste0(colnames(m), "_M")
 
 S8 = cbind(c,f,m)
+
+
 
 write.csv(S8, file = "~/Desktop/nat_com_revs/supp/S10_rev.csv", row.names = T)
 

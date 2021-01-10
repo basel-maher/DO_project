@@ -1,6 +1,6 @@
 library(lsmeans)
-
-
+library(car)
+options(stringsAsFactors = F)
 
 dat2<-read.csv('./data/pheno_data/Qsox1_data/QsoxAssay_June09.csv',header=T)
 
@@ -23,36 +23,41 @@ dev.off()
 # can add mutation type to the filter statement to look at effects
 # of individual mutation
 
-dat1<-read.csv('./data/pheno_data/Qsox1_data/qsox1_caliper.csv',header=T,na.strings='NA')
+dat1<-read.csv('./data/pheno_data/Qsox1_data/qsox1_caliper.csv',header=T,na.strings='NA', stringsAsFactors = F)
 
 dat1$Genotype<-factor(dat1$Genotype, levels=c('wt','Het','Mut'))
 dat1<-dplyr::filter(dat1,dat1$Mom_genotype!='B6' & dat1$Dad_genotype!='B6')
 dat1$ML_all<-(dat1$right_Femur_ML+dat1$left_Femur_ML)/2
+dat1$FL_all<-(dat1$right_Femur_FL+dat1$left_Femur_FL)/2
+dat1$AP_all<-(dat1$right_Femur_AP+dat1$left_Femur_AP)/2
 
 
 dat1.m<-dplyr::filter(dat1,dat1$Sex=='M')
+dat1.f<-dplyr::filter(dat1,dat1$Sex=='F')
 
-
-lf.lm.12<-lm(ML_all~Genotype+Weight+Qsox_Mutation+Length,data=dat1.m)
-anova(lf.lm.12)
+lf.lm.12<-lm(AP_all~Genotype+Sex+Weight+Qsox_Mutation+Length,data=dat1)
+#lf.lm.12<-lm(ML_all~Genotype+Weight+Qsox_Mutation+Length,data=dat1.f)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
-plot(lf,horizontal=F,ylab='Femur Length (mm)')
+plot(lf,horizontal=F,ylab='ML overall (mm)')
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
 
 
 lff = as.data.frame(lff)
-cairo_pdf(file="~/Desktop/figs/6Emales.pdf", width = 10, height = 7)
+#cairo_pdf(file="~/Desktop/figs/6Emales.pdf", width = 10, height = 7)
+cairo_pdf(file="~/Desktop/ML_overall.pdf", width = 10, height = 7)
+
 ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
-  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("2.4e-3","2.87e-7","0.044"),aes(y=lsmeans.lsmean),y_position = c(1.95,1.98,1.97)) + ylim(1.83,1.98)+ylab("ML (mm)") + xlab("Genotype")
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("4.0e-3","<1e-4","1.2e-3"),aes(y=lsmeans.lsmean),y_position = c(1.85,1.86,1.865)) + ylim(1.73,1.87)+ylab("AP (mm)") + xlab("Genotype")
 dev.off()
 
 #females
 dat1.f<-dplyr::filter(dat1,dat1$Sex=='F')
 
 
-lf.lm.12<-lm(ML_all~Genotype+Weight+Qsox_Mutation+Length,data=dat1.f)
-anova(lf.lm.12)
+lf.lm.12<-lm(ML_all~Genotype+Sex+Weight+Qsox_Mutation+Length,data=dat1)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab='Femur Length (mm)')
@@ -65,6 +70,45 @@ ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans
   theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("0.8","0.004","0.021"),aes(y=lsmeans.lsmean),y_position = c(1.70,1.74,1.73)) + ylim(1.64,1.74)+ylab("ML(mm)") + xlab("Genotype")
 dev.off()
 
+
+##AP
+lf.lm.12<-lm(AP_all~Genotype+Sex+Weight+Qsox_Mutation+Length,data=dat1)
+table(model.frame(lf.lm.12)$Genotype)
+Anova(lf.lm.12)
+lf<-lsmeans(lf.lm.12,"Genotype")
+par(mfrow=c(2,2))
+plot(lf,horizontal=F,ylab='Femur Length (mm)')
+lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
+
+
+lff = as.data.frame(lff)
+cairo_pdf(file="~/Desktop/AP_all.pdf", width = 10, height = 7)
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("0.69","0.28","0.72"),aes(y=lsmeans.lsmean),y_position = c(1.253,1.256,1.25)) + ylim(1.215,1.258)+ylab("ML(mm)") + xlab("Genotype")
+dev.off()
+
+
+
+#######
+#ML all
+##AP
+lf.lm.12<-lm(FL_all~Genotype+Sex+Weight+Qsox_Mutation+Length,data=dat1)
+Anova(lf.lm.12)
+lf<-lsmeans(lf.lm.12,"Genotype")
+par(mfrow=c(2,2))
+plot(lf,horizontal=F,ylab='Femur Length (mm)')
+lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')
+
+lff = as.data.frame(lff)
+cairo_pdf(file="~/Desktop/FL_all.pdf", width = 10, height = 7)
+ggplot(lff,aes(x=lsmeans.Genotype)) + geom_errorbar(data = lff, aes(ymin=lsmeans.lower.CL, ymax=lsmeans.upper.CL),color="blue",size=3.5,width=0.15) +
+  theme(axis.text = element_text(size=18), axis.title = element_text(size=18))+geom_point(aes(y=lsmeans.lsmean),size=5)+geom_signif(comparisons = list(c("wt", "Het"),c("wt","Mut"),c("Het","Mut")), annotations=c("0.62","0.82","0.95"),aes(y=lsmeans.lsmean),y_position = c(14.96,14.97,14.98)) + ylim(14.84,15)+ylab("ML(mm)") + xlab("Genotype")
+dev.off()
+
+
+
+
+
 ######
 ######
 #6F
@@ -75,7 +119,7 @@ dat1<-read.csv('./data/pheno_data/Qsox1_data/qsox_uCT.csv',header=T,na.strings='
 dat1$Genotype<-factor(dat1$Genotype, levels=c('wt','Het','Mut'))
 
 lf.lm.12<-lm(pMOI.mm4.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab=expression(paste("pMOI (",mm^4,")")))
@@ -91,7 +135,7 @@ dev.off()
 ####
 
 lf.lm.12<-lm(Imax.mm4.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab=expression(paste("Imax (",mm^4,")")))
@@ -108,7 +152,7 @@ dev.off()
 ####
 
 lf.lm.12<-lm(Ct.Ar.Tt.Ar....~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab=expression(paste("Ct.Ar.Tt.Ar.... (",mm^4,")")))
@@ -125,7 +169,7 @@ dev.off()
 ###
 
 lf.lm.12<-lm(Tt.Ar.mm2.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab=expression(paste("ttar (",mm^4,")")))
@@ -143,7 +187,7 @@ dev.off()
 #
 
 lf.lm.12<-lm(Ma.Ar.mm2.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab="Ma.Ar")
@@ -160,7 +204,7 @@ dev.off()
 
 #6G
 lf.lm.12<-lm(Ct.TMD..mgHA.cm3.~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab="Ma.Ar")
@@ -178,7 +222,7 @@ dev.off()
 #
 ###6H
 lf.lm.12<-lm(Ct.Porosity....~Genotype+Weight..g.+Qsox.Mutation,data=dat1)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 plot(lf,horizontal=F,ylab="Ma.Ar")
@@ -204,7 +248,7 @@ qsox_bend_ML$Qsox.Mutation = qsox_bend_AP[match(qsox_bend_ML$Specimen, qsox_bend
 
 ###AP
 lf.lm.12<-lm(Max.Load..N.~Genotype+Weight+Qsox.Mutation,data=qsox_bend_AP)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 
@@ -221,7 +265,7 @@ dev.off()
 
 #6J
 lf.lm.12<-lm(Max.Load..N.~Genotype+Weight+Qsox.Mutation,data=qsox_bend_ML)
-anova(lf.lm.12)
+Anova(lf.lm.12)
 lf<-lsmeans(lf.lm.12,"Genotype")
 par(mfrow=c(2,2))
 lff = lsmeans(lf.lm.12,pairwise~Genotype, adj='tukey')

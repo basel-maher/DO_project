@@ -18,7 +18,7 @@ lead = unique(lead)
 length(lead)#1161 unique lead snps
 
 
-#Of the 544 homologs within 1 mbp of a lead snp, how many have colocalizing eQTL?
+#Of the 738 homologs within 1 mbp of a lead snp, how many have colocalizing eQTL?
 fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV.txt")
 ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV.txt")
 morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV.txt")
@@ -43,6 +43,8 @@ new_set = superset
 new_set[which(tolower(new_set) == "cavin1")] = "ptrf"
 new_set[which(tolower(new_set) == "adgrd1")] = "gpr133"
 new_set[which(tolower(new_set) == "zfp609")] = "znf609"
+
+length(which(tolower(coloc_genes) %in% tolower(new_set)))
 
 allgenes = homologs
 
