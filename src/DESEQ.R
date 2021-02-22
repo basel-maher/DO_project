@@ -343,8 +343,11 @@ for(i in which(x$MGI == "character(0)")){
 
 x$MGI[z] #CHECK
 
+
 #add ENSEMBL for AC151602.1
 x$ENSEMBL = NA
 x[which(x$symbol == "AC151602.1"),"ENSEMBL"] = "ENSMUSG00000118462" #seems to also be LHB
 x[which(x$symbol == "AC151602.1"),"MGI"] = "NA" #seems to also be LHB
 
+#check in loop which have length > 1 (953)
+#x[953,], MGI ID matches expected

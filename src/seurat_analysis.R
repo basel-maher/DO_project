@@ -203,6 +203,56 @@ DimPlot(ob_s,
         plot.title = "UMAP")
 
 ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
+c0=subset(ob.markers, subset = cluster==0)
+c1=subset(ob.markers, subset = cluster==1)
+c2=subset(ob.markers, subset = cluster==2)
+c3=subset(ob.markers, subset = cluster==3)
+c4=subset(ob.markers, subset = cluster==4)
+c5=subset(ob.markers, subset = cluster==5)
+c6=subset(ob.markers, subset = cluster==6)
+c7=subset(ob.markers, subset = cluster==7)
+c8=subset(ob.markers, subset = cluster==8)
+c9=subset(ob.markers, subset = cluster==9)
+c10=subset(ob.markers, subset = cluster==10)
+c11=subset(ob.markers, subset = cluster==11)
+c12=subset(ob.markers, subset = cluster==12)
+c13=subset(ob.markers, subset = cluster==13)
+c14=subset(ob.markers, subset = cluster==14)
+
+markers_supp = ob.markers
+markers_supp$MGI = NA
+
+MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
+MGI_markers = MGI_markers[-which(MGI_markers$Chr=="UN"),]
+MGI_markers$`Marker Synonyms (pipe-separated)` = gsub("\\|", " ", MGI_markers$`Marker Synonyms (pipe-separated)`)
+
+markers_supp[which(markers_supp$gene %in% MGI_markers$`Marker Symbol` == FALSE) ,]
+
+
+markers_supp$MGI = apply(markers_supp,1,function(z) as.character(MGI_markers[which(MGI_markers$`Marker Symbol` == z[7]),1]))
+
+
+#checker
+z=which(markers_supp$MGI == "character(0)")
+#
+
+#get MGI ID from synonyms
+for(i in which(markers_supp$MGI == "character(0)")){
+  if(length(MGI_markers[grep(markers_supp$gene[i], x = MGI_markers$`Marker Synonyms (pipe-separated)`),`MGI Accession ID`]) >0){
+    markers_supp$MGI[i] = MGI_markers[grep(markers_supp$gene[i], x = MGI_markers$`Marker Synonyms (pipe-separated)`),`MGI Accession ID`]
+  }
+}
+
+markers_supp$MGI[z] #CHECK
+#look at markers with length >1 in loop and make sure theyre good
+markers_supp$MGI[2417] = "MGI:1890373"
+
+##manually annotate missing
+markers_supp[which(markers_supp$MGI == "character(0)"),]
+markers_supp$ENSEMBL = NA
+
+markers_supp[which(markers_supp$gene == "Gm14005"),"ENSEMBL"] = "ENSMUSG00000074813"
+markers_supp[which(markers_supp$gene == "AC160336.1"),"ENSEMBL"] = "ENSMUSG00000115801"
 
 
 save(ob, file = "./results/Rdata/seurat_ob.Rdata")
@@ -279,10 +329,26 @@ t.all$classic<-as.numeric(as.character(t.all$classic))
 #####
 
 
+####
+ob.m = subset(ob, subset= sex==1)
+DimPlot(ob.m,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 6)
+
+FeaturePlot(ob.m, features = "Sertad4", sort.cell = T, pt.size = 1)
+FeaturePlot(ob.m, features = "Glt8d2", sort.cell = T, pt.size = 1)
 
 
 
+ob.f = subset(ob, subset= sex==0)
+DimPlot(ob.f,
+        reduction = "umap",
+        label = TRUE,
+        label.size = 6)
 
+FeaturePlot(ob.f, features = "Sertad4", sort.cell = T, pt.size = 1)
+FeaturePlot(ob.f, features = "Glt8d2", sort.cell = T, pt.size = 1)
 
 
 
