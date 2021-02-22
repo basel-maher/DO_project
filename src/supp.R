@@ -194,22 +194,25 @@ write.csv(S4, file = "~/Desktop/nat_com_revs/supp/S5_rev.csv", row.names = F)
 
 
 
-#S6 - top 100 GO terms for each network, sorted by pval
+#S6 - top 500 GO terms for each network, sorted by pval
 load("./results/Rdata/networks/GO_sft4.RData")
 
-networks = as.data.frame(matrix(nrow=100, ncol = 10000))
+networks = as.data.frame(matrix(nrow=10000, ncol = 10000))
+nrow_counter = c()
 net_counter = 1
 col_counter = 1
 for (i in 1:length(network_GO)){
   n = network_GO[[net_counter]]
   n = n[order(n$classic,decreasing = F),]
-  networks[,col_counter] = n$Term[1:100]
+  n = n[which(n$classic <=0.05),]
+  networks[1:nrow(n),col_counter] = n$Term
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_C_GO_term")
   
   col_counter = col_counter + 1
 
-  networks[,col_counter] = n$classic[1:100]
+  networks[1:nrow(n),col_counter] = n$classic
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_C_p_value")
+  nrow_counter = append(nrow_counter, nrow(n))
   
   col_counter=col_counter+1
   net_counter = net_counter + 1
@@ -223,13 +226,15 @@ net_counter = 1
 for (i in 1:length(network_GO)){
   n = network_GO[[net_counter]]
   n = n[order(n$classic,decreasing = F),]
-  networks[,col_counter] = n$Term[1:100]
+  n = n[which(n$classic <=0.05),]
+  networks[1:nrow(n),col_counter] = n$Term
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_F_GO_term")
   
   col_counter = col_counter + 1
   
-  networks[,col_counter] = n$classic[1:100]
+  networks[1:nrow(n),col_counter] = n$classic
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_F_p_value")
+  nrow_counter = append(nrow_counter, nrow(n))
   
   col_counter=col_counter+1
   net_counter = net_counter + 1
@@ -247,22 +252,24 @@ net_counter = 1
 for (i in 1:length(network_GO)){
   n = network_GO[[net_counter]]
   n = n[order(n$classic,decreasing = F),]
-  networks[,col_counter] = n$Term[1:100]
+  n = n[which(n$classic <=0.05),]
+  networks[1:nrow(n),col_counter] = n$Term
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_M_GO_term")
   
   col_counter = col_counter + 1
   
-  networks[,col_counter] = n$classic[1:100]
+  networks[1:nrow(n),col_counter] = n$classic
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_M_p_value")
+  nrow_counter = append(nrow_counter, nrow(n))
   
   col_counter=col_counter+1
   net_counter = net_counter + 1
 }
 
 
-networks = networks[,c(1:248)]
+networks = networks[c(1:max(nrow_counter)),c(1:248)]
 
-write.csv(networks, file = "~/Desktop/nat_com_revs/supp/S6_rev.csv", row.names = F)
+write.csv(networks, file = "~/Desktop/nat_com_revs/supp/S6_rev.csv", row.names = F,na = "-")
 
 
 #S7
