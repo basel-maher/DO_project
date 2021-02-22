@@ -1105,7 +1105,7 @@ save(TMD_blup_c, ML_blup_c, pMOI_blup_c, Imax_blup_c, ctarttar_blup_c,ttar_blup_
 
 
 cairo_pdf(file="~/Desktop/figs/5Bblups1.pdf", width = 10, height = 7)
-plot_coefCC(TMD_blup_c[5700:6200,], cross_basic$pmap, main = "TMD - Chr. 1", legend_ncol=1,top_panel_prop = 0.7,)
+plot_coefCC(TMD_blup_c[5700:6200,], cross_basic$pmap, main = "TMD - Chr. 1", legend_ncol=1,top_panel_prop = 0.7)
 dev.off()
 
 cairo_pdf(file="~/Desktop/figs/5Bblups2.pdf", width = 10, height = 7)
@@ -1135,7 +1135,7 @@ dev.off()
 
 
 cairo_pdf(file="~/Desktop/figs/5Bscan1.pdf", width = 10, height = 7)
-plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.TMD" )
+plot_scan1(locus1_scan_cond[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.TMD", ylim=c(0,12) )
 add_threshold(cross_basic$pmap, thresholdA = 8.07, col="red")
 dev.off()
 
@@ -1229,7 +1229,7 @@ dev.off()
 
 
 cairo_pdf(file="~/Desktop/figs/5Cscan1.pdf", width = 10, height = 7)
-plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.TMD", ylim=c(0,10))
+plot_scan1(locus1_scan_cond2[5700:6200,], cross_basic$pmap,lodcolumn = "uCT_Ct.TMD", ylim=c(0,12))
 add_threshold(cross_basic$pmap, thresholdA = 8.07, col="red")
 dev.off()
 
