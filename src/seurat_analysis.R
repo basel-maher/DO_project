@@ -1,4 +1,5 @@
-
+library(ggplot2)
+library(reshape)
 library(clustree)
 library(Seurat)
 library(topGO)
@@ -220,7 +221,7 @@ c13=subset(ob.markers, subset = cluster==13)
 c14=subset(ob.markers, subset = cluster==14)
 
 markers_supp = ob.markers
-markers_supp$MGI = NA
+markers_supp$MGI = "NA"
 
 MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
 MGI_markers = MGI_markers[-which(MGI_markers$Chr=="UN"),]
@@ -249,11 +250,12 @@ markers_supp$MGI[2417] = "MGI:1890373"
 
 ##manually annotate missing
 markers_supp[which(markers_supp$MGI == "character(0)"),]
-markers_supp$ENSEMBL = NA
+markers_supp$ENSEMBL = "NA"
 
 markers_supp[which(markers_supp$gene == "Gm14005"),"ENSEMBL"] = "ENSMUSG00000074813"
 markers_supp[which(markers_supp$gene == "AC160336.1"),"ENSEMBL"] = "ENSMUSG00000115801"
 
+write.csv(markers_supp, file = "~/Desktop/scrna_markers_supp.csv", quote = F)
 
 save(ob, file = "./results/Rdata/seurat_ob.Rdata")
 
@@ -350,5 +352,11 @@ DimPlot(ob.f,
 FeaturePlot(ob.f, features = "Sertad4", sort.cell = T, pt.size = 1)
 FeaturePlot(ob.f, features = "Glt8d2", sort.cell = T, pt.size = 1)
 
-
-
+#####mineralization plot
+min = read.csv("data/pheno_data/DO_BM_single_cell_mineralization.csv")
+min = min[,c("sample","D4","D6","D8","D10")]
+min = melt(min, id="sample")
+min$sample = as.factor(min$sample)
+require(scales)
+ggplot(min, aes(x=factor(variable), y=value, group = factor(sample), color=factor(sample))) + geom_line() + geom_point() +
+  scale_y_continuous(labels=comma) +labs(color= "DO Mouse ID", x="Post-differentiation day", y="Fluorescent units") + theme_classic()

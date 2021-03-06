@@ -1,5 +1,8 @@
 #DESeq on RNA-seq data, for sex and bone strength
 library(DESeq2)
+library(FactoMineR)
+library(factoextra)
+options(stringsAsFactors = F)
 
 #what genes are differentially expressed in hi vs lo bone strength? sex? define hi/lo bone strength by for each sex separately
 
@@ -88,6 +91,7 @@ covar$batch4=NA
 
 
 #define batches
+covs = covar
 covs$batch1[match(b1,rownames(covs))] = 1
 covs[which(rownames(covs)%in% b1==FALSE),"batch1"] = 0
 
@@ -133,18 +137,18 @@ covs_full = merge(covs, bone_strength, by=0)
 rownames(covs_full) = covs_full$Row.names
 
 ###split bone strength into hi/lo for each sex
-males = covs_full[which(covs_full$sex == 1),]
-females = covs_full[which(covs_full$sex == 0),]
+males = covs_full[which(covs_full$sex == "M"),]
+females = covs_full[which(covs_full$sex == "F"),]
 
 median_males = median(males$max_load)
 median_females = median(females$max_load)
 
 covs_full$max_load_bin = NA
-covs_full$max_load_bin[which( (covs_full$sex == 1)  & (covs_full$max_load <= median_males) )] = "lo"
-covs_full$max_load_bin[which( (covs_full$sex == 1)  & (covs_full$max_load > median_males) )] = "hi"
+covs_full$max_load_bin[which( (covs_full$sex == "M")  & (covs_full$max_load <= median_males) )] = "lo"
+covs_full$max_load_bin[which( (covs_full$sex == "M")  & (covs_full$max_load > median_males) )] = "hi"
 
-covs_full$max_load_bin[which( (covs_full$sex == 0)  & (covs_full$max_load <= median_females) )] = "lo"
-covs_full$max_load_bin[which( (covs_full$sex == 0)  & (covs_full$max_load > median_females) )] = "hi"
+covs_full$max_load_bin[which( (covs_full$sex == "F")  & (covs_full$max_load <= median_females) )] = "lo"
+covs_full$max_load_bin[which( (covs_full$sex == "F")  & (covs_full$max_load > median_females) )] = "hi"
 
 #####DO I CREATE SPLIT AMONG SEXES IN BONE STRENGTH BASED ON DISTRIBUTION IN 192 SAMPLES OR OVERALL?
 #NORMALIZE BONE STRENGTH? ITS ALREDY PRETTY NORMAL
@@ -173,7 +177,7 @@ dat = t(assay(vsd)[select,])
 dat2 = cbind(covs_full,dat)
 
 
-pca = PCA(dat2[,72:ncol(dat2)],graph=F,scale.unit = F)
+pca = PCA(dat2[,69:ncol(dat2)],graph=F,scale.unit = F)
 
 fviz_screeplot(pca)
 
@@ -288,9 +292,9 @@ x$symbol[31] = "Itgb1bp1"
 
 MGI_markers = data.table::fread("data/MGI_mouse_genetic_markers_11920.rpt",sep= "\t" , header=T)
 
-x$MGI = apply(x,1,function(z) MGI_markers[which(MGI_markers$`Marker Symbol` == z[6]),1])
+x$MGI = apply(x,1,function(z) as.character(MGI_markers[which(MGI_markers$`Marker Symbol` == z[6]),1]))
 
-
+write.csv(x, file = "~/Desktop/DE_maxLoad_padj<0.05.csv",quote = F)
 ########
 
 ###
@@ -299,10 +303,10 @@ dds <- DESeqDataSetFromMatrix(countData = counts,
                               design = ~batch+age_bin+sex)
 DEsex = DESeq(dds)
 
-res_sex = results(DEsex, contrast = c("sex", "0","1"))
+res_sex = results(DEsex, contrast = c("sex", "F","M"))
 resOrdered = res_sex[order(res_sex$padj),]
 
-resLFC_sex = lfcShrink(DEsex, type="apeglm",coef = "sex_1_vs_0")
+resLFC_sex = lfcShrink(DEsex, type="apeglm",coef = "sex_M_vs_F")
 resOrdered_LFC_sex = resLFC_sex[order(resLFC_sex$padj),]
 
 # apeglm cite: Zhu, A., Ibrahim, J.G., Love, M.I. (2018) Heavy-tailed prior distributions for
@@ -345,9 +349,10 @@ x$MGI[z] #CHECK
 
 
 #add ENSEMBL for AC151602.1
-x$ENSEMBL = NA
+x$ENSEMBL = "NA"
 x[which(x$symbol == "AC151602.1"),"ENSEMBL"] = "ENSMUSG00000118462" #seems to also be LHB
 x[which(x$symbol == "AC151602.1"),"MGI"] = "NA" #seems to also be LHB
 
 #check in loop which have length > 1 (953)
 #x[953,], MGI ID matches expected
+write.csv(x, file = "~/Desktop/DE_sex_padj<0.05.csv",quote = F)
