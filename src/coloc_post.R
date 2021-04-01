@@ -95,12 +95,3 @@ fisher.test(mat) #two sided
 fisher.test(mat,alternative = "g") #enrichment
 
 
-
-
-q=?
-k=?
-m=length(new_set)
-n=?-m
-
-phyper(q-1,m,n,k,lower.tail = F) #prob 33 or more bone genes drawn, genome-wide
-

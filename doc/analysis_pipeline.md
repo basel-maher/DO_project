@@ -94,7 +94,9 @@
     	* outputs: 
         	* ./results/Rdata/local_eqtl.Rdata
         
- 
+11. Differential Expression analysis
+  * [src/DESEQ.R](../src/DESEQ.R)
+
 11. Merge Analysis 
   * These two create the merge analysis objects:
     * [src/merge_analysis_QTL.R](../src/merge_analysis_QTL.R)

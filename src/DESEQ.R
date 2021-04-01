@@ -4,8 +4,6 @@ library(FactoMineR)
 library(factoextra)
 options(stringsAsFactors = F)
 
-#what genes are differentially expressed in hi vs lo bone strength? sex? define hi/lo bone strength by for each sex separately
-
 
 
 #create dataset. need to change genes IDs to ENSMUSG or gene names
@@ -160,14 +158,7 @@ dds <- DESeqDataSetFromMatrix(countData = counts,
                               design = ~sex+batch+age_bin+max_load_bin)
 
 vsd <- varianceStabilizingTransformation(dds, blind = TRUE) #blind so design doesnt matter. seems to be the optimal choice for PCA/viz. Use TRUE if using for downstream applications.
-#vsdF <- varianceStabilizingTransformation(dds, blind = FALSE)
-#plot in first 2 principal components
-# plotPCA(vsdF,intgroup = c("sex"))
-# plotPCA(vsd,intgroup = c("batch"))
-# plotPCA(vsd,intgroup = c("age_factor"))
-# plotPCA(vsd,intgroup = c("age_at_sac_days"))
-# plotPCA(vsd,intgroup = c("ngen"))
-# plotPCA(vsd,intgroup = c("PEER_factor_1"))
+
 
 
 ##########factominer#########
