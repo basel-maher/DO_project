@@ -196,6 +196,8 @@ write.csv(S4, file = "~/Desktop/nat_com_revs/supp/S5_rev.csv", row.names = F)
 
 #S6 - top GO terms for each network, sorted by pval
 library(GO.db)
+goterms = Term(GOTERM)
+
 load("./results/Rdata/networks/GO_sft4.RData")
 
 networks = as.data.frame(matrix(nrow=10000, ncol = 10000))
