@@ -194,7 +194,8 @@ write.csv(S4, file = "~/Desktop/nat_com_revs/supp/S5_rev.csv", row.names = F)
 
 
 
-#S6 - top 500 GO terms for each network, sorted by pval
+#S6 - top GO terms for each network, sorted by pval
+library(GO.db)
 load("./results/Rdata/networks/GO_sft4.RData")
 
 networks = as.data.frame(matrix(nrow=10000, ncol = 10000))
@@ -205,7 +206,11 @@ for (i in 1:length(network_GO)){
   n = network_GO[[net_counter]]
   n = n[order(n$classic,decreasing = F),]
   n = n[which(n$classic <=0.05),]
-  networks[1:nrow(n),col_counter] = n$Term
+  
+  x = n$GO.ID
+  net_terms = unname(goterms[match(x, names(goterms))])
+  
+  networks[1:nrow(n),col_counter] = net_terms
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_C_GO_term")
   
   col_counter = col_counter + 1
@@ -220,6 +225,7 @@ for (i in 1:length(network_GO)){
 
 
 
+
 load("./results/Rdata/networks/GO_Females_sft4.RData")
 net_counter = 1
 
@@ -227,7 +233,12 @@ for (i in 1:length(network_GO)){
   n = network_GO[[net_counter]]
   n = n[order(n$classic,decreasing = F),]
   n = n[which(n$classic <=0.05),]
-  networks[1:nrow(n),col_counter] = n$Term
+  
+  x = n$GO.ID
+  net_terms = unname(goterms[match(x, names(goterms))])
+  
+  
+  networks[1:nrow(n),col_counter] = net_terms
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_F_GO_term")
   
   col_counter = col_counter + 1
@@ -253,7 +264,12 @@ for (i in 1:length(network_GO)){
   n = network_GO[[net_counter]]
   n = n[order(n$classic,decreasing = F),]
   n = n[which(n$classic <=0.05),]
-  networks[1:nrow(n),col_counter] = n$Term
+  
+  x = n$GO.ID
+  net_terms = unname(goterms[match(x, names(goterms))])
+  
+  
+  networks[1:nrow(n),col_counter] = net_terms
   colnames(networks)[col_counter] = paste0(names(network_GO)[net_counter], "_M_GO_term")
   
   col_counter = col_counter + 1
@@ -268,6 +284,8 @@ for (i in 1:length(network_GO)){
 
 
 networks = networks[c(1:max(nrow_counter)),c(1:248)]
+
+
 
 write.csv(networks, file = "~/Desktop/nat_com_revs/supp/S6_rev.csv", row.names = F,na = "-")
 

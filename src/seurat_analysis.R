@@ -203,7 +203,7 @@ DimPlot(ob_s,
         label.size = 6,
         plot.title = "UMAP")
 
-ob.markers <- FindAllMarkers(ob, only.pos = TRUE)
+ob.markers <- FindAllMarkers(ob_s, only.pos = TRUE)
 c0=subset(ob.markers, subset = cluster==0)
 c1=subset(ob.markers, subset = cluster==1)
 c2=subset(ob.markers, subset = cluster==2)
@@ -257,31 +257,20 @@ markers_supp[which(markers_supp$gene == "AC160336.1"),"ENSEMBL"] = "ENSMUSG00000
 
 write.csv(markers_supp, file = "~/Desktop/scrna_markers_supp.csv", quote = F)
 
-save(ob, file = "./results/Rdata/seurat_ob.Rdata")
-
-
-# #First, Rasd1 markers. (Cluster 10)
-# 
-# ob.markers[which(ob.markers$gene =="Rasd1"),] # 10
-# FeaturePlot(ob, features = "Rasd1", sort.cell = T, pt.size = 1)
-# 
-# #output the top 30 cluster 10 genes
-# 
-# cluster10.markers <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25,)
-# 
-# head(cluster10.markers, 30)
+#Here the actual saved file is from ob_s, that has the removed 13 cells (outliers)
+save(ob_s, file = "./results/Rdata/seurat_ob.Rdata")
 
 
 
-
-#Then, Qsox1 markers. (Cluster 1)
+#Find Qsox1 markers
+# Qsox1 markers. (Cluster 1)
 
 ob.markers[which(ob.markers$gene =="Qsox1"),] #cluster 1
 
-#FeaturePlot(ob, features = "Qsox1", sort.cell = T, pt.size = 1)
+#FeaturePlot(ob_s, features = "Qsox1", sort.cell = T, pt.size = 1)
 
 
-cluster1.markers <- FindMarkers(ob, ident.1 = 1, min.pct = 0.25)
+cluster1.markers <- FindMarkers(ob_s, ident.1 = 1, min.pct = 0.25)
 
 #Top cluster 1 genes
 
@@ -294,10 +283,10 @@ head(cluster1.markers, 30)
 ##GO analysis, but only for positive genes in a cluster
  
 
-allGenes = rownames(ob)
+allGenes = rownames(ob_s)
 
-cluster1.markers.pos <- FindMarkers(ob, ident.1 = 1, min.pct = 0.25,only.pos = T)
-cluster10.markers.pos <- FindMarkers(ob, ident.1 = 10, min.pct = 0.25, only.pos = T)
+cluster1.markers.pos <- FindMarkers(ob_s, ident.1 = 1, min.pct = 0.25,only.pos = T)
+cluster10.markers.pos <- FindMarkers(ob_s, ident.1 = 10, min.pct = 0.25, only.pos = T)
 
 interesting.genes = rownames(cluster1.markers.pos)
 
@@ -332,7 +321,7 @@ t.all$classic<-as.numeric(as.character(t.all$classic))
 
 
 ####
-ob.m = subset(ob, subset= sex==1)
+ob.m = subset(ob_s, subset= sex==1)
 DimPlot(ob.m,
         reduction = "umap",
         label = TRUE,
@@ -343,7 +332,7 @@ FeaturePlot(ob.m, features = "Glt8d2", sort.cell = T, pt.size = 1)
 
 
 
-ob.f = subset(ob, subset= sex==0)
+ob.f = subset(ob_s, subset= sex==0)
 DimPlot(ob.f,
         reduction = "umap",
         label = TRUE,
