@@ -2,6 +2,7 @@ options(stringsAsFactors = FALSE)
 library(topGO)
 
 #kda_analyses#
+#all these are actually rev 2, after comma fix
 all = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4_REV.csv", stringsAsFactors = F)
 all_f = read.csv("./results/flat/key_driver_analysis_FEMALES_sft4_REV.csv", stringsAsFactors = F)
 all_m = read.csv("./results/flat/key_driver_analysis_MALES_sft5_REV.csv", stringsAsFactors = F)
@@ -21,18 +22,18 @@ length(which(tolower(genes) %in% tolower(superset)==FALSE))
 
 ##are bone genes more highly connected in the network?
 x = all #repeat for males and females
-#x = all_m
-#x = all_f
+x = all_m
+x = all_f
 
 bone_df = x[which(tolower(x$gene) %in% tolower(superset)),]
 not_bone_df = x[which(tolower(x$gene) %in% tolower(superset) == FALSE),]
 
 
-#wilcox.test(bone_df$degree, not_bone_df$degree, alternative = "greater")#1.8e-4, 0.0283 males, 1.052e-5 females
 
 
-wilcox.test(bone_df$num_neib, not_bone_df$num_neib, alternative = "greater")#2.621e-5, 0.005216 males, 5.542e-7 females
+#wilcox.test(bone_df$num_neib, not_bone_df$num_neib, alternative = "greater")#2.621e-5, 0.005216 males, 5.542e-7 females / previous
 
+wilcox.test(bone_df$num_neib, not_bone_df$num_neib, alternative = "greater")#0.0003531, 0.0168 males, 2.912e-5 females / redo 2
 
 #we use this because the BAN was defined as being conencted to a bone gene with num_neib (3-step). 
 ###GO analysis

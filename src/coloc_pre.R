@@ -34,13 +34,13 @@ BANs = c(all[which(all$hyper<=0.05), "gene"], all_m[which(all_m$hyper<=0.05), "g
 BANs = unique(BANs)
 
 #1465 BANs
-
+#1,370 after comma fix
 
 
 #get BAN human homologs
 BAN_human = convertMousetoHuman(BANs)
 #1256
-
+#1,179 after comma fix
 #get homologs genomic position
 mart = useMart(biomart = "ENSEMBL_MART_ENSEMBL", host = "grch37.ensembl.org",path = "/biomart/martservice", dataset = "hsapiens_gene_ensembl")
 
@@ -56,7 +56,7 @@ gene_pos = gene_pos[-which(gene_pos$hgnc_symbol == ""),] #remove genes with no n
 BAN_human_grange = paste0("chr",gene_pos$chromosome_name, ":", gene_pos$start_position, "-", gene_pos$end_position)
 BAN_human_grange = as(BAN_human_grange, "GRanges")
 #1251 BANs have human homologs
-
+#1,173 after comma removal
 ###################################################################
 ###################################################################
 ###################################################################
@@ -86,10 +86,11 @@ overlaps = GenomicRanges::findOverlaps(query = morris_pos, subject = BAN_human_g
 
 
 #734 BANs overlap morris eBMD loci
+#684 after comma removal
 homologs_win_1_morris = unique(gene_pos$hgnc_symbol[overlaps@to])
 homologs_win_1_ens_morris = unique(gene_pos$ensembl_gene_id[overlaps@to])
 
-write.table(homologs_win_1_morris, file = "./results/flat/homologs_within1mbp_morris_REV.txt",quote = F,row.names = F,col.names = F)
+write.table(homologs_win_1_morris, file = "./results/flat/homologs_within1mbp_morris_REV2.txt",quote = F,row.names = F,col.names = F)
 
 #format lead snps for colocalization  
 snp_gene_df = morris_lead_snps[overlaps@from,]
@@ -105,7 +106,7 @@ snp_gene_df$snpid_19 = paste0(gsub(x=snp_gene_df$SNPID,pattern = ":", replacemen
 
 
 #contains BANs within 1 mbp of morris lead snps, and the snp they are in proximity of
-write.table(snp_gene_df[,c("SNPID","snpid_19", "RSID","CHR","BP","overlap_ens","overlap_gene")], file = "./results/flat/coloc/morris_lead_BAN_overlaps_REV.txt",quote = F,row.names = F,col.names = F)
+write.table(snp_gene_df[,c("SNPID","snpid_19", "RSID","CHR","BP","overlap_ens","overlap_gene")], file = "./results/flat/coloc/morris_lead_BAN_overlaps_REV2.txt",quote = F,row.names = F,col.names = F)
 
 ##############
 ##############
@@ -138,10 +139,11 @@ length(unique(overlaps@to))
 length(unique(overlaps@from))
 
 #105 BANs overlap estrada bmd loci
+#99 after comma fix
 homologs_win_1_estrada = unique(gene_pos$hgnc_symbol[overlaps@to])
 homologs_win_1_ens_estrada = unique(gene_pos$ensembl_gene_id[overlaps@to])
 
-write.table(homologs_win_1_estrada, file = "./results/flat/homologs_within1_estrada_REV.txt",quote = F,row.names = F,col.names = F)
+write.table(homologs_win_1_estrada, file = "./results/flat/homologs_within1_estrada_REV2.txt",quote = F,row.names = F,col.names = F)
 
 #format lead snps for colocalization  
 snp_gene_df = estrada_lead_snps[overlaps@from,]
@@ -157,17 +159,20 @@ snp_gene_df$snpid_19 = paste0(snp_gene_df$chr2,"_",snp_gene_df$BP,"_",snp_gene_d
 
 
 #contains BANs within 1 mbp of estrada lead snps, and the snp they are in proximity of
-write.table(snp_gene_df[,c("RSID","chr2","BP","snpid_19","overlap_ens","overlap_gene")], file = "./results/flat/coloc/estrada_lead_BAN_overlaps_REV.txt",quote = F,row.names = F,col.names = F)
+write.table(snp_gene_df[,c("RSID","chr2","BP","snpid_19","overlap_ens","overlap_gene")], file = "./results/flat/coloc/estrada_lead_BAN_overlaps_REV2.txt",quote = F,row.names = F,col.names = F)
 
 homologs = unique(c(homologs_win_1_estrada, homologs_win_1_morris))
 length(homologs)
 #738 BANs within 1mbp of GWAS loci
-
+#688 after comma fix
 ##convert FNBMD and LSBMD summary stats to RSID
-#lsbmd = read.table("data/GEFOS/GEFOS2_LSBMD_POOLED_GC.txt", header = T, stringsAsFactors = F)
-#fnbmd = read.table("data/GEFOS/GEFOS2_FNBMD_POOLED_GC.txt", header = T, stringsAsFactors = F)
-
-#lookup =  read.table("data/GEFOS/GTEx_Analysis_2016-01-15_v7_WholeGenomeSeq_635Ind_PASS_AB02_GQ20_HETX_MISS15_PLINKQC.lookup_table.txt", nrow=10, header = T, stringsAsFactors = F)
-
-#lsbmd_merged = merge(lsbmd, lookup, by.x = "MarkerName", by.y = "rs_id_dbSNP147_GRCh37p13", all.x=T)
-#fnbmd_merged = merge(fnbmd, lookup, by.x = "MarkerName", by.y = "rs_id_dbSNP147_GRCh37p13", all.x=T)
+#DO THIS ON CLUSTER
+#  lsbmd = read.table("data/GEFOS/GEFOS2_LSBMD_POOLED_GC.txt", header = T, stringsAsFactors = F)
+#  fnbmd = read.table("data/GEFOS/GEFOS2_FNBMD_POOLED_GC.txt", header = T, stringsAsFactors = F)
+#  
+# lookup =  read.table("data/GEFOS/GTEx_Analysis_2016-01-15_v7_WholeGenomeSeq_635Ind_PASS_AB02_GQ20_HETX_MISS15_PLINKQC.lookup_table.txt", header = T, stringsAsFactors = F)
+# 
+# lsbmd_merged = merge(lsbmd, lookup, by.x = "MarkerName", by.y = "rs_id_dbSNP147_GRCh37p13", all.x=T)
+# fnbmd_merged = merge(fnbmd, lookup, by.x = "MarkerName", by.y = "rs_id_dbSNP147_GRCh37p13", all.x=T)
+# write.table(lsbmd_merged, file = "lsbmd_merged", row.names = F, quote=F, sep="\t")
+# write.table(fnbmd_merged, file = "fnbmd_merged", row.names = F, quote=F, sep="\t")

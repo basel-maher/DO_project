@@ -71,27 +71,27 @@ phyper(q-1,m,n,k,lower.tail = F) #prob 33 or more bone genes drawn
 
 
 
-#This analysis considers all genes in genome as the global set
-#23648 genes
-
-new_set = superset
-new_set[which(tolower(new_set) == "cavin1")] = "ptrf"
-new_set[which(tolower(new_set) == "adgrd1")] = "gpr133"
-new_set[which(tolower(new_set) == "zfp609")] = "znf609"
-
-
-allgenes = homologs
-
-a = length(which(tolower(coloc_genes) %in% tolower(new_set))) # number of coloc genes that are also bone genes (40)
-b = length(which(tolower(coloc_genes) %in% tolower(new_set) == F)) # number of coloc genes that are not bone genes (32, 72-a)
-c = length(which(tolower(new_set) %in% tolower(coloc_genes) == FALSE))#not coloc and bone genes. For the genome it would equal number of bone genes that dont colocalize (1251)
-d = 23645 - (a+b+c)#not coloc and not bone genes (22087)
-
-#make contingency table
-mat = matrix(nrow=2,ncol=2)
-mat[1,] = c(a,c)
-mat[2,] = c(b,d)
-fisher.test(mat) #two sided
-fisher.test(mat,alternative = "g") #enrichment
+# #This analysis considers all genes in genome as the global set
+# #23648 genes
+# 
+# new_set = superset
+# new_set[which(tolower(new_set) == "cavin1")] = "ptrf"
+# new_set[which(tolower(new_set) == "adgrd1")] = "gpr133"
+# new_set[which(tolower(new_set) == "zfp609")] = "znf609"
+# 
+# 
+# allgenes = homologs
+# 
+# a = length(which(tolower(coloc_genes) %in% tolower(new_set))) # number of coloc genes that are also bone genes (40)
+# b = length(which(tolower(coloc_genes) %in% tolower(new_set) == F)) # number of coloc genes that are not bone genes (32, 72-a)
+# c = length(which(tolower(new_set) %in% tolower(coloc_genes) == FALSE))#not coloc and bone genes. For the genome it would equal number of bone genes that dont colocalize (1251)
+# d = 23645 - (a+b+c)#not coloc and not bone genes (22087)
+# 
+# #make contingency table
+# mat = matrix(nrow=2,ncol=2)
+# mat[1,] = c(a,c)
+# mat[2,] = c(b,d)
+# fisher.test(mat) #two sided
+# fisher.test(mat,alternative = "g") #enrichment
 
 

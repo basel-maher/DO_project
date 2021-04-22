@@ -1,3 +1,4 @@
+library(biomaRt)
 #how many known bone genes overlap with GWAS loci, and are known bone genes more likely to overlap with gwas loci than a random set of genes?
 
 #how many known bone genes overlap with GWAS loci
@@ -24,7 +25,9 @@ zz = which(is.na(superset$`MGI Accession ID`))
 require(Hmisc)
 superset$MGI_NAME[zz] = capitalize(superset$V1[zz])
 
+#old, dont use
 #superset[which(is.na(superset$`MGI Accession ID`)),"MGI Accession ID"] = c("MGI:2140364","MGI:3575190", "MGI:3575247", "MGI:3575248", "MGI:5573174","MGI:1915720","MGI:3819962", "MGI:5633762","MGI:3812132")
+
 
 #superset[which(superset$MGI_NAME == "Adprhl2"),"Feature Type"] = "protein coding gene"
 superset[which(superset$MGI_NAME == "Adprhl2"),] = c("adprhl2","MGI:2140364","4","60.36","126316351","126321703","-","Adprs","O", "ADP-ribosylserine hydrolase","Gene","protein coding gene","Adprhl2 Arh3","Adprhl2")
@@ -33,7 +36,8 @@ superset[which(superset$MGI_NAME == "Impad1"),] = c("impad1","MGI:1915720","4","
 #superset[which(superset$MGI_NAME %in% c("Hlb324b",  "Hlb328",   "Hlb330",   "Hydro",   "M1665asr", "Rdns","Shsn")),"Feature Type"] = "heritable phenotypic marker"
 
 #superset_pruned = superset[which(superset$`Feature Type` %in% c("complex/cluster/region","heritable phenotypic marker","QTL","unclassified other genome feature")==FALSE),14]
-superset=superset[,c(14,2)]
+superset = superset[which(superset$`Feature Type` == "protein coding gene"),c(14,2)]
+#superset=superset[,c(14,2)]
 
 ##
 homology = read.table("./data/mgi_homologs.txt",sep = "\t", header = T,stringsAsFactors = FALSE)#MGI homology table
@@ -217,9 +221,9 @@ x = fisher.test(mat,alternative = "g")
 x$p.value
 
 ######
-a = 738 # BANs that have human homologs and are within 1 mbp of gwas snp
-b = 1251-738 #BANs that are human homologs but not within 1 mbp of gwas snp
-c = 10809-738 # genes within 1 mbp of gwas snp but arent BANs
+a = 688 # BANs that have human homologs and are within 1 mbp of gwas snp
+b = 1173-688 #BANs that are human homologs but not within 1 mbp of gwas snp
+c = 10809-688 # genes within 1 mbp of gwas snp but arent BANs
 d = 20261 - (a+b+c)#not bans and not within 1 mbp
 
 mat = matrix(nrow=2,ncol=2)
