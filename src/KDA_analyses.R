@@ -36,6 +36,7 @@ not_bone_df = x[which(tolower(x$gene) %in% tolower(superset) == FALSE),]
 wilcox.test(bone_df$num_neib, not_bone_df$num_neib, alternative = "greater")#0.0003531, 0.0168 males, 2.912e-5 females / redo 2
 
 #we use this because the BAN was defined as being conencted to a bone gene with num_neib (3-step). 
+
 ###GO analysis
 load("./results/Rdata/networks/geneModMemAnnot_power4.RData")
 load("./results/Rdata/networks/geneModMemAnnot_m_power5.RData")

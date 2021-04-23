@@ -145,7 +145,7 @@ all = kda_full
 all = all[-which(all$num_neib<=2),] #remove unconnected genes or those connected to only 1 
 
 thresh = mean(all$num_neib) - sd(all$num_neib) #threshold based on all networks combined mean neighborhoods 
-all = all[-which(all$num_neib < thresh)]
+all = all[-which(all$num_neib < thresh),]
 
 #hypergeometric test to define key drivers
 #n is based on all genes, before removal of unconnected genes or thresholding
