@@ -122,7 +122,7 @@ overlaps = GenomicRanges::findOverlaps(query = morris_pos, subject = gene_human_
 
 
 
-#769 known bone genes overlap morris eBMD loci
+#768 known bone genes overlap morris eBMD loci
 homologs_win_1_morris = unique(gene_pos$hgnc_symbol[overlaps@to])
 homologs_win_1_ens_morris = unique(gene_pos$ensembl_gene_id[overlaps@to])
 
@@ -195,30 +195,30 @@ ens_prot_overlap = unique(ens_prot_overlap)
 #10809 protein coding genes overlap gwas
 
 
-#771 overlap
-q=771
-k=1270
-m=10809
-n=20261-10810
-phyper(q-1, m,n,k,lower.tail = F)
-#2.9e-8
-
-
-
-a = 771 # number known genes that are also overlapping with gwas
-b = 1270-a # num known genes that are not overlapping with gwas
-c = 10122 #which of the 10809 overlapping genes are not known bone genes (length(which(ens_prot_overlap %in% gene_pos$ensembl_gene_id == FALSE)))  #meaning they prot coding genes that overlap gwas and are not known bone genes
-d = 8873 #not known bone genes and also not overlapping length(which( (allGenes$ensembl_gene_id %in% ens_prot_overlap == FALSE) & (allGenes$ensembl_gene_id %in% gene_pos$ensembl_gene_id == FALSE) ))
-
-#make contingency table
-mat = matrix(nrow=2,ncol=2)
-mat[1,] = c(a,c)
-mat[2,] = c(b,d)
-fisher.test(mat) #two sided (enrichment or depletion)
-fisher.test(mat,alternative = "g") #enrichment
-
-x = fisher.test(mat,alternative = "g")
-x$p.value
+# #770 overlap
+# q=770
+# k=1284
+# m=10809
+# n=20261-10810
+# phyper(q-1, m,n,k,lower.tail = F)
+# #2.9e-8
+# 
+# 
+# 
+# a = 771 # number known genes that are also overlapping with gwas
+# b = 1270-a # num known genes that are not overlapping with gwas
+# c = 10122 #which of the 10809 overlapping genes are not known bone genes (length(which(ens_prot_overlap %in% gene_pos$ensembl_gene_id == FALSE)))  #meaning they prot coding genes that overlap gwas and are not known bone genes
+# d = 8873 #not known bone genes and also not overlapping length(which( (allGenes$ensembl_gene_id %in% ens_prot_overlap == FALSE) & (allGenes$ensembl_gene_id %in% gene_pos$ensembl_gene_id == FALSE) ))
+# 
+# #make contingency table
+# mat = matrix(nrow=2,ncol=2)
+# mat[1,] = c(a,c)
+# mat[2,] = c(b,d)
+# fisher.test(mat) #two sided (enrichment or depletion)
+# fisher.test(mat,alternative = "g") #enrichment
+# 
+# x = fisher.test(mat,alternative = "g")
+# x$p.value
 
 ######
 a = 688 # BANs that have human homologs and are within 1 mbp of gwas snp
@@ -234,5 +234,5 @@ fisher.test(mat,alternative = "g") #enrichment
 
 x = fisher.test(mat,alternative = "g")
 x$p.value
-#change in rev1.R
+
 
