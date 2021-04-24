@@ -157,8 +157,7 @@ dds <- DESeqDataSetFromMatrix(countData = counts,
                               colData = covs_full, 
                               design = ~sex+batch+age_bin+max_load_bin)
 
-vsd <- varianceStabilizingTransformation(dds, blind = TRUE) #blind so design doesnt matter. seems to be the optimal choice for PCA/viz. Use TRUE if using for downstream applications.
-
+vsd <- varianceStabilizingTransformation(dds, blind = TRUE) #blind so design doesnt matter. seems to be the optimal choice for PCA/viz. 
 
 
 ##########factominer#########

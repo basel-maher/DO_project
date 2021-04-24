@@ -19,9 +19,9 @@ length(lead)#1161 unique lead snps
 
 
 #Of the 688 homologs within 1 mbp of a lead snp, how many have colocalizing eQTL?
-fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV.txt")
-ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV.txt")
-morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV.txt")
+fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV2.txt")
+ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV2.txt")
+morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV2.txt")
 
 coloc_genes = c(fn$gene, ls$gene, morris_coloc$gene)
 coloc_genes = unique(coloc_genes)
@@ -59,7 +59,7 @@ mat[1,] = c(a,c)
 mat[2,] = c(b,d)
 fisher.test(mat) #two sided (enrichment or depletion)
 fisher.test(mat,alternative = "g") #enrichment
-x=fisher.test(mat,alternative = "g")$p.value
+(x=fisher.test(mat,alternative = "g")$p.value)
 ###same but with hypergeometric 
 
 
