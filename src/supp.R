@@ -343,7 +343,7 @@ write.csv(superset, file = "~/Desktop/nat_com_revs/supp/S7_rev.csv", row.names =
 
 #S8
 full = read.csv("./results/flat/key_driver_analysis_sexcombined_sft4_REV.csv", stringsAsFactors = F)
-full = full[,c(1:4,16,17)]
+full = full[,c(1:4,17,18)]
 
 colnames(full)[2:ncol(full)] = paste0(colnames(full)[2:ncol(full)], "_C")
 
@@ -440,16 +440,17 @@ write.csv(S7, file = "~/Desktop/nat_com_revs/supp/S8_rev.csv", row.names = F)
 
 
 #S9
-fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV.txt")
-ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV.txt")
-morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV.txt")
+fn = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_FNBMD_over75_REV2.txt")
+ls = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_v7_LSBMD_over75_REV2.txt")
+morris_coloc = read.table("~/Documents/projects/DO_project/results/flat/coloc/coloc_morris_v7_all_results_over75_REV2.txt")
 
 S9 = rbind(morris_coloc, fn, ls)
 S9 = S9[which(S9$H4 >= 0.75),]
 
 S9[which(S9$pheno == "BMD"),"pheno"] = "eBMD"
 
-S9[,c("H0","H1","H2","H3","H4")] = signif(S9[,c("H0","H1","H2","H3","H4")],3)
+S9[,c("H0","H1","H2","H3","H4")] = signif(S9[,c("H0","H1","H2","H3","H4")],5)
+
 
 write.csv(S9, file = "~/Desktop/nat_com_revs/supp/S9_rev.csv", row.names = F)
 

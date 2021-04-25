@@ -31,7 +31,6 @@ length(coloc_genes)#66
 #How many are known regulators of bone biology?
 superset = read.table("./results/flat/superset_in_networks.txt")
 superset = superset$V1
-#MYPOP,PLEKHM1,ZNF609,GPR133,PTRF
 length(which(tolower(coloc_genes) %in% tolower(superset)))
 #34 in superset. however, GPR133 amd ZNF609 are also in superset as Adgrd1 and Zfp609, respectively. So 36 in superset
 
